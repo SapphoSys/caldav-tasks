@@ -90,7 +90,7 @@ export function UpdateModal({
             className="px-4 py-2 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors flex items-center gap-2"
             onClick={() => {
               openUrl(
-                `https://github.com/sapphies/caldav-tasks/releases/tag/app-v${updateInfo.version}`,
+                `https://github.com/SapphoSys/caldav-tasks/releases/tag/app-v${updateInfo.version}`,
               );
             }}
           >

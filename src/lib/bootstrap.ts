@@ -200,7 +200,7 @@ ${error}
 **Additional context:**
 <!-- Any additional information that might help us debug this issue -->`;
 
-        const issueUrl = `https://github.com/sapphies/caldav-tasks/issues/new?title=${encodeURIComponent(errorTitle)}&body=${encodeURIComponent(errorBody)}`;
+        const issueUrl = `https://github.com/SapphoSys/caldav-tasks/issues/new?title=${encodeURIComponent(errorTitle)}&body=${encodeURIComponent(errorBody)}`;
         await openUrl(issueUrl);
       });
     }

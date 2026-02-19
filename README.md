@@ -36,7 +36,7 @@ You can download pre-built binaries of the application for each platform by clic
 ## Nix
 To quickly try out the app, you can use the following command:
 ```
-nix run github:sapphies/caldav-tasks
+nix run github:SapphoSys/caldav-tasks
 ```
 
 ### Flakes
@@ -49,7 +49,7 @@ Add `caldav-tasks` as an input to your `flake.nix` file.
   inputs = {
     # ... other inputs ...
     caldav-tasks = {
-      url = "github:sapphies/caldav-tasks";
+      url = "github:SapphoSys/caldav-tasks";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # ... other inputs ...
@@ -67,7 +67,7 @@ Add `caldav-tasks` as an input to your `flake.nix` file.
     inputs = {
       nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
       caldav-tasks = {
-        url = "github:sapphies/caldav-tasks";
+        url = "github:SapphoSys/caldav-tasks";
         inputs.nixpkgs.follows = "nixpkgs";
       };
     };
@@ -114,7 +114,7 @@ Add `caldav-tasks` as an input to your `flake.nix` file.
         inputs.nixpkgs.follows = "nixpkgs";
       };
       caldav-tasks = {
-        url = "github:sapphies/caldav-tasks";
+        url = "github:SapphoSys/caldav-tasks";
         inputs.nixpkgs.follows = "nixpkgs";
       };
     };
@@ -169,22 +169,22 @@ caldav-tasks is licensed under the [<span aria-hidden="true">&nearr;</span> zlib
 
 [header-donate-kofi-badge]: https://img.shields.io/badge/donate-kofi-f5c2e7?style=plastic&logo=kofi&logoColor=f5c2e7&labelColor=18181b
 [header-donate-liberapay-badge]: https://img.shields.io/badge/donate-liberapay-f5c2e7?style=plastic&logo=liberapay&logoColor=f5c2e7&labelColor=18181b
-[header-repo-license-badge]: https://img.shields.io/github/license/sapphies/caldav-tasks?style=plastic&labelColor=18181b&color=f5c2e7
-[header-repo-stars-badge]: https://img.shields.io/github/stars/sapphies/caldav-tasks?style=plastic&logo=github&logoColor=f5c2e7&labelColor=18181b&color=f5c2e7&cacheSeconds=600
-[header-repo-total-downloads-badge]: https://img.shields.io/github/downloads/sapphies/caldav-tasks/total?style=plastic&logo=hack-the-box&logoColor=f5c2e7&label=downloads&labelColor=18181b&color=f5c2e7&cacheSeconds=600
+[header-repo-license-badge]: https://img.shields.io/github/license/SapphoSys/caldav-tasks?style=plastic&labelColor=18181b&color=f5c2e7
+[header-repo-stars-badge]: https://img.shields.io/github/stars/SapphoSys/caldav-tasks?style=plastic&logo=github&logoColor=f5c2e7&labelColor=18181b&color=f5c2e7&cacheSeconds=600
+[header-repo-total-downloads-badge]: https://img.shields.io/github/downloads/SapphoSys/caldav-tasks/total?style=plastic&logo=hack-the-box&logoColor=f5c2e7&label=downloads&labelColor=18181b&color=f5c2e7&cacheSeconds=600
 
-[header-repo-issues-link]: https://github.com/sapphies/caldav-tasks/issues
+[header-repo-issues-link]: https://github.com/SapphoSys/caldav-tasks/issues
 [header-screenshot]: ./.github/assets/screenshot.png
 
-[release-windows-msi-x64]: https://github.com/sapphies/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks_0.5.31_x64_en-US.msi
-[release-windows-exe-x64]: https://github.com/sapphies/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks_0.5.31_x64-setup.exe
-[release-macos-dmg-applesilicon]: https://github.com/sapphies/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks_0.5.31_aarch64.dmg
-[release-macos-dmg-intel]: https://github.com/sapphies/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks_0.5.31_x64.dmg
-[release-linux-deb-x86_64]: https://github.com/sapphies/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks_0.5.31_amd64.deb
-[release-linux-deb-arm]: https://github.com/sapphies/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks_0.5.31_arm64.deb
-[release-linux-rpm-x86_64]: https://github.com/sapphies/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks-0.5.31-1.x86_64.rpm
-[release-linux-rpm-arm]: https://github.com/sapphies/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks-0.5.31-1.aarch64.rpm
+[release-windows-msi-x64]: https://github.com/SapphoSys/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks_0.5.31_x64_en-US.msi
+[release-windows-exe-x64]: https://github.com/SapphoSys/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks_0.5.31_x64-setup.exe
+[release-macos-dmg-applesilicon]: https://github.com/SapphoSys/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks_0.5.31_aarch64.dmg
+[release-macos-dmg-intel]: https://github.com/SapphoSys/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks_0.5.31_x64.dmg
+[release-linux-deb-x86_64]: https://github.com/SapphoSys/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks_0.5.31_amd64.deb
+[release-linux-deb-arm]: https://github.com/SapphoSys/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks_0.5.31_arm64.deb
+[release-linux-rpm-x86_64]: https://github.com/SapphoSys/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks-0.5.31-1.x86_64.rpm
+[release-linux-rpm-arm]: https://github.com/SapphoSys/caldav-tasks/releases/download/app-v0.5.31/caldav-tasks-0.5.31-1.aarch64.rpm
 
-[repo-license]: https://github.com/sapphies/caldav-tasks/blob/master/LICENSE
-[repo-releases]: https://github.com/sapphies/caldav-tasks/releases
-[repo-stars]: https://github.com/sapphies/caldav-tasks/stargazers
+[repo-license]: https://github.com/SapphoSys/caldav-tasks/blob/master/LICENSE
+[repo-releases]: https://github.com/SapphoSys/caldav-tasks/releases
+[repo-stars]: https://github.com/SapphoSys/caldav-tasks/stargazers

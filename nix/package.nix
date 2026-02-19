@@ -34,13 +34,17 @@ rustPlatform.buildRustPackage (finalAttrs: {
 
   # for local flake builds, src is passed in
   # for nixpkgs, use fetchFromGitHub
-  src = if src != null then src else fetchFromGitHub {
-    owner = "sapphies";
-    repo = "caldav-tasks";
-    tag = "v${finalAttrs.version}";
-    # Update this hash when releasing a new version
-    hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-  };
+  src =
+    if src != null then
+      src
+    else
+      fetchFromGitHub {
+        owner = "SapphoSys";
+        repo = "caldav-tasks";
+        tag = "v${finalAttrs.version}";
+        # Update this hash when releasing a new version
+        hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+      };
 
   # cargo dependencies hash - update when Cargo.lock changes
   cargoHash = "sha256-XPAqWdCsNZ7JQkGRCbbktRnaDRAVEDRlv57fEN5hbVs=";
@@ -93,10 +97,17 @@ rustPlatform.buildRustPackage (finalAttrs: {
   buildAndTestSubdir = "src-tauri";
 
   # patch libappindicator path on Linux for tray icon support
-  postPatch = lib.optionalString stdenv.hostPlatform.isLinux ''
-    substituteInPlace $cargoDepsCopy/libappindicator-sys-*/src/lib.rs \
-      --replace-fail "libayatana-appindicator3.so.1" "${libayatana-appindicator}/lib/libayatana-appindicator3.so.1"
-  '';
+  postPatch =
+    lib.optionalString stdenv.hostPlatform.isLinux ''
+      substituteInPlace $cargoDepsCopy/libappindicator-sys-*/src/lib.rs \
+        --replace-fail "libayatana-appindicator3.so.1" "${libayatana-appindicator}/lib/libayatana-appindicator3.so.1"
+    ''
+    + ''
+      # Disable updater artifact creation to avoid requiring signing keys
+      # Regular users don't have the private signing key, and don't need updater artifacts
+      substituteInPlace src-tauri/tauri.conf.json \
+        --replace-fail '"createUpdaterArtifacts": true' '"createUpdaterArtifacts": false'
+    '';
 
   # build the frontend before Tauri build
   preBuild = ''
@@ -114,10 +125,10 @@ rustPlatform.buildRustPackage (finalAttrs: {
 
   meta = {
     description = "A cross-platform CalDAV task management app";
-    homepage = "https://github.com/sapphies/caldav-tasks";
-    changelog = "https://github.com/sapphies/caldav-tasks/releases/tag/v${finalAttrs.version}";
+    homepage = "https://github.com/SapphoSys/caldav-tasks";
+    changelog = "https://github.com/SapphoSys/caldav-tasks/releases/tag/v${finalAttrs.version}";
     license = lib.licenses.zlib;
-    maintainers = with lib.maintainers; [sapphies];
+    maintainers = with lib.maintainers; [ SapphoSys ];
     mainProgram = "caldav-tasks";
     platforms = lib.platforms.linux ++ lib.platforms.darwin;
   };
