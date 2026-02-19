@@ -41,6 +41,7 @@ export function useTray({ isSyncing, lastSyncTime, onSyncRequest }: UseTrayOptio
         minute: '2-digit',
         hour12: false,
       });
+
       invoke('update_tray_sync_time', { timeStr: `Last sync: ${timeStr}` }).catch((err) => {
         console.error('Failed to update sync time:', err);
       });

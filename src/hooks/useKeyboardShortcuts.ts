@@ -189,9 +189,7 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
 
       // if keyboard dragging is in progress (via dnd-kit KeyboardSensor),
       // let dnd-kit handle all keyboard events (arrow keys, enter, escape)
-      if (getIsKeyboardDragging()) {
-        return;
-      }
+      if (getIsKeyboardDragging()) return;
 
       // don't trigger shortcuts when typing in inputs
       const target = e.target as HTMLElement;
@@ -204,9 +202,7 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
 
       const isAllowedInInput = allowInInput.includes(e.key);
 
-      if (isInput && !isAllowedInInput) {
-        return;
-      }
+      if (isInput && !isAllowedInInput) return;
 
       // Shortcuts that should NOT work when a modal is open
       // (except for 'settings' which toggles, and 'close' which closes modals)
@@ -226,9 +222,7 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
         if (!handler) continue;
 
         // Block certain shortcuts when a modal is open
-        if (isAnyModalOpen && blockedInModal.includes(shortcut.id)) {
-          continue;
-        }
+        if (isAnyModalOpen && blockedInModal.includes(shortcut.id)) continue;
 
         const metaMatch = shortcut.meta ? e.metaKey || e.ctrlKey : true;
         const ctrlMatch = shortcut.ctrl ? e.ctrlKey : true;
