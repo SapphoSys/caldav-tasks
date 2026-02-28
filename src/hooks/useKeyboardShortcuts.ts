@@ -12,7 +12,6 @@ import {
 } from '@/hooks/queries';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import { useConfirmTaskDelete } from '@/hooks/useConfirmTaskDelete';
-import { getIsKeyboardDragging } from '@/lib/dragState';
 import * as taskData from '@/lib/taskData';
 import { type KeyboardShortcut, useSettingsStore } from '@/store/settingsStore';
 import { DEFAULT_SORT_CONFIG } from '@/utils/constants';
@@ -187,10 +186,6 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
         }
         return;
       }
-
-      // if keyboard dragging is in progress (via dnd-kit KeyboardSensor),
-      // let dnd-kit handle all keyboard events (arrow keys, enter, escape)
-      if (getIsKeyboardDragging()) return;
 
       // don't trigger shortcuts when typing in inputs
       const target = e.target as HTMLElement;

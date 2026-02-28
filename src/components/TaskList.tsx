@@ -29,8 +29,6 @@ import { TaskItem } from './TaskItem';
 
 const log = createLogger('TaskList', '#14b8a6');
 
-import { setIsKeyboardDragging } from '@/lib/dragState';
-
 export function TaskList() {
   const { data: uiState } = useUIState();
   const { data: filteredTasksData = [] } = useFilteredTasks();
@@ -39,7 +37,6 @@ export function TaskList() {
   const reorderTasksMutation = useReorderTasks();
 
   const sortConfig = uiState?.sortConfig ?? DEFAULT_SORT_CONFIG;
-
   const searchQuery = uiState?.searchQuery ?? '';
   const showCompletedTasks = uiState?.showCompletedTasks ?? true;
 
@@ -189,12 +186,6 @@ export function TaskList() {
         // store starting X from the event
         const pointerEvent = event.activatorEvent as PointerEvent;
         dragStartXRef.current = pointerEvent?.clientX ?? 0;
-
-        // track if this is a keyboard-initiated drag
-        // KeyboardEvent is used by dnd-kit KeyboardSensor, PointerEvent by PointerSensor
-        if (event.activatorEvent instanceof KeyboardEvent) {
-          setIsKeyboardDragging(true);
-        }
       }
     },
     [flattenedTasks],
@@ -241,7 +232,6 @@ export function TaskList() {
     setActiveTask(null);
     setTargetIndent(0);
     setTargetParentName(null);
-    setIsKeyboardDragging(false);
   }, []);
 
   const handleDragEnd = useCallback(
@@ -253,7 +243,6 @@ export function TaskList() {
       setActiveTask(null);
       setTargetIndent(0);
       setTargetParentName(null);
-      setIsKeyboardDragging(false);
 
       if (!over) return;
 
