@@ -109,8 +109,13 @@ function App() {
 
   // disable default browser context menu globally
   const handleContextMenu = (e: React.MouseEvent) => {
-    // allow custom context menus to work by checking if event was already handled
-    if (!(e.target as HTMLElement).closest('[data-context-menu]')) {
+    const target = e.target as HTMLElement;
+    // allow custom context menus and native context menus for input/textarea elements
+    if (
+      !target.closest('[data-context-menu]') &&
+      target.tagName !== 'INPUT' &&
+      target.tagName !== 'TEXTAREA'
+    ) {
       e.preventDefault();
     }
   };
