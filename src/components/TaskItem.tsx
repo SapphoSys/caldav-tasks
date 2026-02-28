@@ -1,6 +1,6 @@
 import type { AnimateLayoutChanges } from '@dnd-kit/sortable';
 import { defaultAnimateLayoutChanges, useSortable } from '@dnd-kit/sortable';
-import Calendar from 'lucide-react/icons/calendar';
+import { openUrl } from '@tauri-apps/plugin-opener';
 import Check from 'lucide-react/icons/check';
 import CheckCircle2 from 'lucide-react/icons/check-circle-2';
 import ChevronDown from 'lucide-react/icons/chevron-down';
@@ -105,7 +105,6 @@ export function TaskItem({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
     pointerEvents: isDragging ? 'none' : undefined,
   };
 
-  const isSelected = selectedTaskId === task.id;
   const taskTags = (task.tags || []).map((tagId) => getTagById(tagId)).filter(Boolean);
   const calendar = accounts.flatMap((a) => a.calendars).find((c) => c.id === task.calendarId);
   const showCalendar = activeCalendarId === null && calendar;
@@ -236,16 +235,18 @@ export function TaskItem({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
             task.url) && (
             <div className="flex items-center gap-2 mt-2 flex-wrap">
               {task.url && (
-                <a
-                  href={task.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors"
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openUrl(task.url!);
+                  }}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:opacity-80 transition-opacity"
                   title={task.url}
                 >
                   <Link className="w-3 h-3" />
                   URL
-                </a>
+                </button>
               )}
 
               {taskTags.map((tag) => {

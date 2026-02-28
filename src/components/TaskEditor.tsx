@@ -1,3 +1,4 @@
+import { openUrl } from '@tauri-apps/plugin-opener';
 import { format } from 'date-fns';
 import Bell from 'lucide-react/icons/bell';
 import Calendar from 'lucide-react/icons/calendar';
@@ -378,15 +379,14 @@ export function TaskEditor({ task }: TaskEditorProps) {
               className="flex-1 px-3 py-2 text-sm text-surface-700 dark:text-surface-300 bg-surface-50 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:border-primary-300 focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary-900/50"
             />
             {pendingUrl && (
-              <a
-                href={pendingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                onClick={() => openUrl(pendingUrl)}
                 className="p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors"
                 title="Open URL"
               >
                 <Link className="w-4 h-4" />
-              </a>
+              </button>
             )}
           </div>
         </div>
