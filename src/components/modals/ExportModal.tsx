@@ -124,9 +124,9 @@ export function ExportModal({
 
         <div className="p-6 space-y-4 overflow-y-auto flex-1">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-surface-700 dark:text-surface-300">
+            <p className="text-sm font-medium text-surface-700 dark:text-surface-300">
               Export Format
-            </label>
+            </p>
             <div className="grid grid-cols-1 gap-2">
               {EXPORT_FORMATS.map((format) => (
                 <button
