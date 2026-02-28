@@ -76,6 +76,7 @@ export interface Tag {
   name: string;
   color: string;
   icon?: string; // Icon name from lucide-react
+  emoji?: string; // Emoji character(s)
 }
 
 export interface Calendar {
@@ -86,6 +87,7 @@ export interface Calendar {
   syncToken?: string;
   color?: string;
   icon?: string; // Icon name from lucide-react
+  emoji?: string; // Emoji character(s)
   accountId: string;
   supportedComponents?: string[]; // e.g., ['VTODO', 'VEVENT']
 }

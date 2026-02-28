@@ -59,6 +59,9 @@ export function useModalEscapeKey(
         }
 
         // don't handle if an icon/emoji picker dropdown is open - let it handle the escape
+        if (document.querySelector('[data-icon-emoji-picker-dropdown]')) {
+          return;
+        }
 
         // if this is a panel, only respond if no modals or context menus are open
         if (isPanelRef.current) {

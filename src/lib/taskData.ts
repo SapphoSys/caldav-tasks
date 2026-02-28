@@ -868,6 +868,7 @@ export function createTag(tagData: Partial<Tag>): Tag {
     name: tagData.name ?? 'New Tag',
     color: tagData.color ?? FALLBACK_ITEM_COLOR,
     icon: tagData.icon,
+    emoji: tagData.emoji,
   };
 
   // Persist to SQLite

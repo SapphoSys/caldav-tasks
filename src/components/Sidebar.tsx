@@ -467,10 +467,19 @@ export function Sidebar({
                                         : undefined
                                     }
                                   >
-                                    <CalendarIcon
-                                      className="w-4 h-4"
-                                      style={{ color: isActive ? textColor : calendarColor }}
-                                    />
+                                    {calendar.emoji ? (
+                                      <span
+                                        className="text-xs leading-none"
+                                        style={{ color: isActive ? textColor : calendarColor }}
+                                      >
+                                        {calendar.emoji}
+                                      </span>
+                                    ) : (
+                                      <CalendarIcon
+                                        className="w-4 h-4"
+                                        style={{ color: isActive ? textColor : calendarColor }}
+                                      />
+                                    )}
                                     <span className="flex-1 text-left truncate">
                                       {calendar.displayName}
                                     </span>
@@ -550,12 +559,23 @@ export function Sidebar({
                               : undefined
                           }
                         >
-                          <TagIcon
-                            className="w-3.5 h-3.5"
-                            style={{
-                              color: isActive ? getContrastTextColor(tag.color) : tag.color,
-                            }}
-                          />
+                          {tag.emoji ? (
+                            <span
+                              className="text-xs leading-none"
+                              style={{
+                                color: isActive ? getContrastTextColor(tag.color) : tag.color,
+                              }}
+                            >
+                              {tag.emoji}
+                            </span>
+                          ) : (
+                            <TagIcon
+                              className="w-3.5 h-3.5"
+                              style={{
+                                color: isActive ? getContrastTextColor(tag.color) : tag.color,
+                              }}
+                            />
+                          )}
                           <span className="flex-1 text-left truncate">{tag.name}</span>
                           <span className="text-xs">{getTagTaskCount(tag.id)}</span>
                         </button>
@@ -647,12 +667,23 @@ export function Sidebar({
                           : undefined
                       }
                     >
-                      <CalendarIcon
-                        className="w-5 h-5"
-                        style={{
-                          color: isActive ? getContrastTextColor(calendarColor) : calendarColor,
-                        }}
-                      />
+                      {calendar.emoji ? (
+                        <span
+                          className="text-base leading-none"
+                          style={{
+                            color: isActive ? getContrastTextColor(calendarColor) : calendarColor,
+                          }}
+                        >
+                          {calendar.emoji}
+                        </span>
+                      ) : (
+                        <CalendarIcon
+                          className="w-5 h-5"
+                          style={{
+                            color: isActive ? getContrastTextColor(calendarColor) : calendarColor,
+                          }}
+                        />
+                      )}
                     </button>
                   </Tooltip>
                 );
@@ -688,10 +719,21 @@ export function Sidebar({
                         : undefined
                     }
                   >
-                    <TagIcon
-                      className="w-5 h-5"
-                      style={{ color: isActive ? getContrastTextColor(tag.color) : tag.color }}
-                    />
+                    {tag.emoji ? (
+                      <span
+                        className="text-base leading-none"
+                        style={{
+                          color: isActive ? getContrastTextColor(tag.color) : tag.color,
+                        }}
+                      >
+                        {tag.emoji}
+                      </span>
+                    ) : (
+                      <TagIcon
+                        className="w-5 h-5"
+                        style={{ color: isActive ? getContrastTextColor(tag.color) : tag.color }}
+                      />
+                    )}
                   </button>
                 </Tooltip>
               );

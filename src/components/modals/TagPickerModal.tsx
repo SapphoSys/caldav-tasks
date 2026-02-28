@@ -69,7 +69,13 @@ export function TagPickerModal({
                     onClick={() => handleSelectTag(tag.id)}
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
                   >
-                    <TagIcon className="w-4 h-4" style={{ color: tag.color }} />
+                    {tag.emoji ? (
+                      <span className="text-xs leading-none" style={{ color: tag.color }}>
+                        {tag.emoji}
+                      </span>
+                    ) : (
+                      <TagIcon className="w-4 h-4" style={{ color: tag.color }} />
+                    )}
                     <span className="text-surface-700 dark:text-surface-300">{tag.name}</span>
                   </button>
                 );

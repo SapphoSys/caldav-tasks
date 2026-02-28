@@ -7,7 +7,7 @@ import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
 import { caldavService } from '@/lib/caldav';
 import { useSettingsStore } from '@/store/settingsStore';
 import { COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '@/utils/constants';
-import { IconPicker } from '../IconPicker';
+import { IconEmojiPicker } from '../IconEmojiPicker';
 
 interface CreateCalendarModalProps {
   accountId: string;
@@ -21,6 +21,7 @@ export function CreateCalendarModal({ accountId, onClose }: CreateCalendarModalP
   const [displayName, setDisplayName] = useState('');
   const [color, setColor] = useState(accentColor);
   const [icon, setIcon] = useState('calendar');
+  const [emoji, setEmoji] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -46,8 +47,8 @@ export function CreateCalendarModal({ accountId, onClose }: CreateCalendarModalP
       // create calendar on server
       const calendar = await caldavService.createCalendar(accountId, displayName, color);
 
-      // add to local store with icon
-      addCalendarMutation.mutate({ accountId, calendarData: { ...calendar, icon } });
+      // add to local store with icon and emoji
+      addCalendarMutation.mutate({ accountId, calendarData: { ...calendar, icon, emoji } });
 
       onClose();
     } catch (err) {
@@ -87,7 +88,13 @@ export function CreateCalendarModal({ accountId, onClose }: CreateCalendarModalP
               Calendar Name
             </label>
             <div className="flex items-center gap-2">
-              <IconPicker value={icon} onChange={setIcon} color={color} />
+              <IconEmojiPicker
+                iconValue={icon}
+                emojiValue={emoji}
+                onIconChange={setIcon}
+                onEmojiChange={setEmoji}
+                color={color}
+              />
               <ComposedInput
                 ref={nameInputRef}
                 id="calendar-name"

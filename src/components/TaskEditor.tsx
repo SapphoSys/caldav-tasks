@@ -285,6 +285,7 @@ export function TaskEditor({ task }: TaskEditorProps) {
           >
             <Trash2 className="w-5 h-5" />
           </button>
+
           <button
             type="button"
             onClick={() => setEditorOpenMutation.mutate(false)}
@@ -524,7 +525,11 @@ export function TaskEditor({ task }: TaskEditorProps) {
                     color: tag.color,
                   }}
                 >
-                  <TagIcon className="w-3 h-3" />
+                  {tag.emoji ? (
+                    <span className="text-xs leading-none">{tag.emoji}</span>
+                  ) : (
+                    <TagIcon className="w-3 h-3" />
+                  )}
                   {tag.name}
                   <button
                     type="button"

@@ -4,7 +4,7 @@ import { ComposedInput } from '@/components/ComposedInput';
 import { useCreateTag, useTags, useUpdateTag } from '@/hooks/queries';
 import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
 import { COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '@/utils/constants';
-import { getIconByName, IconPicker } from '../IconPicker';
+import { getIconByName, IconEmojiPicker } from '../IconEmojiPicker';
 
 interface TagModalProps {
   tagId: string | null;
@@ -21,6 +21,7 @@ export function TagModal({ tagId, onClose }: TagModalProps) {
   const [name, setName] = useState(existingTag?.name || '');
   const [color, setColor] = useState(existingTag?.color ?? FALLBACK_ITEM_COLOR);
   const [icon, setIcon] = useState(existingTag?.icon || 'star');
+  const [emoji, setEmoji] = useState(existingTag?.emoji || '');
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   // handle ESC key to close modal
@@ -39,9 +40,9 @@ export function TagModal({ tagId, onClose }: TagModalProps) {
     e.preventDefault();
 
     if (existingTag) {
-      updateTagMutation.mutate({ id: existingTag.id, updates: { name, color, icon } });
+      updateTagMutation.mutate({ id: existingTag.id, updates: { name, color, icon, emoji } });
     } else {
-      createTagMutation.mutate({ name, color, icon });
+      createTagMutation.mutate({ name, color, icon, emoji });
     }
 
     onClose();
@@ -79,7 +80,13 @@ export function TagModal({ tagId, onClose }: TagModalProps) {
               Tag Name
             </label>
             <div className="flex items-center gap-2">
-              <IconPicker value={icon} onChange={setIcon} color={color} />
+              <IconEmojiPicker
+                iconValue={icon}
+                emojiValue={emoji}
+                onIconChange={setIcon}
+                onEmojiChange={setEmoji}
+                color={color}
+              />
               <ComposedInput
                 ref={nameInputRef}
                 id="tag-name"
@@ -140,7 +147,11 @@ export function TagModal({ tagId, onClose }: TagModalProps) {
                 color: color,
               }}
             >
-              <IconComponent className="w-3.5 h-3.5" />
+              {emoji ? (
+                <span className="text-sm">{emoji}</span>
+              ) : (
+                <IconComponent className="w-3.5 h-3.5" />
+              )}
               {name || 'Tag name'}
             </span>
           </div>

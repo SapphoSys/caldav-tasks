@@ -68,7 +68,11 @@ export function TaskDefaultsSettings() {
                     color: tag.color,
                   }}
                 >
-                  <TagIcon className="w-3 h-3" />
+                  {tag.emoji ? (
+                    <span className="text-sm">{tag.emoji}</span>
+                  ) : (
+                    <TagIcon className="w-3 h-3" />
+                  )}
                   {tag.name}
                 </button>
               );

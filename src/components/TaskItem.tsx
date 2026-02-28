@@ -266,7 +266,11 @@ export function TaskItem({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
                       color: tag.color,
                     }}
                   >
-                    <TagIcon className="w-3 h-3" />
+                    {tag.emoji ? (
+                      <span className="text-xs leading-none">{tag.emoji}</span>
+                    ) : (
+                      <TagIcon className="w-3 h-3" />
+                    )}
                     {tag.name}
                   </button>
                 );

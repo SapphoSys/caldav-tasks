@@ -179,6 +179,7 @@ function rowToCalendar(row: CalendarRow): Calendar {
     syncToken: row.sync_token || undefined,
     color: row.color || undefined,
     icon: row.icon || undefined,
+    emoji: row.emoji || undefined,
     accountId: row.account_id,
     supportedComponents: row.supported_components
       ? JSON.parse(row.supported_components)
@@ -193,6 +194,7 @@ function rowToTag(row: TagRow): Tag {
     name: row.name,
     color: row.color,
     icon: row.icon || undefined,
+    emoji: row.emoji || undefined,
   };
 }
 
@@ -524,12 +526,10 @@ export async function updateTag(id: string, updates: Partial<Tag>): Promise<Tag 
 
   const updatedTag: Tag = { ...existing, ...updates };
 
-  await database.execute(`UPDATE tags SET name = $1, color = $2, icon = $3 WHERE id = $4`, [
-    updatedTag.name,
-    updatedTag.color,
-    updatedTag.icon || null,
-    id,
-  ]);
+  await database.execute(
+    `UPDATE tags SET name = $1, color = $2, icon = $3, emoji = $4 WHERE id = $5`,
+    [updatedTag.name, updatedTag.color, updatedTag.icon || null, updatedTag.emoji || null, id],
+  );
 
   notifyListeners();
   return updatedTag;
@@ -676,8 +676,8 @@ export async function addCalendar(
   log.debug(`Adding calendar: ${calendar.displayName} with ID: ${calendar.id}`);
 
   await database.execute(
-    `INSERT INTO calendars (id, account_id, display_name, url, ctag, sync_token, color, icon, supported_components)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+    `INSERT INTO calendars (id, account_id, display_name, url, ctag, sync_token, color, icon, emoji, supported_components)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
     [
       calendar.id,
       accountId,
@@ -687,6 +687,7 @@ export async function addCalendar(
       calendar.syncToken || null,
       calendar.color || null,
       calendar.icon || null,
+      calendar.emoji || null,
       calendar.supportedComponents ? JSON.stringify(calendar.supportedComponents) : null,
     ],
   );

@@ -7,7 +7,7 @@ import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
 import { caldavService } from '@/lib/caldav';
 import type { Calendar } from '@/types';
 import { COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '@/utils/constants';
-import { IconPicker } from '../IconPicker';
+import { IconEmojiPicker } from '../IconEmojiPicker';
 
 interface CalendarModalProps {
   calendar: Calendar;
@@ -22,6 +22,7 @@ export function CalendarModal({ calendar, accountId, onClose }: CalendarModalPro
   const [displayName, setDisplayName] = useState(calendar.displayName);
   const [color, setColor] = useState(calendar.color ?? FALLBACK_ITEM_COLOR);
   const [icon, setIcon] = useState(calendar.icon || 'calendar');
+  const [emoji, setEmoji] = useState(calendar.emoji || '');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [warning, setWarning] = useState('');
@@ -46,11 +47,12 @@ export function CalendarModal({ calendar, accountId, onClose }: CalendarModalPro
         serverUpdates.color = color;
       }
 
-      // track local-only changes (icon is stored locally only)
+      // track local-only changes (icon and emoji are stored locally only)
       const iconChanged = icon !== calendar.icon;
+      const emojiChanged = emoji !== calendar.emoji;
 
       // if nothing changed at all, just close the modal
-      if (Object.keys(serverUpdates).length === 0 && !iconChanged) {
+      if (Object.keys(serverUpdates).length === 0 && !iconChanged && !emojiChanged) {
         onClose();
         return;
       }
@@ -77,8 +79,9 @@ export function CalendarModal({ calendar, accountId, onClose }: CalendarModalPro
             if (!result.failedProperties.includes('calendar-color')) {
               updates.color = color;
             }
-            // icon is always updated locally (not stored on server)
+            // icon and emoji are always updated locally (not stored on server)
             updates.icon = icon;
+            updates.emoji = emoji;
             return { ...c, ...updates };
           }
           return c;
@@ -133,7 +136,13 @@ export function CalendarModal({ calendar, accountId, onClose }: CalendarModalPro
               Calendar Name
             </label>
             <div className="flex items-center gap-2">
-              <IconPicker value={icon} onChange={setIcon} color={color} />
+              <IconEmojiPicker
+                iconValue={icon}
+                emojiValue={emoji}
+                onIconChange={setIcon}
+                onEmojiChange={setEmoji}
+                color={color}
+              />
               <ComposedInput
                 id="calendar-name"
                 type="text"
