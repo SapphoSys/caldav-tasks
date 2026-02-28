@@ -1,5 +1,6 @@
 # Nix
 result
+.direnv
 
 # Dependencies
 node_modules/
@@ -35,3 +36,6 @@ src-tauri/target/
 
 # local stuff
 *.mobileconfig
+
+# temporary
+tmp/
