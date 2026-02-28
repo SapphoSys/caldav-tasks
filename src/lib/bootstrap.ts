@@ -36,6 +36,8 @@ export async function initializeApp(): Promise<void> {
   try {
     await invoke('initialize_tray', { enabled: enableSystemTray });
     log.debug(`System tray initialized (enabled: ${enableSystemTray})`);
+    // Sync the applied value with the current setting on app start
+    useSettingsStore.setSystemTrayAppliedValue(enableSystemTray);
   } catch (error) {
     log.error('Failed to initialize system tray:', error);
   }
