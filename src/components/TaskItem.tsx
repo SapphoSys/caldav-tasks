@@ -365,7 +365,7 @@ export function TaskItem({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
           />
           <div
             data-context-menu-content
-            className="fixed bg-white dark:bg-surface-800 rounded-lg shadow-lg border border-surface-200 dark:border-surface-700 py-1 z-50 min-w-[160px] animate-scale-in"
+            className="fixed bg-white dark:bg-surface-800 rounded-lg shadow-lg border border-surface-200 dark:border-surface-700 my-1 z-50 min-w-[160px] animate-scale-in"
             style={{ left: contextMenu.x, top: contextMenu.y }}
           >
             <button
@@ -374,12 +374,12 @@ export function TaskItem({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
                 setSelectedTaskMutation.mutate(task.id);
                 setContextMenu(null);
               }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700"
+              className="w-full rounded-t-md flex items-center gap-2 px-3 py-2 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700"
             >
               <Edit2 className="w-4 h-4" />
               Edit
             </button>
-            {/* todo: implement duplicate func. low priority rn */}
+            <div className="border-t border-surface-200 dark:border-surface-700" />
             <button
               type="button"
               onClick={() => {
@@ -391,7 +391,7 @@ export function TaskItem({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
               <CheckCircle2 className="w-4 h-4" />
               {task.completed ? 'Mark Incomplete' : 'Mark Complete'}
             </button>
-            <div className="border-t border-surface-200 dark:border-surface-700 my-1" />
+            <div className="border-t border-surface-200 dark:border-surface-700" />
             <button
               type="button"
               onClick={handleExport}
@@ -400,10 +400,11 @@ export function TaskItem({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
               <Share2 className="w-4 h-4" />
               Export
             </button>
+            <div className="border-t border-surface-200 dark:border-surface-700" />
             <button
               type="button"
               onClick={handleDelete}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
+              className="w-full rounded-b-md flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
             >
               <Trash2 className="w-4 h-4" />
               Delete

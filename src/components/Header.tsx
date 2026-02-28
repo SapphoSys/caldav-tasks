@@ -232,29 +232,29 @@ export function Header({
                 <div className="fixed inset-0 z-40" onClick={() => setShowSortMenu(false)} />
                 <div
                   data-context-menu-content
-                  className="absolute right-0 top-full mt-1 bg-white dark:bg-surface-800 rounded-lg shadow-lg border border-surface-200 dark:border-surface-700 py-1 z-50 min-w-[180px] animate-scale-in"
+                  className="absolute right-0 top-full mt-1 bg-white dark:bg-surface-800 rounded-lg shadow-lg border border-surface-200 dark:border-surface-700 z-50 min-w-[180px] animate-scale-in"
                 >
                   {SORT_OPTIONS.map((option) => (
                     <button
                       type="button"
                       key={option.value}
                       onClick={() => handleSortChange(option.value)}
-                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-surface-100 dark:hover:bg-surface-700 ${
+                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-surface-100 dark:hover:bg-surface-700 first:rounded-t-md ${
                         sortConfig.mode === option.value
-                          ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30'
+                          ? 'text-primary-600 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-200'
                           : 'text-surface-700 dark:text-surface-300'
                       }`}
                     >
                       {option.label}
                     </button>
                   ))}
-                  <div className="border-t border-surface-200 dark:border-surface-700 my-1" />
+                  <div className="border-t border-surface-200 dark:border-surface-700" />
                   <div className="relative group">
                     <button
                       type="button"
                       onClick={sortConfig.mode === 'manual' ? () => {} : toggleSortDirection}
                       disabled={sortConfig.mode === 'manual'}
-                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm ${
+                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-b-md ${
                         sortConfig.mode === 'manual'
                           ? 'text-surface-400 dark:text-surface-600 cursor-not-allowed'
                           : 'text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700'
