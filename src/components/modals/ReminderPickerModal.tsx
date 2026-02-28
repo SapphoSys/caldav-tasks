@@ -13,6 +13,7 @@ import {
 import ChevronLeft from 'lucide-react/icons/chevron-left';
 import ChevronRight from 'lucide-react/icons/chevron-right';
 import Clock from 'lucide-react/icons/clock';
+import Trash2 from 'lucide-react/icons/trash-2';
 import X from 'lucide-react/icons/x';
 import { useEffect, useState } from 'react';
 import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
@@ -31,6 +32,7 @@ interface ReminderPickerModalProps {
   onClose: () => void;
   value?: Date;
   onSave: (date: Date) => void;
+  onClear?: () => void;
   title?: string;
 }
 
@@ -39,10 +41,12 @@ export function ReminderPickerModal({
   onClose,
   value,
   onSave,
+  onClear,
   title = 'Add Reminder',
 }: ReminderPickerModalProps) {
   const [currentMonth, setCurrentMonth] = useState(value ? new Date(value) : new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(value);
+  const [localValue, setLocalValue] = useState<Date | undefined>(value);
+  const [initialValue, setInitialValue] = useState<Date | undefined>(value);
   const [selectedTime, setSelectedTime] = useState(() => {
     if (value) {
       return {
@@ -60,14 +64,16 @@ export function ReminderPickerModal({
   useEffect(() => {
     if (isOpen) {
       if (value) {
-        setSelectedDate(value);
+        setLocalValue(value);
+        setInitialValue(value);
         setCurrentMonth(new Date(value));
         setSelectedTime({
           hours: value.getHours(),
           minutes: value.getMinutes(),
         });
       } else {
-        setSelectedDate(undefined);
+        setLocalValue(undefined);
+        setInitialValue(undefined);
         setCurrentMonth(new Date());
         setSelectedTime({ hours: 9, minutes: 0 });
       }
@@ -91,29 +97,37 @@ export function ReminderPickerModal({
 
   const handleDayClick = (day: Date) => {
     const newDate = setDateTime(day, selectedTime.hours, selectedTime.minutes);
-    setSelectedDate(newDate);
+    setLocalValue(newDate);
   };
 
   const handleTimeChange = (type: 'hours' | 'minutes', newValue: number) => {
     const newTime = updateTimeComponent(selectedTime, type, newValue);
     setSelectedTime(newTime);
 
-    if (selectedDate) {
-      const newDate = setDateTime(selectedDate, newTime.hours, newTime.minutes);
-      setSelectedDate(newDate);
+    if (localValue) {
+      const newDate = setDateTime(localValue, newTime.hours, newTime.minutes);
+      setLocalValue(newDate);
     }
   };
 
   const handleQuickSelect = (date: Date) => {
     const newDate = setDateTime(date, selectedTime.hours, selectedTime.minutes);
-    setSelectedDate(newDate);
+    onSave(newDate);
+    onClose();
+  };
+
+  const handleClear = () => {
+    setLocalValue(undefined);
   };
 
   const handleSave = () => {
-    if (selectedDate) {
-      onSave(selectedDate);
-      onClose();
+    if (localValue) {
+      onSave(localValue);
+    } else if (initialValue && onClear) {
+      // If we had a value initially but cleared it, delete the reminder
+      onClear();
     }
+    onClose();
   };
 
   return (
@@ -121,13 +135,25 @@ export function ReminderPickerModal({
       <div className="bg-white dark:bg-surface-800 rounded-xl shadow-xl w-full max-w-xs animate-scale-in">
         <div className="flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700">
           <h2 className="text-lg font-semibold text-surface-800 dark:text-surface-200">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1">
+            {localValue && (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="p-2 text-surface-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                title="Clear date"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         <div className="p-4">
@@ -196,7 +222,7 @@ export function ReminderPickerModal({
                 return <div key={`empty-${index}-${day}`} />;
               }
 
-              const isSelected = selectedDate && isSameDay(day, selectedDate);
+              const isSelected = localValue && isSameDay(day, localValue);
               const isCurrentMonth = isSameMonth(day, currentMonth);
               const isTodayDate = isToday(day);
 
@@ -268,8 +294,12 @@ export function ReminderPickerModal({
           <button
             type="button"
             onClick={handleSave}
-            disabled={!selectedDate}
-            className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-surface-300 dark:disabled:bg-surface-600 disabled:cursor-not-allowed rounded-lg transition-colors"
+            disabled={!localValue && !initialValue}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              localValue || initialValue
+                ? 'text-white bg-primary-600 hover:bg-primary-700'
+                : 'text-surface-400 dark:text-surface-600 bg-surface-200 dark:bg-surface-700 cursor-not-allowed'
+            }`}
           >
             {value ? 'Save' : 'Add Reminder'}
           </button>

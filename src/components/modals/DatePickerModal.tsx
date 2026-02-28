@@ -49,6 +49,8 @@ export function DatePickerModal({
   onAllDayChange,
 }: DatePickerModalProps) {
   const [currentMonth, setCurrentMonth] = useState(value ? new Date(value) : new Date());
+  const [localValue, setLocalValue] = useState<Date | undefined>(value);
+  const [initialValue, setInitialValue] = useState<Date | undefined>(value);
   const [selectedTime, setSelectedTime] = useState(() => {
     if (value && !allDay) {
       return {
@@ -60,20 +62,20 @@ export function DatePickerModal({
   });
   const [localAllDay, setLocalAllDay] = useState(allDay);
 
-  // Sync allDay state when prop changes
+  // Sync local state when modal opens or value changes
   useEffect(() => {
-    setLocalAllDay(allDay);
-  }, [allDay]);
-
-  // Sync selectedTime when value changes
-  useEffect(() => {
-    if (value && !allDay) {
-      setSelectedTime({
-        hours: value.getHours(),
-        minutes: value.getMinutes(),
-      });
+    if (isOpen) {
+      setLocalValue(value);
+      setInitialValue(value);
+      setLocalAllDay(allDay);
+      if (value && !allDay) {
+        setSelectedTime({
+          hours: value.getHours(),
+          minutes: value.getMinutes(),
+        });
+      }
     }
-  }, [value, allDay]);
+  }, [isOpen, value, allDay]);
 
   // Handle ESC key to close modal
   useModalEscapeKey(onClose);
@@ -97,16 +99,16 @@ export function DatePickerModal({
     const newDate = localAllDay
       ? createAllDayDate(day)
       : setDateTime(day, selectedTime.hours, selectedTime.minutes);
-    onChange(newDate, localAllDay);
+    setLocalValue(newDate);
   };
 
   const handleTimeChange = (type: 'hours' | 'minutes', newValue: number) => {
     const newTime = updateTimeComponent(selectedTime, type, newValue);
     setSelectedTime(newTime);
 
-    if (value !== undefined) {
-      const newDate = setDateTime(value, newTime.hours, newTime.minutes);
-      onChange(newDate, localAllDay);
+    if (localValue !== undefined) {
+      const newDate = setDateTime(localValue, newTime.hours, newTime.minutes);
+      setLocalValue(newDate);
     }
   };
 
@@ -114,11 +116,11 @@ export function DatePickerModal({
     const newAllDay = !localAllDay;
     setLocalAllDay(newAllDay);
 
-    if (value) {
+    if (localValue) {
       const newDate = newAllDay
-        ? createAllDayDate(value)
-        : setDateTime(value, selectedTime.hours, selectedTime.minutes);
-      onChange(newDate, newAllDay);
+        ? createAllDayDate(localValue)
+        : setDateTime(localValue, selectedTime.hours, selectedTime.minutes);
+      setLocalValue(newDate);
     }
   };
 
@@ -131,8 +133,13 @@ export function DatePickerModal({
   };
 
   const handleClear = () => {
-    onChange(undefined, false);
-    onAllDayChange?.(false);
+    setLocalValue(undefined);
+    setLocalAllDay(false);
+  };
+
+  const handleDone = () => {
+    onChange(localValue, localAllDay);
+    onAllDayChange?.(localAllDay);
     onClose();
   };
 
@@ -146,13 +153,25 @@ export function DatePickerModal({
       <div className="bg-white dark:bg-surface-800 rounded-xl shadow-xl w-full max-w-xs animate-scale-in">
         <div className="flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700">
           <h2 className="text-lg font-semibold text-surface-800 dark:text-surface-200">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1">
+            {localValue && (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="p-2 text-surface-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                title="Clear date"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         <div className="p-4">
@@ -221,7 +240,7 @@ export function DatePickerModal({
                 return <div key={`empty-${index}-${day}`} />;
               }
 
-              const isSelected = value && isSameDay(day, value);
+              const isLocalSelected = localValue && isSameDay(day, localValue);
               const isCurrentMonth = isSameMonth(day, currentMonth);
               const isTodayDate = isToday(day);
 
@@ -233,7 +252,7 @@ export function DatePickerModal({
                   className={`
                     w-8 h-8 rounded-full text-sm flex items-center justify-center transition-colors
                     ${
-                      isSelected
+                      isLocalSelected
                         ? 'bg-primary-600 text-white'
                         : isTodayDate
                           ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-medium'
@@ -305,23 +324,23 @@ export function DatePickerModal({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-between gap-3 p-4 border-t border-surface-200 dark:border-surface-700">
-          {value ? (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-              Clear
-            </button>
-          ) : (
-            <div />
-          )}
+        <div className="flex justify-end gap-3 p-4 border-t border-surface-200 dark:border-surface-700">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleDone}
+            disabled={!localValue && !initialValue}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              localValue || initialValue
+                ? 'text-white bg-primary-600 hover:bg-primary-700'
+                : 'text-surface-400 dark:text-surface-600 bg-surface-200 dark:bg-surface-700 cursor-not-allowed'
+            }`}
           >
             Done
           </button>
