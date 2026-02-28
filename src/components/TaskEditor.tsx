@@ -8,7 +8,6 @@ import Clock from 'lucide-react/icons/clock';
 import Flag from 'lucide-react/icons/flag';
 import FolderSync from 'lucide-react/icons/folder-sync';
 import Link from 'lucide-react/icons/link';
-import Pencil from 'lucide-react/icons/pencil';
 import Plus from 'lucide-react/icons/plus';
 import Tag from 'lucide-react/icons/tag';
 import Trash2 from 'lucide-react/icons/trash-2';
@@ -36,6 +35,7 @@ import { useDebouncedTaskUpdate } from '@/hooks/useDebouncedTaskUpdate';
 import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
 import * as taskData from '@/lib/taskData';
 import { useSettingsStore } from '@/store/settingsStore';
+
 import type { Priority, Task } from '@/types';
 import { filterCalDavDescription } from '@/utils/ical';
 import { hasOpenModalElements } from '@/utils/misc';
@@ -123,8 +123,7 @@ export function TaskEditor({ task }: TaskEditorProps) {
     }
   }, [task.title]);
 
-  // Handle escape key to close editor
-  // first unfocus any focused input, then close on second ESC press
+  // Handle escape key to blur focused inputs
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -594,29 +593,35 @@ export function TaskEditor({ task }: TaskEditorProps) {
           {/* biome-ignore lint/a11y/useSemanticElements: fieldset would change semantic structure; div with role="group" is appropriate here */}
           <div className="space-y-2" role="group" aria-labelledby="reminders-label">
             {(task.reminders || []).map((reminder) => (
-              <div key={reminder.id}>
-                <div className="flex items-center gap-2 px-3 py-2 bg-surface-50 dark:bg-surface-700 rounded-lg group">
-                  <Bell className="w-4 h-4 text-surface-400 flex-shrink-0" />
-                  <span className="flex-1 text-sm text-surface-700 dark:text-surface-300">
-                    {format(new Date(reminder.trigger), 'MMM d, yyyy h:mm a')}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleStartEditReminder(reminder)}
-                    className="p-1 text-surface-400 hover:text-primary-500 dark:hover:text-primary-400 opacity-0 group-hover:opacity-100 transition-all"
-                    title="Edit reminder"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveReminder(reminder.id)}
-                    className="p-1 text-surface-400 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-                    title="Remove reminder"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
+              // biome-ignore lint/a11y/useSemanticElements: Using div with role=button to allow nested delete button without button nesting
+              <div
+                key={reminder.id}
+                role="button"
+                tabIndex={0}
+                className="flex items-center gap-2 px-3 py-2 bg-surface-50 dark:bg-surface-700 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-600 transition-colors cursor-pointer group"
+                onClick={() => handleStartEditReminder(reminder)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleStartEditReminder(reminder);
+                  }
+                }}
+              >
+                <Bell className="w-4 h-4 text-surface-400 flex-shrink-0" />
+                <span className="flex-1 text-sm text-surface-700 dark:text-surface-300">
+                  {format(new Date(reminder.trigger), 'MMM d, yyyy h:mm a')}
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveReminder(reminder.id);
+                  }}
+                  className="p-1 text-surface-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-full invisible group-hover:visible"
+                  title="Remove reminder"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             ))}
 
@@ -809,6 +814,12 @@ export function TaskEditor({ task }: TaskEditorProps) {
           onSave={(date) => {
             if (editingReminderId) {
               handleUpdateReminder(editingReminderId, date);
+            }
+          }}
+          onClear={() => {
+            if (editingReminderId) {
+              handleRemoveReminder(editingReminderId);
+              handleCancelEditReminder();
             }
           }}
           title="Edit Reminder"
