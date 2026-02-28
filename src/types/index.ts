@@ -219,3 +219,13 @@ export interface ReminderRow {
   trigger: string;
   [key: string]: unknown;
 }
+
+export interface KeyboardShortcut {
+  id: string;
+  key: string;
+  ctrl?: boolean;
+  meta?: boolean;
+  shift?: boolean;
+  alt?: boolean;
+  description: string;
+}
