@@ -168,7 +168,7 @@ export function Sidebar({
       const timer = setTimeout(() => {
         setShowCollapsedContent(true);
         setIsTransitioning(false);
-      }, 200); // Match transition duration
+      }, 100); // Match transition duration
       return () => clearTimeout(timer);
     } else {
       // Expanding: hide collapsed content immediately, show expanded after transition
@@ -177,7 +177,7 @@ export function Sidebar({
       const timer = setTimeout(() => {
         setShowExpandedContent(true);
         setIsTransitioning(false);
-      }, 200); // Match transition duration
+      }, 100); // Match transition duration
       return () => clearTimeout(timer);
     }
   }, [isCollapsed]);
