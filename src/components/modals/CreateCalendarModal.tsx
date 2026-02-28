@@ -6,7 +6,7 @@ import { useAddCalendar } from '@/hooks/queries';
 import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
 import { caldavService } from '@/lib/caldav';
 import { useSettingsStore } from '@/store/settingsStore';
-import { COLOR_PRESETS } from '@/utils/constants';
+import { COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '@/utils/constants';
 import { IconPicker } from '../IconPicker';
 
 interface CreateCalendarModalProps {
@@ -125,7 +125,7 @@ export function CreateCalendarModal({ accountId, onClose }: CreateCalendarModalP
                 type="text"
                 value={color}
                 onChange={setColor}
-                placeholder="#3b82f6"
+                placeholder={FALLBACK_ITEM_COLOR}
                 className="flex-1 px-3 py-1.5 text-sm font-mono text-surface-800 dark:text-surface-200 bg-white dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:border-primary-300"
               />
             </div>

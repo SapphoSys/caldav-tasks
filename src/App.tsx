@@ -6,7 +6,7 @@ import { CreateCalendarModal } from '@/components/modals/CreateCalendarModal';
 import { ExportModal } from '@/components/modals/ExportModal';
 import { ImportModal } from '@/components/modals/ImportModal';
 import { OnboardingModal } from '@/components/modals/OnboardingModal';
-import { SettingsModal, type SettingsSubtab } from '@/components/modals/SettingsModal';
+import { SettingsModal } from '@/components/modals/SettingsModal';
 import { UpdateModal } from '@/components/modals/UpdateModal';
 import { Sidebar } from '@/components/Sidebar';
 import { TaskEditor } from '@/components/TaskEditor';
@@ -173,10 +173,8 @@ function App() {
             menuHandlers.setShowSettings(false);
             menuHandlers.setSettingsInitialTab({});
           }}
-          initialCategory={
-            menuHandlers.settingsInitialTab.category as 'general' | 'account' | 'about' | undefined
-          }
-          initialSubtab={menuHandlers.settingsInitialTab.subtab as SettingsSubtab | undefined}
+          initialCategory={menuHandlers.settingsInitialTab.category}
+          initialSubtab={menuHandlers.settingsInitialTab.subtab}
         />
       )}
 

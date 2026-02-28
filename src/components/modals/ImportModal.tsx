@@ -4,10 +4,10 @@ import FileText from 'lucide-react/icons/file-text';
 import Upload from 'lucide-react/icons/upload';
 import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { useAccounts, useCreateTask } from '@/hooks/queries';
 import { createLogger } from '@/lib/logger';
 import type { Calendar, Task } from '@/types';
+import { generateUUID } from '@/utils/misc';
 import { pluralize } from '../../utils/format';
 import { parseIcsFile, parseJsonTasksFile } from '../../utils/ical';
 
@@ -148,19 +148,21 @@ export function ImportModal({ isOpen, onClose, preloadedFile }: ImportModalProps
       const uidMap = new Map<string, string>();
       for (const task of parsedTasks) {
         if (task.uid) {
-          const newUid = `${uuidv4()}@caldav-tasks`;
+          const newUid = `${generateUUID()}@caldav-tasks`;
           uidMap.set(task.uid, newUid);
         }
       }
 
       // import tasks with new UIDs
       for (const partialTask of parsedTasks) {
-        const newUid = partialTask.uid ? uidMap.get(partialTask.uid) : `${uuidv4()}@caldav-tasks`;
+        const newUid = partialTask.uid
+          ? uidMap.get(partialTask.uid)
+          : `${generateUUID()}@caldav-tasks`;
         const newParentUid = partialTask.parentUid ? uidMap.get(partialTask.parentUid) : undefined;
 
         const task: Task = {
-          id: uuidv4(),
-          uid: newUid || `${uuidv4()}@caldav-tasks`,
+          id: generateUUID(),
+          uid: newUid || `${generateUUID()}@caldav-tasks`,
           title: partialTask.title || 'Untitled Task',
           description: partialTask.description || '',
           completed: partialTask.completed || false,

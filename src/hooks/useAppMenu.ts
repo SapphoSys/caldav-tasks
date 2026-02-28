@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useAccounts, useTasks, useUIState } from '@/hooks/queries';
 import { loggers } from '@/lib/logger';
 import { useSettingsStore } from '@/store/settingsStore';
+import type { SortMode } from '@/types';
 import { rebuildAppMenu, updateMenuState } from '@/utils/menu';
 
 const log = loggers.app;
@@ -19,14 +20,7 @@ export function useAppMenu() {
   useEffect(() => {
     const sortMode = uiState?.sortConfig?.mode ?? 'manual';
     // only use menu-supported sort modes
-    const menuSortMode:
-      | 'manual'
-      | 'smart'
-      | 'due-date'
-      | 'priority'
-      | 'title'
-      | 'created'
-      | 'modified' = sortMode === 'start-date' ? 'manual' : sortMode;
+    const menuSortMode: SortMode = sortMode === 'start-date' ? 'manual' : sortMode;
 
     log.debug('Updating menu state with sortMode:', menuSortMode);
     updateMenuState({
@@ -40,14 +34,7 @@ export function useAppMenu() {
   // Rebuild menu when keyboard shortcuts change
   useEffect(() => {
     const sortMode = uiState?.sortConfig?.mode ?? 'manual';
-    const menuSortMode:
-      | 'manual'
-      | 'smart'
-      | 'due-date'
-      | 'priority'
-      | 'title'
-      | 'created'
-      | 'modified' = sortMode === 'start-date' ? 'manual' : sortMode;
+    const menuSortMode: SortMode = sortMode === 'start-date' ? 'manual' : sortMode;
 
     rebuildAppMenu({
       showCompleted: uiState?.showCompletedTasks ?? true,

@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import type { SortMode } from '@/types';
+import type { SettingsCategory, SettingsSubtab, SortDirection, SortMode } from '@/types';
 import {
   useAccounts,
   useCreateTask,
@@ -12,8 +12,8 @@ import { useMenuEvents } from './useMenuEvents';
 export function useMenuHandlers() {
   const [showSettings, setShowSettings] = useState(false);
   const [settingsInitialTab, setSettingsInitialTab] = useState<{
-    category?: 'general' | 'account' | 'about';
-    subtab?: string;
+    category?: SettingsCategory;
+    subtab?: SettingsSubtab;
   }>({});
   const [showImport, setShowImport] = useState(false);
   const [showExport, setShowExport] = useState(false);
@@ -38,7 +38,7 @@ export function useMenuHandlers() {
   const onOpenKeyboardShortcutsRef = useRef<(() => void) | null>(null);
   const onToggleCompletedRef = useRef<((currentValue: boolean) => void) | null>(null);
   const onSetSortModeRef = useRef<
-    ((mode: SortMode, currentMode: SortMode, currentDirection: 'asc' | 'desc') => void) | null
+    ((mode: SortMode, currentMode: SortMode, currentDirection: SortDirection) => void) | null
   >(null);
 
   const handleNewTask = useCallback(() => {
@@ -106,7 +106,7 @@ export function useMenuHandlers() {
   );
 
   const handleSetSortMode = useCallback(
-    (mode: SortMode, _currentMode: SortMode, currentDirection: 'asc' | 'desc') => {
+    (mode: SortMode, _currentMode: SortMode, currentDirection: SortDirection) => {
       setSortConfigMutation.mutate({ mode, direction: currentDirection });
     },
     [setSortConfigMutation],

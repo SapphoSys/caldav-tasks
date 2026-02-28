@@ -97,8 +97,8 @@ export interface Account {
   name: string;
   serverUrl: string;
   username: string;
-  password: string; // stored locally, for now
-  serverType?: ServerType; // defaults to 'rustical' for backward compatibility
+  password: string;
+  serverType?: ServerType;
   calendars: Calendar[];
   lastSync?: Date;
   isActive: boolean;
@@ -116,3 +116,18 @@ export interface AppSettings {
   showCompletedTasks: boolean;
   confirmBeforeDelete: boolean;
 }
+
+export type SettingsCategory = 'general' | 'account' | 'about';
+export type SettingsSubtab =
+  | 'behavior'
+  | 'appearance'
+  | 'notifications'
+  | 'shortcuts'
+  | 'defaults'
+  | 'connections'
+  | 'sync'
+  | 'data'
+  | 'version';
+
+export type ExportFormat = 'ics' | 'json' | 'markdown' | 'csv';
+export type ExportType = 'tasks' | 'all-calendars' | 'single-calendar';

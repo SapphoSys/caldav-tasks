@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import * as taskData from '@/lib/taskData';
 import type { SortConfig } from '@/types';
+import { DEFAULT_SORT_CONFIG } from '@/utils/constants';
 
 // ============================================================================
 // Query Hooks
@@ -83,7 +84,7 @@ export function useSearchQuery() {
  */
 export function useSortConfig() {
   const { data: uiState } = useUIState();
-  return uiState?.sortConfig ?? { mode: 'manual' as const, direction: 'asc' as const };
+  return uiState?.sortConfig ?? DEFAULT_SORT_CONFIG;
 }
 
 /**

@@ -2,7 +2,8 @@ import { listen } from '@tauri-apps/api/event';
 import { useEffect } from 'react';
 import { useSyncQuery, useUIState } from '@/hooks/queries';
 import { createLogger } from '@/lib/logger';
-import type { SortMode } from '@/types';
+import type { SortDirection, SortMode } from '@/types';
+import { DEFAULT_SORT_CONFIG } from '@/utils/constants';
 import { MENU_EVENTS } from '@/utils/menu';
 
 const log = createLogger('Menu', '#0ea5e9');
@@ -23,7 +24,7 @@ export function useMenuEvents(callbacks: {
   onOpenKeyboardShortcuts?: React.RefObject<(() => void) | null>;
   onToggleCompleted?: React.RefObject<((currentValue: boolean) => void) | null>;
   onSetSortMode?: React.RefObject<
-    ((mode: SortMode, currentMode: SortMode, currentDirection: 'asc' | 'desc') => void) | null
+    ((mode: SortMode, currentMode: SortMode, currentDirection: SortDirection) => void) | null
   >;
 }) {
   const { syncAll } = useSyncQuery();
@@ -170,8 +171,8 @@ export function useMenuEvents(callbacks: {
       for (const [event, mode] of Object.entries(sortModeMap)) {
         const unlisten = await listen(event, () => {
           log.debug(`Sort ${mode} triggered`);
-          const currentMode = uiState?.sortConfig?.mode ?? 'manual';
-          const currentDirection = uiState?.sortConfig?.direction ?? 'asc';
+          const currentMode = uiState?.sortConfig?.mode ?? DEFAULT_SORT_CONFIG.mode;
+          const currentDirection = uiState?.sortConfig?.direction ?? DEFAULT_SORT_CONFIG.direction;
           callbacks.onSetSortMode?.current?.(mode, currentMode, currentDirection);
         });
         if (!isActive) {

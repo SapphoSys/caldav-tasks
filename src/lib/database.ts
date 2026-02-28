@@ -4,10 +4,11 @@
  */
 
 import Database from '@tauri-apps/plugin-sql';
-import { v4 as uuidv4 } from 'uuid';
 import { useSettingsStore } from '@/store/settingsStore';
 import type { Account, Calendar, Priority, SortConfig, Tag, Task } from '@/types';
+import { DEFAULT_SORT_CONFIG, FALLBACK_ITEM_COLOR } from '@/utils/constants';
 import { toAppleEpoch } from '@/utils/ical';
+import { generateUUID } from '@/utils/misc';
 import { createLogger } from './logger';
 
 const log = createLogger('Database', '#8b5cf6');
@@ -54,7 +55,7 @@ const defaultUIState: UIState = {
   activeTagId: null,
   selectedTaskId: null,
   searchQuery: '',
-  sortConfig: { mode: 'manual', direction: 'asc' },
+  sortConfig: DEFAULT_SORT_CONFIG,
   showCompletedTasks: true,
   isEditorOpen: false,
 };
@@ -285,8 +286,8 @@ export async function createTask(taskData: Partial<Task>): Promise<Task> {
   const isLocalOnly = !calendarId || !accountId;
 
   const task: Task = {
-    id: uuidv4(),
-    uid: uuidv4(),
+    id: generateUUID(),
+    uid: generateUUID(),
     title: taskData.title || 'New Task',
     description: taskData.description || '',
     completed: false,
@@ -482,9 +483,9 @@ export async function createTag(tagData: Partial<Tag>): Promise<Tag> {
   const database = await getDb();
 
   const tag: Tag = {
-    id: uuidv4(),
+    id: generateUUID(),
     name: tagData.name || 'New Tag',
-    color: tagData.color || '#3b82f6',
+    color: tagData.color ?? FALLBACK_ITEM_COLOR,
     icon: tagData.icon,
   };
 
@@ -559,7 +560,7 @@ export async function createAccount(accountData: Partial<Account>): Promise<Acco
   const database = await getDb();
 
   const account: Account = {
-    id: accountData.id || uuidv4(),
+    id: accountData.id || generateUUID(),
     name: accountData.name || 'New Account',
     serverUrl: accountData.serverUrl || '',
     username: accountData.username || '',
@@ -649,7 +650,7 @@ export async function addCalendar(
 
   const calendar: Calendar = {
     ...calendarData,
-    id: calendarData.id || uuidv4(),
+    id: calendarData.id || generateUUID(),
     displayName: calendarData.displayName || 'Tasks',
     url: calendarData.url || '',
     accountId,

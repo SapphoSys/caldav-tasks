@@ -3,10 +3,10 @@
  * Replaces ical.js (~266KB) with minimal implementation for VTODO support
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { createLogger } from '@/lib/logger';
 import * as taskData from '@/lib/taskData';
 import type { Priority, Reminder, Subtask, Task } from '@/types';
+import { generateUUID } from '@/utils/misc';
 
 const log = createLogger('iCal', '#22c55e');
 
@@ -629,7 +629,7 @@ export function vtodoToTask(
       reminders = parsed.alarms
         .filter((a) => a.trigger)
         .map((a) => ({
-          id: uuidv4(),
+          id: generateUUID(),
           trigger: a.trigger!,
         }));
     }
@@ -644,8 +644,8 @@ export function vtodoToTask(
     }
 
     const task: Task = {
-      id: uuidv4(),
-      uid: parsed.uid || uuidv4(),
+      id: generateUUID(),
+      uid: parsed.uid || generateUUID(),
       etag,
       href,
       title: parsed.summary || 'Untitled Task',
@@ -682,7 +682,7 @@ export function vtodoToTask(
  * Generate a unique iCalendar UID
  */
 export function generateICalUid(): string {
-  return `${uuidv4()}@caldav-tasks`;
+  return `${generateUUID()}@caldav-tasks`;
 }
 
 /**
@@ -809,7 +809,7 @@ export function parseIcsFile(icsContent: string): Partial<Task>[] {
         reminders = parsed.alarms
           .filter((a) => a.trigger)
           .map((a) => ({
-            id: uuidv4(),
+            id: generateUUID(),
             trigger: a.trigger!,
           }));
       }
@@ -824,8 +824,8 @@ export function parseIcsFile(icsContent: string): Partial<Task>[] {
       }
 
       tasks.push({
-        id: uuidv4(),
-        uid: parsed.uid || uuidv4(),
+        id: generateUUID(),
+        uid: parsed.uid || generateUUID(),
         title: parsed.summary || 'Untitled Task',
         description: filterCalDavDescription(parsed.description),
         completed: parsed.status === 'COMPLETED',
@@ -866,7 +866,7 @@ export function parseJsonTasksFile(jsonContent: string): Partial<Task>[] {
     if (Array.isArray(data)) {
       return data.map((task) => ({
         ...task,
-        id: uuidv4(), // Always generate new IDs
+        id: generateUUID(), // Always generate new IDs
         synced: false,
       }));
     }

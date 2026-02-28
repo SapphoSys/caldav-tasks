@@ -1,4 +1,5 @@
 import { relaunch } from '@tauri-apps/plugin-process';
+import { WEEK_START_OPTIONS } from '@/data/settings';
 import { useAccounts } from '@/hooks/queries';
 import {
   type StartOfWeek,
@@ -46,7 +47,6 @@ export function BehaviorSettings() {
     }
   };
 
-  // Get all calendars from all accounts
   const allCalendars = accounts.flatMap((account) =>
     account.calendars.map((cal) => ({
       ...cal,
@@ -137,8 +137,11 @@ export function BehaviorSettings() {
             onChange={(e) => setStartOfWeek(e.target.value as StartOfWeek)}
             className="px-3 py-1.5 text-sm border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg focus:outline-none focus:border-primary-300"
           >
-            <option value="sunday">Sunday</option>
-            <option value="monday">Monday</option>
+            {WEEK_START_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
 

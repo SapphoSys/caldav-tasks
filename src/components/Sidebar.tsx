@@ -39,10 +39,11 @@ import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import { caldavService } from '@/lib/caldav';
 import { useSettingsStore } from '@/store/settingsStore';
 import type { Account, Calendar as CalendarType } from '@/types';
+import { FALLBACK_ITEM_COLOR, MAX_SIDEBAR_WIDTH, MIN_SIDEBAR_WIDTH } from '@/utils/constants';
+import { getIconByName } from '../data/icons';
 import { getContrastTextColor } from '../utils/color';
 import { getMetaKeyLabel, getModifierJoiner } from '../utils/keyboard';
 import { clampToViewport } from '../utils/position';
-import { getIconByName } from './IconPicker';
 import { AccountModal } from './modals/AccountModal';
 import { CalendarModal } from './modals/CalendarModal';
 import { CreateCalendarModal } from './modals/CreateCalendarModal';
@@ -60,9 +61,6 @@ interface SidebarProps {
   updateAvailable?: boolean;
   onUpdateClick?: () => void;
 }
-
-const MIN_SIDEBAR_WIDTH = 200;
-const MAX_SIDEBAR_WIDTH = 400;
 
 export function Sidebar({
   onOpenSettings,
@@ -412,7 +410,7 @@ export function Sidebar({
                             account.calendars.map((calendar) => {
                               const CalendarIcon = getIconByName(calendar.icon || 'calendar');
                               const isActive = activeCalendarId === calendar.id;
-                              const calendarColor = calendar.color ?? '#3b82f6';
+                              const calendarColor = calendar.color ?? FALLBACK_ITEM_COLOR;
                               const textColor = isActive
                                 ? getContrastTextColor(calendarColor)
                                 : undefined;
@@ -571,7 +569,7 @@ export function Sidebar({
               account.calendars.map((calendar) => {
                 const CalendarIcon = getIconByName(calendar.icon || 'calendar');
                 const isActive = activeCalendarId === calendar.id;
-                const calendarColor = calendar.color ?? '#3b82f6';
+                const calendarColor = calendar.color ?? FALLBACK_ITEM_COLOR;
                 return (
                   <Tooltip key={calendar.id} content={calendar.displayName} position="right">
                     <button

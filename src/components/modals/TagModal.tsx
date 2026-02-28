@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ComposedInput } from '@/components/ComposedInput';
 import { useCreateTag, useTags, useUpdateTag } from '@/hooks/queries';
 import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
-import { COLOR_PRESETS, DEFAULT_COLOR } from '@/utils/constants';
+import { COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '@/utils/constants';
 import { getIconByName, IconPicker } from '../IconPicker';
 
 interface TagModalProps {
@@ -19,7 +19,7 @@ export function TagModal({ tagId, onClose }: TagModalProps) {
   const existingTag = tagId ? tags.find((t) => t.id === tagId) : null;
 
   const [name, setName] = useState(existingTag?.name || '');
-  const [color, setColor] = useState(existingTag?.color || DEFAULT_COLOR);
+  const [color, setColor] = useState(existingTag?.color ?? FALLBACK_ITEM_COLOR);
   const [icon, setIcon] = useState(existingTag?.icon || 'star');
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -117,7 +117,7 @@ export function TagModal({ tagId, onClose }: TagModalProps) {
                 type="text"
                 value={color}
                 onChange={setColor}
-                placeholder="#3b82f6"
+                placeholder={FALLBACK_ITEM_COLOR}
                 className="flex-1 px-3 py-1.5 text-sm font-mono text-surface-800 dark:text-surface-200 bg-white dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:border-primary-300"
               />
             </div>

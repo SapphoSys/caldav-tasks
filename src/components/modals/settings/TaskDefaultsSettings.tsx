@@ -1,48 +1,11 @@
-import { getIconByName } from '@/components/IconPicker';
 import { useTags } from '@/hooks/queries';
 import { useSettingsStore } from '@/store/settingsStore';
-import type { Priority } from '@/types';
+import { PRIORITIES } from '@/utils/priority';
+import { getIconByName } from '../../../data/icons';
 
 export function TaskDefaultsSettings() {
   const { defaultPriority, setDefaultPriority, defaultTags, setDefaultTags } = useSettingsStore();
   const { data: tags = [] } = useTags();
-
-  const priorities: {
-    value: Priority;
-    label: string;
-    color: string;
-    borderColor: string;
-    bgColor: string;
-  }[] = [
-    {
-      value: 'high',
-      label: 'High',
-      color: 'text-red-500',
-      borderColor: 'border-red-400',
-      bgColor: 'bg-red-50 dark:bg-red-900/30',
-    },
-    {
-      value: 'medium',
-      label: 'Medium',
-      color: 'text-amber-500',
-      borderColor: 'border-amber-400',
-      bgColor: 'bg-amber-50 dark:bg-amber-900/30',
-    },
-    {
-      value: 'low',
-      label: 'Low',
-      color: 'text-blue-500',
-      borderColor: 'border-blue-400',
-      bgColor: 'bg-blue-50 dark:bg-blue-900/30',
-    },
-    {
-      value: 'none',
-      label: 'None',
-      color: 'text-surface-400',
-      borderColor: 'border-surface-300',
-      bgColor: 'bg-surface-50 dark:bg-surface-700',
-    },
-  ];
 
   const handleTagToggle = (tagId: string) => {
     if (defaultTags.includes(tagId)) {
@@ -62,7 +25,7 @@ export function TaskDefaultsSettings() {
           Default Priority
         </h4>
         <div className="flex gap-2">
-          {priorities.map((p) => (
+          {PRIORITIES.map((p) => (
             <button
               type="button"
               key={p.value}

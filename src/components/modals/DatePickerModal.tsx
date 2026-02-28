@@ -19,6 +19,15 @@ import X from 'lucide-react/icons/x';
 import { useEffect, useState } from 'react';
 import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
 import { useSettingsStore } from '@/store/settingsStore';
+import {
+  createAllDayDate,
+  createPaddedDaysArray,
+  getDaysOfWeekLabels,
+  getMonthStartPadding,
+  getWeekStartValue,
+  setDateTime,
+  updateTimeComponent,
+} from '@/utils/calendar';
 
 interface DatePickerModalProps {
   isOpen: boolean;
@@ -72,12 +81,8 @@ export function DatePickerModal({
   if (!isOpen) return null;
 
   const { startOfWeek: weekStartsSetting } = useSettingsStore.getState();
-  const weekStartsOn = weekStartsSetting === 'monday' ? 1 : 0;
-
-  // Generate days of week labels based on setting
-  const daysOfWeekLabels = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-  const daysOfWeek =
-    weekStartsOn === 1 ? [...daysOfWeekLabels.slice(1), daysOfWeekLabels[0]] : daysOfWeekLabels;
+  const weekStartsOn = getWeekStartValue(weekStartsSetting);
+  const daysOfWeek = getDaysOfWeekLabels(weekStartsOn);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -85,27 +90,22 @@ export function DatePickerModal({
 
   // Pad start of month based on week start setting
   const firstDayOfMonth = monthStart.getDay();
-  const startPadding =
-    weekStartsOn === 1 ? (firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1) : firstDayOfMonth;
-  const paddedDays = Array(startPadding).fill(null).concat(days);
+  const startPadding = getMonthStartPadding(firstDayOfMonth, weekStartsOn);
+  const paddedDays = createPaddedDaysArray(days, startPadding);
 
   const handleDayClick = (day: Date) => {
-    const newDate = new Date(day);
-    if (localAllDay) {
-      newDate.setHours(0, 0, 0, 0);
-    } else {
-      newDate.setHours(selectedTime.hours, selectedTime.minutes, 0, 0);
-    }
+    const newDate = localAllDay
+      ? createAllDayDate(day)
+      : setDateTime(day, selectedTime.hours, selectedTime.minutes);
     onChange(newDate, localAllDay);
   };
 
   const handleTimeChange = (type: 'hours' | 'minutes', newValue: number) => {
-    const newTime = { ...selectedTime, [type]: newValue };
+    const newTime = updateTimeComponent(selectedTime, type, newValue);
     setSelectedTime(newTime);
 
     if (value !== undefined) {
-      const newDate = new Date(value);
-      newDate.setHours(newTime.hours, newTime.minutes, 0, 0);
+      const newDate = setDateTime(value, newTime.hours, newTime.minutes);
       onChange(newDate, localAllDay);
     }
   };
@@ -113,26 +113,19 @@ export function DatePickerModal({
   const handleAllDayToggle = () => {
     const newAllDay = !localAllDay;
     setLocalAllDay(newAllDay);
-    onAllDayChange?.(newAllDay);
 
     if (value) {
-      const newDate = new Date(value);
-      if (newAllDay) {
-        newDate.setHours(0, 0, 0, 0);
-      } else {
-        newDate.setHours(selectedTime.hours, selectedTime.minutes, 0, 0);
-      }
+      const newDate = newAllDay
+        ? createAllDayDate(value)
+        : setDateTime(value, selectedTime.hours, selectedTime.minutes);
       onChange(newDate, newAllDay);
     }
   };
 
   const handleQuickSelect = (date: Date) => {
-    const newDate = new Date(date);
-    if (localAllDay) {
-      newDate.setHours(0, 0, 0, 0);
-    } else {
-      newDate.setHours(selectedTime.hours, selectedTime.minutes, 0, 0);
-    }
+    const newDate = localAllDay
+      ? createAllDayDate(date)
+      : setDateTime(date, selectedTime.hours, selectedTime.minutes);
     onChange(newDate, localAllDay);
     onClose();
   };

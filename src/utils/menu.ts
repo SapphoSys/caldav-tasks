@@ -9,6 +9,8 @@ import {
 } from '@tauri-apps/api/menu';
 import { loggers } from '@/lib/logger';
 import type { KeyboardShortcut } from '@/store/settingsStore';
+import type { SortMode } from '@/types';
+import { isMacPlatform } from './misc';
 
 const log = loggers.menu;
 
@@ -95,7 +97,7 @@ function getAcceleratorById(
  */
 export async function createMacMenu(options?: {
   showCompleted?: boolean;
-  sortMode?: 'manual' | 'smart' | 'due-date' | 'priority' | 'title' | 'created' | 'modified';
+  sortMode?: SortMode;
   shortcuts?: KeyboardShortcut[];
 }): Promise<Menu> {
   const showCompleted = options?.showCompleted ?? true;
@@ -394,13 +396,11 @@ export async function createMacMenu(options?: {
  */
 export async function initAppMenu(options?: {
   showCompleted?: boolean;
-  sortMode?: 'manual' | 'smart' | 'due-date' | 'priority' | 'title' | 'created' | 'modified';
+  sortMode?: SortMode;
   shortcuts?: KeyboardShortcut[];
 }): Promise<void> {
   // Only create menu on macOS
-  if (!navigator.userAgent.includes('Macintosh')) {
-    return;
-  }
+  if (!isMacPlatform()) return;
 
   try {
     const menu = await createMacMenu(options);
@@ -417,7 +417,7 @@ export async function initAppMenu(options?: {
  */
 export async function rebuildAppMenu(options?: {
   showCompleted?: boolean;
-  sortMode?: 'manual' | 'smart' | 'due-date' | 'priority' | 'title' | 'created' | 'modified';
+  sortMode?: SortMode;
   shortcuts?: KeyboardShortcut[];
 }): Promise<void> {
   await initAppMenu(options);
@@ -502,7 +502,7 @@ export async function updateMenuState(options: {
   hasAccounts?: boolean;
   hasTasks?: boolean;
   showCompleted?: boolean;
-  sortMode?: 'manual' | 'smart' | 'due-date' | 'priority' | 'title' | 'created' | 'modified';
+  sortMode?: SortMode;
 }): Promise<void> {
   if (options.hasAccounts !== undefined) {
     await updateMenuItem('add-calendar', { enabled: options.hasAccounts });

@@ -4,3 +4,7 @@ export function isMacPlatform(): boolean {
   }
   return /Mac/.test(navigator.userAgent);
 }
+
+export function generateUUID(): string {
+  return crypto.randomUUID();
+}

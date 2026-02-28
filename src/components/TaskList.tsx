@@ -22,6 +22,7 @@ import {
 } from '@/hooks/queries';
 import { createLogger } from '@/lib/logger';
 import * as taskData from '@/lib/taskData';
+import { DEFAULT_SORT_CONFIG, TASK_LIST_INDENT_SHIFT_SIZE } from '@/utils/constants';
 import { getMetaKeyLabel, getModifierJoiner } from '../utils/keyboard';
 import { type FlattenedTask, flattenTasks } from '../utils/tree';
 import { TaskItem } from './TaskItem';
@@ -30,13 +31,6 @@ const log = createLogger('TaskList', '#14b8a6');
 
 import { setIsKeyboardDragging } from '@/lib/dragState';
 
-// pixels of horizontal drag per indent level
-const INDENT_SHIFT_SIZE = 28;
-
-// Disable drop animation entirely to prevent visual conflict
-// When we drop, items should instantly appear in their new positions
-const dropAnimation = null;
-
 export function TaskList() {
   const { data: uiState } = useUIState();
   const { data: filteredTasksData = [] } = useFilteredTasks();
@@ -44,7 +38,8 @@ export function TaskList() {
   const setSelectedTaskMutation = useSetSelectedTask();
   const reorderTasksMutation = useReorderTasks();
 
-  const sortConfig = uiState?.sortConfig ?? { mode: 'manual' as const, direction: 'asc' as const };
+  const sortConfig = uiState?.sortConfig ?? DEFAULT_SORT_CONFIG;
+
   const searchQuery = uiState?.searchQuery ?? '';
   const showCompletedTasks = uiState?.showCompletedTasks ?? true;
 
@@ -222,7 +217,7 @@ export function TaskList() {
     const deltaX = event.delta.x;
 
     // calculate indent change based on horizontal drag
-    const indentDelta = Math.round(deltaX / INDENT_SHIFT_SIZE);
+    const indentDelta = Math.round(deltaX / TASK_LIST_INDENT_SHIFT_SIZE);
 
     // calculate bounds - pass activeIndex for proper calculation
     const maxIndent = getMaxIndentAtPosition(overIndex, active.id as string, activeIndex);
@@ -379,7 +374,7 @@ export function TaskList() {
           </div>
         </SortableContext>
 
-        <DragOverlay dropAnimation={dropAnimation}>
+        <DragOverlay dropAnimation={null}>
           {activeTask ? (
             <div className="drag-overlay relative" style={{ marginLeft: `${targetIndent * 24}px` }}>
               {targetIndent !== originalIndentRef.current && (

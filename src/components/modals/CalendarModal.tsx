@@ -6,7 +6,7 @@ import { useAccounts, useUpdateAccount } from '@/hooks/queries';
 import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
 import { caldavService } from '@/lib/caldav';
 import type { Calendar } from '@/types';
-import { COLOR_PRESETS } from '@/utils/constants';
+import { COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '@/utils/constants';
 import { IconPicker } from '../IconPicker';
 
 interface CalendarModalProps {
@@ -20,7 +20,7 @@ export function CalendarModal({ calendar, accountId, onClose }: CalendarModalPro
   const updateAccountMutation = useUpdateAccount();
 
   const [displayName, setDisplayName] = useState(calendar.displayName);
-  const [color, setColor] = useState(calendar.color || '#3b82f6');
+  const [color, setColor] = useState(calendar.color ?? FALLBACK_ITEM_COLOR);
   const [icon, setIcon] = useState(calendar.icon || 'calendar');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');

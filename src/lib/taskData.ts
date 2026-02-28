@@ -4,7 +4,6 @@
  * Uses SQLite via Tauri SQL plugin with in-memory cache for synchronous access
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { useSettingsStore } from '@/store/settingsStore';
 import type {
   Account,
@@ -16,7 +15,9 @@ import type {
   Tag,
   Task,
 } from '@/types';
+import { DEFAULT_SORT_CONFIG, FALLBACK_ITEM_COLOR } from '@/utils/constants';
 import { toAppleEpoch } from '@/utils/ical';
+import { generateUUID } from '@/utils/misc';
 import * as db from './database';
 import { loggers } from './logger';
 
@@ -58,7 +59,7 @@ const defaultUIState: UIState = {
   activeTagId: null,
   selectedTaskId: null,
   searchQuery: '',
-  sortConfig: { mode: 'manual', direction: 'asc' },
+  sortConfig: DEFAULT_SORT_CONFIG,
   showCompletedTasks: true,
   isEditorOpen: false,
 };
@@ -240,8 +241,8 @@ export function createTask(taskData: Partial<Task>): Task {
       : toAppleEpoch(now.getTime()) - 1;
 
   const task: Task = {
-    id: uuidv4(),
-    uid: uuidv4(),
+    id: generateUUID(),
+    uid: generateUUID(),
     title: taskData.title || 'New Task',
     description: taskData.description || '',
     completed: false,
@@ -464,7 +465,7 @@ export function setTaskParent(taskId: string, parentUid: string | undefined): vo
 export function addSubtask(taskId: string, title: string): void {
   const data = loadDataStore();
   const subtask: Subtask = {
-    id: uuidv4(),
+    id: generateUUID(),
     title,
     completed: false,
   };
@@ -564,7 +565,7 @@ export function removeTagFromTask(taskId: string, tagId: string): void {
 export function addReminder(taskId: string, trigger: Date): void {
   const data = loadDataStore();
   const reminder: Reminder = {
-    id: uuidv4(),
+    id: generateUUID(),
     trigger,
   };
   const tasks = data.tasks.map((task) =>
@@ -863,9 +864,9 @@ export function getTagById(id: string): Tag | undefined {
 export function createTag(tagData: Partial<Tag>): Tag {
   const data = loadDataStore();
   const tag: Tag = {
-    id: uuidv4(),
+    id: generateUUID(),
     name: tagData.name ?? 'New Tag',
-    color: tagData.color ?? '#3b82f6',
+    color: tagData.color ?? FALLBACK_ITEM_COLOR,
     icon: tagData.icon,
   };
 
@@ -929,7 +930,7 @@ export function getAccountById(id: string): Account | undefined {
 export function createAccount(accountData: Partial<Account>): Account {
   const data = loadDataStore();
   const account: Account = {
-    id: accountData.id || uuidv4(),
+    id: accountData.id || generateUUID(),
     name: accountData.name || 'New Account',
     serverUrl: accountData.serverUrl || '',
     username: accountData.username || '',
@@ -1006,7 +1007,7 @@ export function addCalendar(accountId: string, calendarData: Partial<Calendar>):
   const data = loadDataStore();
   const calendar: Calendar = {
     ...calendarData,
-    id: calendarData.id || uuidv4(),
+    id: calendarData.id || generateUUID(),
     displayName: calendarData.displayName || 'Tasks',
     url: calendarData.url || '',
     accountId,
@@ -1266,7 +1267,6 @@ export function setShowCompletedTasks(show: boolean): void {
 }
 
 // Filtering and sorting helpers
-
 const priorityOrder: Record<Priority, number> = {
   high: 0,
   medium: 1,
@@ -1315,7 +1315,6 @@ export function getSortedTasks(tasks: Task[], sortConfig?: SortConfig): Task[] {
   const { mode, direction } = config;
   const multiplier = direction === 'asc' ? 1 : -1;
 
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: todo: figure out how to simplify
   return [...tasks].sort((a, b) => {
     switch (mode) {
       case 'manual':

@@ -19,19 +19,9 @@ import {
   useUIState,
 } from '@/hooks/queries';
 import type { SortMode } from '@/types';
+import { DEFAULT_SORT_CONFIG, SORT_OPTIONS } from '@/utils/constants';
 import { getMetaKeyLabel, getModifierJoiner } from '../utils/keyboard';
 import { Tooltip } from './Tooltip';
-
-const sortOptions: { value: SortMode; label: string }[] = [
-  { value: 'manual', label: 'Manual' },
-  { value: 'smart', label: 'Smart Sort' },
-  { value: 'due-date', label: 'Due Date' },
-  { value: 'start-date', label: 'Start Date' },
-  { value: 'priority', label: 'Priority' },
-  { value: 'title', label: 'Title' },
-  { value: 'modified', label: 'Last Modified' },
-  { value: 'created', label: 'Created' },
-];
 
 interface HeaderProps {
   isSyncing?: boolean;
@@ -56,10 +46,7 @@ export function Header({
   const setSelectedTaskMutation = useSetSelectedTask();
 
   const searchQuery = uiState?.searchQuery ?? '';
-  const sortConfig = uiState?.sortConfig ?? {
-    mode: 'manual' as SortMode,
-    direction: 'asc' as const,
-  };
+  const sortConfig = uiState?.sortConfig ?? DEFAULT_SORT_CONFIG;
   const showCompletedTasks = uiState?.showCompletedTasks ?? true;
 
   const { isAnyModalOpen } = useModalState();
@@ -189,7 +176,7 @@ export function Header({
                 ) : (
                   <SortDesc className="w-4 h-4" />
                 )}
-                <span>{sortOptions.find((o) => o.value === sortConfig.mode)?.label}</span>
+                <span>{SORT_OPTIONS.find((o) => o.value === sortConfig.mode)?.label}</span>
               </button>
             </Tooltip>
 
@@ -200,7 +187,7 @@ export function Header({
                   data-context-menu-content
                   className="absolute right-0 top-full mt-1 bg-white dark:bg-surface-800 rounded-lg shadow-lg border border-surface-200 dark:border-surface-700 py-1 z-50 min-w-[180px] animate-scale-in"
                 >
-                  {sortOptions.map((option) => (
+                  {SORT_OPTIONS.map((option) => (
                     <button
                       type="button"
                       key={option.value}

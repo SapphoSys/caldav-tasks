@@ -7,22 +7,14 @@ import Copy from 'lucide-react/icons/copy';
 import Download from 'lucide-react/icons/download';
 import X from 'lucide-react/icons/x';
 import { useState } from 'react';
+import { EXPORT_FORMATS } from '@/data/export';
 import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
 import { createLogger } from '@/lib/logger';
-import type { Calendar, Task } from '@/types';
+import type { Calendar, ExportFormat, ExportType, Task } from '@/types';
+import { getExportContent, getExportDescription, getExportTitle } from '@/utils/export';
 import { downloadFile } from '../../utils/file';
-import { pluralize } from '../../utils/format';
-import {
-  exportTasksAsCsv,
-  exportTasksAsIcs,
-  exportTasksAsJson,
-  exportTasksAsMarkdown,
-} from '../../utils/ical';
 
 const log = createLogger('Export', '#f59e0b');
-
-type ExportFormat = 'ics' | 'json' | 'markdown' | 'csv';
-type ExportType = 'tasks' | 'all-calendars' | 'single-calendar';
 
 interface ExportModalProps {
   tasks: Task[];
@@ -49,88 +41,9 @@ export function ExportModal({
 
   useModalEscapeKey(onClose);
 
-  // calculate subtask count based on array length (for flattened task hierarchies)
-  // when tasks are passed with descendants, count all items after the first one
-  const descendantCount = tasks.length > 1 ? tasks.length - 1 : 0;
-
-  // also count subtasks from the first task's subtasks array (for non-flattened case)
-  const firstTaskSubtasks = tasks[0]?.subtasks?.length || 0;
-  const totalSubtasks = descendantCount > 0 ? descendantCount : firstTaskSubtasks;
-
-  // get the title based on export type
-  const getTitle = () => {
-    switch (type) {
-      case 'all-calendars':
-        return 'Export All Calendars';
-      case 'single-calendar':
-        return 'Export Calendars';
-      case 'tasks':
-        return 'Export Tasks';
-    }
-  };
-
-  // generate description based on type
-  const getDescription = () => {
-    switch (type) {
-      case 'all-calendars':
-        return `${calendars.length} ${pluralize(calendars.length, 'calendar')}, ${tasks.length} ${pluralize(tasks.length, 'task')}`;
-
-      case 'single-calendar':
-        return `${tasks.length} ${pluralize(tasks.length, 'task')} in ${calendarName || 'Calendar'}`;
-
-      case 'tasks':
-        if (totalSubtasks > 0) {
-          return `${tasks.length} ${pluralize(tasks.length, 'task')} + ${totalSubtasks} ${pluralize(totalSubtasks, 'subtask')}`;
-        }
-        return `${tasks.length} ${pluralize(tasks.length, 'task')}`;
-    }
-  };
-
-  const formats: { id: ExportFormat; label: string; description: string; ext: string }[] = [
-    {
-      id: 'ics',
-      label: 'iCalendar (.ics)',
-      description: 'Universal calendar format, compatible with most apps',
-      ext: 'ics',
-    },
-    {
-      id: 'json',
-      label: 'JSON',
-      description: 'Complete data export for backup or reimport',
-      ext: 'json',
-    },
-    {
-      id: 'markdown',
-      label: 'Markdown',
-      description: 'Readable checklist format for notes and wikis',
-      ext: 'md',
-    },
-    {
-      id: 'csv',
-      label: 'CSV',
-      description: 'Spreadsheet-compatible format',
-      ext: 'csv',
-    },
-  ];
-
-  const getExportContent = (): string => {
-    switch (selectedFormat) {
-      case 'ics':
-        return exportTasksAsIcs(tasks);
-      case 'json':
-        return exportTasksAsJson(tasks);
-      case 'markdown':
-        return exportTasksAsMarkdown(tasks);
-      case 'csv':
-        return exportTasksAsCsv(tasks);
-      default:
-        return '';
-    }
-  };
-
   const handleCopyToClipboard = async () => {
     try {
-      const content = getExportContent();
+      const content = getExportContent(selectedFormat, tasks);
       await navigator.clipboard.writeText(content);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -145,8 +58,8 @@ export function ExportModal({
       setExporting(true);
       setError(null);
 
-      const content = getExportContent();
-      const format = formats.find((f) => f.id === selectedFormat);
+      const content = getExportContent(selectedFormat, tasks);
+      const format = EXPORT_FORMATS.find((f) => f.id === selectedFormat);
       const fullFileName = `${fileName}.${format?.ext}`;
 
       try {
@@ -166,9 +79,10 @@ export function ExportModal({
           await writeTextFile(path, content);
           onClose();
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         // if dialog is cancelled or error, fall back to browser download
-        if (err.message?.includes('dialog cancelled') || err.message?.includes('user closed')) {
+        const errorMessage = err instanceof Error ? err.message : '';
+        if (errorMessage.includes('dialog cancelled') || errorMessage.includes('user closed')) {
           // silently handle user cancellation
           setExporting(false);
           return;
@@ -192,10 +106,10 @@ export function ExportModal({
         <div className="bg-white dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 p-6 flex-shrink-0 flex items-start justify-between rounded-t-xl">
           <div>
             <h2 className="text-lg font-semibold text-surface-900 dark:text-surface-100">
-              {getTitle()}
+              {getExportTitle(type)}
             </h2>
             <p className="text-sm text-surface-600 dark:text-surface-400 mt-1">
-              {getDescription()}
+              {getExportDescription(type, tasks, calendars, calendarName)}
             </p>
           </div>
           <button
@@ -214,7 +128,7 @@ export function ExportModal({
               Export Format
             </label>
             <div className="grid grid-cols-1 gap-2">
-              {formats.map((format) => (
+              {EXPORT_FORMATS.map((format) => (
                 <button
                   type="button"
                   key={format.id}
@@ -272,8 +186,8 @@ export function ExportModal({
           {showPreview && (
             <div className="bg-surface-50 dark:bg-surface-900 p-3 rounded-lg border border-surface-200 dark:border-surface-700 max-h-24 overflow-y-auto">
               <pre className="text-xs text-surface-700 dark:text-surface-300 font-mono whitespace-pre-wrap break-words">
-                {getExportContent().substring(0, 150)}
-                {getExportContent().length > 150 ? '...' : ''}
+                {getExportContent(selectedFormat, tasks).substring(0, 150)}
+                {getExportContent(selectedFormat, tasks).length > 150 ? '...' : ''}
               </pre>
             </div>
           )}

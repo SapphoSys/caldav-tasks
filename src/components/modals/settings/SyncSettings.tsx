@@ -1,3 +1,4 @@
+import { SYNC_INTERVAL_OPTIONS } from '@/data/settings';
 import { useSettingsStore } from '@/store/settingsStore';
 
 export function SyncSettings() {
@@ -22,7 +23,6 @@ export function SyncSettings() {
             className="rounded border-surface-300 dark:border-surface-600"
           />
         </label>
-
         {autoSync && (
           <div>
             <label className="block text-sm text-surface-600 dark:text-surface-400 mb-2">
@@ -33,15 +33,14 @@ export function SyncSettings() {
               onChange={(e) => setSyncInterval(Number(e.target.value))}
               className="w-full px-3 py-2 text-sm border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg focus:outline-none focus:border-primary-300"
             >
-              <option value="1">Every 1 minute</option>
-              <option value="5">Every 5 minutes</option>
-              <option value="15">Every 15 minutes</option>
-              <option value="30">Every 30 minutes</option>
-              <option value="60">Every hour</option>
+              {SYNC_INTERVAL_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
         )}
-
         <label className="flex items-center justify-between">
           <div>
             <span className="text-sm text-surface-700 dark:text-surface-300">Sync on startup</span>

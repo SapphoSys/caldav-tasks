@@ -4,6 +4,7 @@ import Loader2 from 'lucide-react/icons/loader-2';
 import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
 import { ComposedInput } from '@/components/ComposedInput';
+import { getServerTypeDescription, SERVER_TYPE_OPTIONS } from '@/data/settings';
 import { useAddCalendar, useCreateAccount, useUpdateAccount } from '@/hooks/queries';
 import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
 import { caldavService } from '@/lib/caldav';
@@ -11,6 +12,7 @@ import { createLogger } from '@/lib/logger';
 import * as taskData from '@/lib/taskData';
 import type { Account, Calendar, ServerType } from '@/types';
 import { generateTagColor } from '@/utils/color';
+import { generateUUID } from '@/utils/misc';
 
 const log = createLogger('Account', '#f97316');
 
@@ -61,6 +63,7 @@ export function AccountModal({ account, onClose }: AccountModalProps) {
       name: tagName,
       color: generateTagColor(tagName),
     });
+
     return newTag.id;
   };
 
@@ -133,8 +136,9 @@ export function AccountModal({ account, onClose }: AccountModalProps) {
         }
 
         // create a temporary ID to test the connection
-        const tempId = crypto.randomUUID();
+        const tempId = generateUUID();
 
+        log.debug(`Connecting to ${serverUrl}...`);
         log.debug(`Connecting to ${serverUrl}...`);
         await caldavService.connect(tempId, serverUrl, username, effectivePassword, serverType);
 
@@ -226,18 +230,14 @@ export function AccountModal({ account, onClose }: AccountModalProps) {
               onChange={(e) => setServerType(e.target.value as ServerType)}
               className="w-full px-3 py-2 text-sm text-surface-800 dark:text-surface-200 bg-white dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:border-primary-300 focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary-900/50"
             >
-              <option value="generic">Generic (auto-detect)</option>
-              <option value="nextcloud">Nextcloud</option>
-              <option value="rustical">RustiCal</option>
-              <option value="radicale">Radicale</option>
-              <option value="baikal">Baikal</option>
+              {SERVER_TYPE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
             <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
-              {serverType === 'rustical' && 'Uses /caldav/principal/{username}/ path structure'}
-              {serverType === 'radicale' && 'Uses /{username}/ path structure'}
-              {serverType === 'baikal' && 'Uses /dav.php/principals/{username}/ path structure'}
-              {serverType === 'nextcloud' && 'Uses /remote.php/dav/ path structure'}
-              {serverType === 'generic' && 'Uses .well-known/caldav. Good enough for most servers.'}
+              {getServerTypeDescription(serverType)}
             </p>
           </div>
 

@@ -1,7 +1,5 @@
-import Monitor from 'lucide-react/icons/monitor';
-import Moon from 'lucide-react/icons/moon';
-import Sun from 'lucide-react/icons/sun';
-import { type Theme, useSettingsStore } from '@/store/settingsStore';
+import { useSettingsStore } from '@/context/settingsContext';
+import { THEME_OPTIONS } from '@/data/theme';
 import { ACCENT_COLORS } from '@/utils/constants';
 
 export function AppearanceSettings() {
@@ -14,11 +12,7 @@ export function AppearanceSettings() {
         <div>
           <h4 className="text-sm font-medium text-surface-800 dark:text-surface-200 mb-3">Theme</h4>
           <div className="flex gap-2">
-            {[
-              { value: 'light' as Theme, icon: <Sun className="w-4 h-4" />, label: 'Light' },
-              { value: 'dark' as Theme, icon: <Moon className="w-4 h-4" />, label: 'Dark' },
-              { value: 'system' as Theme, icon: <Monitor className="w-4 h-4" />, label: 'System' },
-            ].map((option) => (
+            {THEME_OPTIONS.map((option) => (
               <button
                 type="button"
                 key={option.value}
@@ -26,7 +20,7 @@ export function AppearanceSettings() {
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm transition-colors ${
                   theme === option.value
                     ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
-                    : 'border-surface-200 dark:border-surface-700 hover:border-surface-300 text-surface-600 dark:text-surface-400'
+                    : 'border-surface-200 dark:border-surface-700 hover:border-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700 text-surface-600 dark:text-surface-400'
                 }`}
               >
                 {option.icon}

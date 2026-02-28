@@ -1,11 +1,9 @@
-import { open, save } from '@tauri-apps/plugin-dialog';
-import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import ChevronDown from 'lucide-react/icons/chevron-down';
 import Download from 'lucide-react/icons/download';
 import Upload from 'lucide-react/icons/upload';
 import { useState } from 'react';
-import { useSettingsStore } from '@/store/settingsStore';
-import { downloadFile } from '@/utils/file';
+import { useSettingsStore } from '@/context/settingsContext';
+import { exportSettingsToFile, importSettingsFromFile } from '@/utils/settings';
 
 export function DataSettings() {
   const { exportSettings, importSettings } = useSettingsStore();
@@ -27,18 +25,7 @@ export function DataSettings() {
               type="button"
               onClick={async () => {
                 const json = exportSettings();
-                try {
-                  const path = await save({
-                    defaultPath: 'caldav-settings.json',
-                    filters: [{ name: 'JSON', extensions: ['json'] }],
-                  });
-                  if (path) {
-                    await writeTextFile(path, json);
-                  }
-                } catch (_e) {
-                  // fallback to browser download
-                  downloadFile(json, 'caldav-settings.json', 'application/json');
-                }
+                await exportSettingsToFile(json);
               }}
               className="flex items-center gap-2 px-3 py-2 text-sm bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-300 rounded-lg transition-colors"
             >
@@ -48,35 +35,7 @@ export function DataSettings() {
             <button
               type="button"
               onClick={async () => {
-                try {
-                  const path = await open({
-                    filters: [{ name: 'JSON', extensions: ['json'] }],
-                    multiple: false,
-                  });
-                  if (path) {
-                    const content = await readTextFile(path as string);
-                    const success = importSettings(content);
-                    if (!success) {
-                      alert('Failed to import settings. Invalid format.');
-                    }
-                  }
-                } catch (_e) {
-                  // fallback to browser file input
-                  const input = document.createElement('input');
-                  input.type = 'file';
-                  input.accept = '.json';
-                  input.onchange = async (event) => {
-                    const file = (event.target as HTMLInputElement).files?.[0];
-                    if (file) {
-                      const content = await file.text();
-                      const success = importSettings(content);
-                      if (!success) {
-                        alert('Failed to import settings. Invalid format.');
-                      }
-                    }
-                  };
-                  input.click();
-                }
+                await importSettingsFromFile(importSettings);
               }}
               className="flex items-center gap-2 px-3 py-2 text-sm bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-300 rounded-lg transition-colors"
             >

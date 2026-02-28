@@ -1,3 +1,5 @@
+import { COLOR_PRESETS } from './constants';
+
 /**
  * calculate the relative luminance of a color to determine appropriate contrast text color
  * uses the standard relative luminance formula from WCAG guidelines
@@ -29,23 +31,11 @@ export const getContrastTextColor = (hexColor: string): string => {
  * generate a consistent color for a tag based on its name
  */
 export const generateTagColor = (name: string) => {
-  const colors = [
-    '#ef4444', // red
-    '#f97316', // orange
-    '#eab308', // yellow
-    '#22c55e', // green
-    '#14b8a6', // teal
-    '#3b82f6', // blue
-    '#8b5cf6', // violet
-    '#ec4899', // pink
-  ];
-
-  // simple hash function
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = (hash << 5) - hash + name.charCodeAt(i);
     hash = hash & hash;
   }
 
-  return colors[Math.abs(hash) % colors.length];
+  return COLOR_PRESETS[Math.abs(hash) % COLOR_PRESETS.length];
 };

@@ -11,6 +11,7 @@ import X from 'lucide-react/icons/x';
 import { useState } from 'react';
 import { useAccounts } from '@/hooks/queries';
 import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
+import type { SettingsCategory, SettingsSubtab } from '@/types';
 import {
   AboutSettings,
   AppearanceSettings,
@@ -28,18 +29,6 @@ interface SettingsModalProps {
   initialCategory?: SettingsCategory;
   initialSubtab?: SettingsSubtab;
 }
-
-type SettingsCategory = 'general' | 'account' | 'about';
-export type SettingsSubtab =
-  | 'behavior'
-  | 'appearance'
-  | 'notifications'
-  | 'shortcuts'
-  | 'defaults'
-  | 'connections'
-  | 'sync'
-  | 'data'
-  | 'version';
 
 type SettingsSubtabInfo = { id: SettingsSubtab; label: string; icon: React.ReactNode };
 

@@ -25,11 +25,13 @@ import { useContextMenu } from '@/hooks/useContextMenu';
 import * as taskData from '@/lib/taskData';
 import { useSettingsStore } from '@/store/settingsStore';
 import type { Priority, Task } from '@/types';
+import { FALLBACK_ITEM_COLOR } from '@/utils/constants';
 import { formatDueDate } from '@/utils/date';
 import { filterCalDavDescription } from '@/utils/ical';
+import { getPriorityColor, getPriorityRingColor } from '@/utils/priority';
+import { getIconByName } from '../data/icons';
 import { getContrastTextColor } from '../utils/color';
 import { pluralize } from '../utils/format';
-import { getIconByName } from './IconPicker';
 import { ExportModal } from './modals/ExportModal';
 
 interface TaskItemProps {
@@ -39,13 +41,6 @@ interface TaskItemProps {
   isDragEnabled: boolean;
   isOverlay?: boolean;
 }
-
-const priorityColors: Record<Priority, string> = {
-  high: 'border-red-400 bg-red-50 dark:bg-red-900/30',
-  medium: 'border-amber-400 bg-amber-50 dark:bg-amber-900/30',
-  low: 'border-blue-400 bg-blue-50 dark:bg-blue-900/30',
-  none: 'border-transparent',
-};
 
 export function TaskItem({ task, depth, ancestorIds, isDragEnabled, isOverlay }: TaskItemProps) {
   const { data: uiState } = useUIState();
@@ -114,7 +109,7 @@ export function TaskItem({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
   const taskTags = (task.tags || []).map((tagId) => getTagById(tagId)).filter(Boolean);
   const calendar = accounts.flatMap((a) => a.calendars).find((c) => c.id === task.calendarId);
   const showCalendar = activeCalendarId === null && calendar;
-  const calendarColor = calendar?.color ?? '#475569';
+  const calendarColor = calendar?.color ?? FALLBACK_ITEM_COLOR;
   const dueDateDisplay = task.dueDate ? formatDueDate(task.dueDate) : null;
 
   const handleClick = (e: React.MouseEvent) => {
@@ -174,13 +169,15 @@ export function TaskItem({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
         className={`
           group relative flex items-start gap-3 pr-3 py-3 bg-white dark:bg-surface-800 rounded-lg border transition-all focus:outline-none
           ${isOverlay ? 'shadow-xl' : 'shadow-sm hover:shadow-md'}
-          ${isSelected ? 'ring-2 ring-primary-100 dark:ring-primary-500/50' : task.priority === 'none' ? 'border-surface-200 dark:border-surface-700' : ''}
+          ${isSelected ? '' : task.priority === 'none' ? 'border-surface-200 dark:border-surface-700' : ''}
           ${task.completed ? 'opacity-60' : ''}
           ${isDragEnabled ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}
-          ${priorityColors[task.priority]}
+          ${!isOverlay ? 'hover:bg-surface-50 dark:hover:bg-surface-800/70' : ''}
+          ${isSelected && `border-transparent ${getPriorityRingColor(task.priority)}`}
+          ${getPriorityColor(task.priority)}
         `}
       >
-        <div className="task-checkbox-wrapper flex-shrink-0" onClick={handleCheckboxClick}>
+        <div className="task-checkbox-wrapper flex-shrink-0">
           <button
             type="button"
             className={`

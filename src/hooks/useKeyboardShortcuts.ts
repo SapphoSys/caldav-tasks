@@ -15,6 +15,7 @@ import { useConfirmTaskDelete } from '@/hooks/useConfirmTaskDelete';
 import { getIsKeyboardDragging } from '@/lib/dragState';
 import * as taskData from '@/lib/taskData';
 import { type KeyboardShortcut, useSettingsStore } from '@/store/settingsStore';
+import { DEFAULT_SORT_CONFIG } from '@/utils/constants';
 import { flattenTasks } from '@/utils/tree';
 import {
   getAltKeyLabel,
@@ -41,7 +42,7 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
 
   const selectedTaskId = uiState?.selectedTaskId ?? null;
   const showCompletedTasks = uiState?.showCompletedTasks ?? true;
-  const sortConfig = uiState?.sortConfig ?? { mode: 'manual' as const, direction: 'asc' as const };
+  const sortConfig = uiState?.sortConfig ?? DEFAULT_SORT_CONFIG;
 
   const { keyboardShortcuts } = useSettingsStore();
   const { confirmAndDelete } = useConfirmTaskDelete();

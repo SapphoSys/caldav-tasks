@@ -2,14 +2,8 @@ import Check from 'lucide-react/icons/check';
 import ChevronDown from 'lucide-react/icons/chevron-down';
 import ChevronRight from 'lucide-react/icons/chevron-right';
 import X from 'lucide-react/icons/x';
-import type { Priority, Task } from '@/types';
-
-const priorityDots: Record<Priority, string> = {
-  high: 'bg-red-500',
-  medium: 'bg-amber-500',
-  low: 'bg-blue-500',
-  none: '',
-};
+import type { Task } from '@/types';
+import { getPriorityDot } from '@/utils/priority';
 
 interface SubtaskTreeItemProps {
   task: Task;
@@ -83,7 +77,7 @@ export function SubtaskTreeItem({
 
         {/* Priority indicator */}
         {task.priority !== 'none' && (
-          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${priorityDots[task.priority]}`} />
+          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getPriorityDot(task.priority)}`} />
         )}
 
         {/* Checkbox */}

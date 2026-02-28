@@ -1,5 +1,6 @@
 import X from 'lucide-react/icons/x';
 import type { ReactNode } from 'react';
+import { MODAL_SIZE_CLASSES } from '@/utils/constants';
 
 interface ModalWrapperProps {
   isOpen?: boolean;
@@ -11,12 +12,6 @@ interface ModalWrapperProps {
   size?: 'sm' | 'md' | 'lg';
   preventClose?: boolean;
 }
-
-const sizeClasses = {
-  sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
-};
 
 export function ModalWrapper({
   isOpen = true,
@@ -42,7 +37,7 @@ export function ModalWrapper({
       onClick={handleBackdropClick}
     >
       <div
-        className={`bg-white dark:bg-surface-800 rounded-xl shadow-xl ${sizeClasses[size]} w-full max-h-[90vh] flex flex-col animate-scale-in`}
+        className={`bg-white dark:bg-surface-800 rounded-xl shadow-xl ${MODAL_SIZE_CLASSES[size]} w-full max-h-[90vh] flex flex-col animate-scale-in`}
         onClick={(e) => e.stopPropagation()}
       >
         {title && (

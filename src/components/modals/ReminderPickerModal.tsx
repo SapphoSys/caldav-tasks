@@ -17,6 +17,14 @@ import X from 'lucide-react/icons/x';
 import { useEffect, useState } from 'react';
 import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
 import { useSettingsStore } from '@/store/settingsStore';
+import {
+  createPaddedDaysArray,
+  getDaysOfWeekLabels,
+  getMonthStartPadding,
+  getWeekStartValue,
+  setDateTime,
+  updateTimeComponent,
+} from '@/utils/calendar';
 
 interface ReminderPickerModalProps {
   isOpen: boolean;
@@ -69,12 +77,8 @@ export function ReminderPickerModal({
   if (!isOpen) return null;
 
   const { startOfWeek: weekStartsSetting } = useSettingsStore.getState();
-  const weekStartsOn = weekStartsSetting === 'monday' ? 1 : 0;
-
-  // Generate days of week labels based on setting
-  const daysOfWeekLabels = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-  const daysOfWeek =
-    weekStartsOn === 1 ? [...daysOfWeekLabels.slice(1), daysOfWeekLabels[0]] : daysOfWeekLabels;
+  const weekStartsOn = getWeekStartValue(weekStartsSetting);
+  const daysOfWeek = getDaysOfWeekLabels(weekStartsOn);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -82,30 +86,26 @@ export function ReminderPickerModal({
 
   // Pad start of month based on week start setting
   const firstDayOfMonth = monthStart.getDay();
-  const startPadding =
-    weekStartsOn === 1 ? (firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1) : firstDayOfMonth;
-  const paddedDays = Array(startPadding).fill(null).concat(days);
+  const startPadding = getMonthStartPadding(firstDayOfMonth, weekStartsOn);
+  const paddedDays = createPaddedDaysArray(days, startPadding);
 
   const handleDayClick = (day: Date) => {
-    const newDate = new Date(day);
-    newDate.setHours(selectedTime.hours, selectedTime.minutes, 0, 0);
+    const newDate = setDateTime(day, selectedTime.hours, selectedTime.minutes);
     setSelectedDate(newDate);
   };
 
   const handleTimeChange = (type: 'hours' | 'minutes', newValue: number) => {
-    const newTime = { ...selectedTime, [type]: newValue };
+    const newTime = updateTimeComponent(selectedTime, type, newValue);
     setSelectedTime(newTime);
 
     if (selectedDate) {
-      const newDate = new Date(selectedDate);
-      newDate.setHours(newTime.hours, newTime.minutes, 0, 0);
+      const newDate = setDateTime(selectedDate, newTime.hours, newTime.minutes);
       setSelectedDate(newDate);
     }
   };
 
   const handleQuickSelect = (date: Date) => {
-    const newDate = new Date(date);
-    newDate.setHours(selectedTime.hours, selectedTime.minutes, 0, 0);
+    const newDate = setDateTime(date, selectedTime.hours, selectedTime.minutes);
     setSelectedDate(newDate);
   };
 

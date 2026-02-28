@@ -2,7 +2,7 @@ import RotateCcw from 'lucide-react/icons/rotate-ccw';
 import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
 import type { KeyboardShortcut } from '@/store/settingsStore';
-import { getAltKeyLabel, getMetaKeyLabel, getShiftKeyLabel } from '../../utils/keyboard';
+import { formatShortcut } from '@/utils/keyboard';
 
 interface KeyboardShortcutModalProps {
   isOpen: boolean;
@@ -10,8 +10,6 @@ interface KeyboardShortcutModalProps {
   onClose: () => void;
   onSave: (id: string, updates: Partial<KeyboardShortcut>) => void;
 }
-
-const metaKeyLabel = getMetaKeyLabel();
 
 export function KeyboardShortcutModal({
   isOpen,
@@ -29,7 +27,7 @@ export function KeyboardShortcutModal({
       // Focus input after animation
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [isOpen, shortcut?.id]);
+  }, [isOpen, shortcut]);
 
   // Handle ESC key - need to use capture phase to intercept before useModalEscapeKey
   useEffect(() => {
@@ -102,19 +100,6 @@ export function KeyboardShortcutModal({
 
   const handleReset = () => {
     setPendingShortcut(null);
-  };
-
-  const formatShortcut = (s: KeyboardShortcut | Partial<KeyboardShortcut>): string => {
-    const parts: string[] = [];
-    if (s.meta) parts.push(metaKeyLabel);
-    if (s.ctrl && !s.meta) parts.push('Ctrl');
-    if (s.shift) parts.push(getShiftKeyLabel());
-    if (s.alt) parts.push(getAltKeyLabel());
-    if (s.key) {
-      const keyDisplay = s.key === ' ' ? 'Space' : s.key.length === 1 ? s.key.toUpperCase() : s.key;
-      parts.push(keyDisplay);
-    }
-    return parts.join(' + ') || 'Press keys...';
   };
 
   const displayShortcut = pendingShortcut || shortcut;

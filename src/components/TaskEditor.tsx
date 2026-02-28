@@ -37,8 +37,9 @@ import * as taskData from '@/lib/taskData';
 import { useSettingsStore } from '@/store/settingsStore';
 import type { Priority, Task } from '@/types';
 import { filterCalDavDescription } from '@/utils/ical';
+import { PRIORITIES } from '@/utils/priority';
+import { getIconByName } from '../data/icons';
 import { getContrastTextColor } from '../utils/color';
-import { getIconByName } from './IconPicker';
 import { DatePickerModal } from './modals/DatePickerModal';
 import { ReminderPickerModal } from './modals/ReminderPickerModal';
 import { TagPickerModal } from './modals/TagPickerModal';
@@ -47,43 +48,6 @@ import { SubtaskTreeItem } from './SubtaskTreeItem';
 interface TaskEditorProps {
   task: Task;
 }
-
-const priorities: {
-  value: Priority;
-  label: string;
-  color: string;
-  borderColor: string;
-  bgColor: string;
-}[] = [
-  {
-    value: 'high',
-    label: 'High',
-    color: 'text-red-500',
-    borderColor: 'border-red-400',
-    bgColor: 'bg-red-50 dark:bg-red-900/30',
-  },
-  {
-    value: 'medium',
-    label: 'Medium',
-    color: 'text-amber-500',
-    borderColor: 'border-amber-400',
-    bgColor: 'bg-amber-50 dark:bg-amber-900/30',
-  },
-  {
-    value: 'low',
-    label: 'Low',
-    color: 'text-blue-500',
-    borderColor: 'border-blue-400',
-    bgColor: 'bg-blue-50 dark:bg-blue-900/30',
-  },
-  {
-    value: 'none',
-    label: 'None',
-    color: 'text-surface-400',
-    borderColor: 'border-surface-300',
-    bgColor: 'bg-surface-50 dark:bg-surface-700',
-  },
-];
 
 export function TaskEditor({ task }: TaskEditorProps) {
   const updateTaskMutation = useUpdateTask();
@@ -219,7 +183,7 @@ export function TaskEditor({ task }: TaskEditorProps) {
     const targetCalendar = allCalendars.find((c) => c.id === calendarId);
     if (targetCalendar) {
       // If this is a subtask and calendar is being changed, convert it to a regular task
-      const updates: any = {
+      const updates: Partial<Task> = {
         calendarId: targetCalendar.id,
         accountId: targetCalendar.accountId,
       };
@@ -441,7 +405,7 @@ export function TaskEditor({ task }: TaskEditorProps) {
             Priority
           </label>
           <div className="flex gap-2">
-            {priorities.map((p) => (
+            {PRIORITIES.map((p) => (
               <button
                 type="button"
                 key={p.value}

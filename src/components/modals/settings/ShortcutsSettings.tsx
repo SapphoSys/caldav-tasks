@@ -2,10 +2,8 @@ import Pencil from 'lucide-react/icons/pencil';
 import RotateCcw from 'lucide-react/icons/rotate-ccw';
 import { useState } from 'react';
 import { type KeyboardShortcut, useSettingsStore } from '@/store/settingsStore';
-import { getAltKeyLabel, getMetaKeyLabel, getShiftKeyLabel } from '@/utils/keyboard';
+import { formatShortcut } from '@/utils/keyboard';
 import { KeyboardShortcutModal } from '../KeyboardShortcutModal';
-
-const metaKeyLabel = getMetaKeyLabel();
 
 export function ShortcutsSettings({
   onEditingShortcutChange,
@@ -14,24 +12,6 @@ export function ShortcutsSettings({
 }) {
   const { keyboardShortcuts, updateShortcut, resetShortcuts } = useSettingsStore();
   const [editingShortcut, setEditingShortcut] = useState<KeyboardShortcut | null>(null);
-
-  const formatShortcut = (shortcut: KeyboardShortcut | Partial<KeyboardShortcut>): string => {
-    const parts: string[] = [];
-    if (shortcut.meta) parts.push(metaKeyLabel);
-    if (shortcut.ctrl && !shortcut.meta) parts.push('Ctrl');
-    if (shortcut.shift) parts.push(getShiftKeyLabel());
-    if (shortcut.alt) parts.push(getAltKeyLabel());
-    if (shortcut.key) {
-      const keyDisplay =
-        shortcut.key === ' '
-          ? 'Space'
-          : shortcut.key.length === 1
-            ? shortcut.key.toUpperCase()
-            : shortcut.key;
-      parts.push(keyDisplay);
-    }
-    return parts.join(' + ') || 'Press keys...';
-  };
 
   const handleSave = (id: string, updates: Partial<KeyboardShortcut>) => {
     updateShortcut(id, updates);

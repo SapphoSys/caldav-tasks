@@ -17,6 +17,15 @@ import Sun from 'lucide-react/icons/sun';
 import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
 import { useSettingsStore } from '@/store/settingsStore';
+import {
+  createAllDayDate,
+  createPaddedDaysArray,
+  getDaysOfWeekLabels,
+  getMonthStartPadding,
+  getWeekStartValue,
+  setDateTime,
+  updateTimeComponent,
+} from '@/utils/calendar';
 
 interface DateTimePickerProps {
   value?: Date;
@@ -73,12 +82,8 @@ export function DateTimePicker({
   }, [isOpen]);
 
   const { startOfWeek: weekStartsSetting } = useSettingsStore();
-  const weekStartsOn = weekStartsSetting === 'monday' ? 1 : 0;
-
-  // Generate days of week labels based on setting
-  const daysOfWeekLabels = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-  const daysOfWeek =
-    weekStartsOn === 1 ? [...daysOfWeekLabels.slice(1), daysOfWeekLabels[0]] : daysOfWeekLabels;
+  const weekStartsOn = getWeekStartValue(weekStartsSetting);
+  const daysOfWeek = getDaysOfWeekLabels(weekStartsOn);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -86,28 +91,22 @@ export function DateTimePicker({
 
   // pad start of month based on week start setting
   const firstDayOfMonth = monthStart.getDay();
-  const startPadding =
-    weekStartsOn === 1 ? (firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1) : firstDayOfMonth;
-  const paddedDays = Array(startPadding).fill(null).concat(days);
+  const startPadding = getMonthStartPadding(firstDayOfMonth, weekStartsOn);
+  const paddedDays = createPaddedDaysArray(days, startPadding);
 
   const handleDayClick = (day: Date) => {
-    const newDate = new Date(day);
-    if (allDay) {
-      // For all-day, set to start of day in local timezone
-      newDate.setHours(0, 0, 0, 0);
-    } else {
-      newDate.setHours(selectedTime.hours, selectedTime.minutes, 0, 0);
-    }
+    const newDate = allDay
+      ? createAllDayDate(day)
+      : setDateTime(day, selectedTime.hours, selectedTime.minutes);
     onChange(newDate, allDay);
   };
 
   const handleTimeChange = (type: 'hours' | 'minutes', newValue: number) => {
-    const newTime = { ...selectedTime, [type]: newValue };
+    const newTime = updateTimeComponent(selectedTime, type, newValue);
     setSelectedTime(newTime);
 
     if (value !== undefined) {
-      const newDate = new Date(value);
-      newDate.setHours(newTime.hours, newTime.minutes, 0, 0);
+      const newDate = setDateTime(value, newTime.hours, newTime.minutes);
       onChange(newDate, allDay);
     }
   };
@@ -117,14 +116,9 @@ export function DateTimePicker({
     onAllDayChange?.(newAllDay);
 
     if (value) {
-      const newDate = new Date(value);
-      if (newAllDay) {
-        // Set to start of day for all-day
-        newDate.setHours(0, 0, 0, 0);
-      } else {
-        // Restore time when switching off all-day
-        newDate.setHours(selectedTime.hours, selectedTime.minutes, 0, 0);
-      }
+      const newDate = newAllDay
+        ? createAllDayDate(value)
+        : setDateTime(value, selectedTime.hours, selectedTime.minutes);
       onChange(newDate, newAllDay);
     }
   };
@@ -277,7 +271,7 @@ export function DateTimePicker({
                       onChange={(e) => handleTimeChange('minutes', parseInt(e.target.value, 10))}
                       className="px-2 py-1 text-sm bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded text-surface-700 dark:text-surface-300 focus:outline-none focus:border-primary-300"
                     >
-                      {Array.from({ length: 60 }, (_, i) => (
+                      {Array.from({ length: 24 }, (_, i) => (
                         <option key={i} value={i}>
                           {i.toString().padStart(2, '0')}
                         </option>
@@ -293,10 +287,7 @@ export function DateTimePicker({
             <button
               type="button"
               onClick={() => {
-                const now = new Date();
-                if (allDay) {
-                  now.setHours(0, 0, 0, 0);
-                }
+                const now = allDay ? createAllDayDate(new Date()) : new Date();
                 onChange(now, allDay);
                 setIsOpen(false);
               }}
@@ -309,12 +300,10 @@ export function DateTimePicker({
               onClick={() => {
                 const tomorrow = new Date();
                 tomorrow.setDate(tomorrow.getDate() + 1);
-                if (allDay) {
-                  tomorrow.setHours(0, 0, 0, 0);
-                } else {
-                  tomorrow.setHours(selectedTime.hours, selectedTime.minutes, 0, 0);
-                }
-                onChange(tomorrow, allDay);
+                const date = allDay
+                  ? createAllDayDate(tomorrow)
+                  : setDateTime(tomorrow, selectedTime.hours, selectedTime.minutes);
+                onChange(date, allDay);
                 setIsOpen(false);
               }}
               className="flex-1 px-3 py-1.5 text-xs font-medium text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700 rounded transition-colors"
@@ -326,12 +315,10 @@ export function DateTimePicker({
               onClick={() => {
                 const nextWeek = new Date();
                 nextWeek.setDate(nextWeek.getDate() + 7);
-                if (allDay) {
-                  nextWeek.setHours(0, 0, 0, 0);
-                } else {
-                  nextWeek.setHours(selectedTime.hours, selectedTime.minutes, 0, 0);
-                }
-                onChange(nextWeek, allDay);
+                const date = allDay
+                  ? createAllDayDate(nextWeek)
+                  : setDateTime(nextWeek, selectedTime.hours, selectedTime.minutes);
+                onChange(date, allDay);
                 setIsOpen(false);
               }}
               className="flex-1 px-3 py-1.5 text-xs font-medium text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700 rounded transition-colors"
