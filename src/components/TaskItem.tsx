@@ -277,31 +277,36 @@ export function TaskItem({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
                 );
               })}
 
-              {showCalendar && calendar && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Find the account that owns this calendar
-                    const account = accounts.find((a) =>
-                      a.calendars.some((c) => c.id === calendar.id),
-                    );
-                    if (account) {
-                      setActiveAccountMutation.mutate(account.id);
-                    }
-                    setActiveCalendarMutation.mutate(calendar.id);
-                  }}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border hover:opacity-80 transition-opacity"
-                  style={{
-                    borderColor: calendarColor,
-                    backgroundColor: `${calendarColor}15`,
-                    color: calendarColor,
-                  }}
-                >
-                  <Calendar className="w-3 h-3" />
-                  {calendar.displayName || 'Calendar'}
-                </button>
-              )}
+              {showCalendar &&
+                calendar &&
+                (() => {
+                  const CalendarIcon = getIconByName(calendar.icon || 'calendar');
+                  return (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Find the account that owns this calendar
+                        const account = accounts.find((a) =>
+                          a.calendars.some((c) => c.id === calendar.id),
+                        );
+                        if (account) {
+                          setActiveAccountMutation.mutate(account.id);
+                        }
+                        setActiveCalendarMutation.mutate(calendar.id);
+                      }}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border hover:opacity-80 transition-opacity"
+                      style={{
+                        borderColor: calendarColor,
+                        backgroundColor: `${calendarColor}15`,
+                        color: calendarColor,
+                      }}
+                    >
+                      <CalendarIcon className="w-3 h-3" />
+                      {calendar.displayName || 'Calendar'}
+                    </button>
+                  );
+                })()}
 
               {totalSubtasks > 0 && (
                 <span className="inline-flex items-center gap-1 text-xs text-surface-500 dark:text-surface-400">
