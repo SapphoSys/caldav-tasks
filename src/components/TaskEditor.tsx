@@ -37,6 +37,7 @@ import * as taskData from '@/lib/taskData';
 import { useSettingsStore } from '@/store/settingsStore';
 import type { Priority, Task } from '@/types';
 import { filterCalDavDescription } from '@/utils/ical';
+import { hasOpenModalElements } from '@/utils/misc';
 import { PRIORITIES } from '@/utils/priority';
 import { getIconByName } from '../data/icons';
 import { getContrastTextColor } from '../utils/color';
@@ -125,15 +126,19 @@ export function TaskEditor({ task }: TaskEditorProps) {
       if (e.key === 'Escape') {
         const activeElement = document.activeElement as HTMLElement;
 
+        // Don't handle escape if any modal is open (they should handle it first)
+        if (hasOpenModalElements()) {
+          return;
+        }
+
         // Check if focus is on an input or textarea within the editor
         if (
           editorContainerRef.current?.contains(activeElement) &&
           (activeElement instanceof HTMLInputElement ||
             activeElement instanceof HTMLTextAreaElement)
         ) {
+          // Only blur the input, don't stop propagation so useModalEscapeKey can run on next press
           e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
           activeElement.blur();
           return;
         }

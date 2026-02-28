@@ -140,7 +140,7 @@ export function DatePickerModal({
     // biome-ignore lint/a11y/noStaticElementInteractions: Modal backdrop does not require keyboard handler; ESC key closes modal via useModalEscapeKey hook
     // biome-ignore lint/a11y/useKeyWithClickEvents: Modal backdrop is non-interactive; users close with Escape or X button
     <div
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 animate-fade-in"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 animate-fade-in"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="bg-white dark:bg-surface-800 rounded-xl shadow-xl w-full max-w-xs animate-scale-in">

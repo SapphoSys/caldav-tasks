@@ -5,6 +5,7 @@ import Upload from 'lucide-react/icons/upload';
 import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
 import { useAccounts, useCreateTask } from '@/hooks/queries';
+import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
 import { createLogger } from '@/lib/logger';
 import type { Calendar, Task } from '@/types';
 import { generateUUID } from '@/utils/misc';
@@ -72,21 +73,8 @@ export function ImportModal({ isOpen, onClose, preloadedFile }: ImportModalProps
     }
   }, [isOpen, preloadedFile]);
 
-  // handle ESC key to close
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        e.stopPropagation();
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown, true);
-    return () => document.removeEventListener('keydown', handleKeyDown, true);
-  }, [isOpen, onClose]);
+  // handle ESC key to close (only when modal is open)
+  useModalEscapeKey(onClose, { enabled: isOpen });
 
   const handleFileContent = (name: string, content: string) => {
     setFileName(name);

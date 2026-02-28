@@ -13,7 +13,8 @@ import {
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import { useConfirmTaskDelete } from '@/hooks/useConfirmTaskDelete';
 import * as taskData from '@/lib/taskData';
-import { type KeyboardShortcut, useSettingsStore } from '@/store/settingsStore';
+import { useSettingsStore } from '@/store/settingsStore';
+import type { KeyboardShortcut } from '@/types';
 import { DEFAULT_SORT_CONFIG } from '@/utils/constants';
 import { flattenTasks } from '@/utils/tree';
 import {
@@ -201,7 +202,7 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
       if (isInput && !isAllowedInInput) return;
 
       // Shortcuts that should NOT work when a modal is open
-      // (except for 'settings' which toggles, and 'close' which closes modals)
+      // (except for 'settings' which toggles)
       const blockedInModal = [
         'new-task',
         'search',
@@ -211,6 +212,7 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
         'toggle-show-completed',
         'nav-up',
         'nav-down',
+        'close', // Let modals handle Escape themselves
       ];
 
       for (const shortcut of keyboardShortcuts) {

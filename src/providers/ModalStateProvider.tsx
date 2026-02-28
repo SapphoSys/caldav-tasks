@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { ModalStateContext } from '@/context/modalStateContext';
+import { hasOpenModalElements } from '@/utils/misc';
 
 // This provider tracks modal state and manages hover state resets
 export function ModalStateProvider({ children }: { children: ReactNode }) {
@@ -9,11 +10,8 @@ export function ModalStateProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Observer to detect modal elements being added/removed
     const observer = new MutationObserver(() => {
-      // Check for modal backdrop elements
-      const modals = document.querySelectorAll(
-        '[role="dialog"], .fixed.inset-0.z-50, .fixed.inset-0.z-\\[60\\]',
-      );
-      const hasOpenModal = modals.length > 0;
+      // Check for modal backdrop elements with various z-index classes
+      const hasOpenModal = hasOpenModalElements();
 
       // Check for context menu elements
       const contextMenus = document.querySelectorAll('[data-context-menu-content]');

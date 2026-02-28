@@ -3,6 +3,7 @@
  * Provides a way to dismiss all context menus when clicking anywhere in the app
  */
 import { useCallback, useEffect, useState } from 'react';
+import { hasOpenModalElements } from '@/utils/misc';
 
 // global registry of context menu close handlers
 const closeHandlers = new Set<() => void>();
@@ -40,8 +41,14 @@ export function useGlobalContextMenuClose(onClose: () => void, isOpen: boolean):
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        // Don't handle escape if a modal is open - let the modal handle it
+        if (hasOpenModalElements()) {
+          return;
+        }
+
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         onClose();
       }
     };
