@@ -1,5 +1,7 @@
 import AlertCircle from 'lucide-react/icons/alert-circle';
 import Check from 'lucide-react/icons/check';
+import ChevronDown from 'lucide-react/icons/chevron-down';
+import ChevronRight from 'lucide-react/icons/chevron-right';
 import FileText from 'lucide-react/icons/file-text';
 import Upload from 'lucide-react/icons/upload';
 import X from 'lucide-react/icons/x';
@@ -31,6 +33,7 @@ export function ImportModal({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
   const [error, setError] = useState<string>('');
   const [importing, setImporting] = useState(false);
   const [importSuccess, setImportSuccess] = useState(false);
+  const [showTaskList, setShowTaskList] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // get all calendars from accounts
@@ -300,24 +303,37 @@ export function ImportModal({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
 
           {parsedTasks.length > 0 && (
             <div className="bg-surface-50 dark:bg-surface-700 rounded-lg p-3">
-              <p className="text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                Found {parsedTasks.length} {pluralize(parsedTasks.length, 'task')}:
-              </p>
-              <div className="max-h-32 overflow-y-auto space-y-1 overscroll-contain">
-                {parsedTasks.slice(0, 10).map((task, i) => (
-                  <div
-                    key={task.uid || `task-${i}`}
-                    className="text-sm text-surface-600 dark:text-surface-400 truncate"
-                  >
-                    • {task.title}
-                  </div>
-                ))}
-                {parsedTasks.length > 10 && (
-                  <div className="text-sm text-surface-500">
-                    ... and {parsedTasks.length - 10} more
-                  </div>
+              <button
+                type="button"
+                onClick={() => setShowTaskList(!showTaskList)}
+                className="w-full flex items-center justify-between text-sm font-medium text-surface-700 dark:text-surface-300 mb-2 hover:text-surface-900 dark:hover:text-surface-100 transition-colors"
+              >
+                <span>
+                  Found {parsedTasks.length} {pluralize(parsedTasks.length, 'task')}
+                </span>
+                {showTaskList ? (
+                  <ChevronDown className="w-4 h-4" />
+                ) : (
+                  <ChevronRight className="w-4 h-4" />
                 )}
-              </div>
+              </button>
+              {showTaskList && (
+                <div className="max-h-32 overflow-y-auto space-y-1 overscroll-contain">
+                  {parsedTasks.slice(0, 10).map((task, i) => (
+                    <div
+                      key={task.uid || `task-${i}`}
+                      className="text-sm text-surface-600 dark:text-surface-400 truncate"
+                    >
+                      • {task.title}
+                    </div>
+                  ))}
+                  {parsedTasks.length > 10 && (
+                    <div className="text-sm text-surface-500">
+                      ... and {parsedTasks.length - 10} more
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
