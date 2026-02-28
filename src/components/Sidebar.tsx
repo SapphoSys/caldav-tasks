@@ -393,45 +393,47 @@ export function Sidebar({
                             <ChevronRight className="w-4 h-4 text-surface-400 flex-shrink-0" />
                           )}
                           <User className="w-4 h-4 text-surface-500 dark:text-surface-400 flex-shrink-0" />
-                          <span className="flex-1 text-left truncate text-surface-700 dark:text-surface-300">
+                          <span className="flex-1 text-left truncate min-w-0 text-surface-600 dark:text-surface-400 group-hover:pr-2">
                             {account.name}
                           </span>
-                          <Tooltip content="Add a new calendar" position="top">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setShowCreateCalendarModal(account.id);
-                              }}
-                              onContextMenu={(e) => {
-                                e.stopPropagation();
-                                handleContextMenu(e, 'account', account.id);
-                              }}
-                              className={`p-1.5 rounded bg-transparent ${!isAnyModalOpen ? 'hover:bg-surface-300 dark:hover:bg-surface-600 hover:text-surface-600 dark:hover:text-surface-300' : ''} text-surface-400 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0`}
-                            >
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </Tooltip>
-                          <Tooltip content="Account menu" position="top">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleContextMenu(
-                                  e as React.MouseEvent<HTMLButtonElement>,
-                                  'account',
-                                  account.id,
-                                );
-                              }}
-                              onContextMenu={(e) => {
-                                e.stopPropagation();
-                                handleContextMenu(e, 'account', account.id);
-                              }}
-                              className="p-1.5 rounded bg-transparent hover:bg-surface-300 dark:hover:bg-surface-600 text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
-                            >
-                              <MoreVertical className="w-4 h-4" />
-                            </button>
-                          </Tooltip>
+                          <div className="flex items-center gap-1 w-0 overflow-hidden group-hover:w-auto transition-all">
+                            <Tooltip content="Add a new calendar" position="top">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowCreateCalendarModal(account.id);
+                                }}
+                                onContextMenu={(e) => {
+                                  e.stopPropagation();
+                                  handleContextMenu(e, 'account', account.id);
+                                }}
+                                className={`p-1.5 rounded bg-transparent ${!isAnyModalOpen ? 'hover:bg-surface-300 dark:hover:bg-surface-600 hover:text-surface-600 dark:hover:text-surface-300' : ''} text-surface-400 transition-colors flex-shrink-0`}
+                              >
+                                <Plus className="w-4 h-4" />
+                              </button>
+                            </Tooltip>
+                            <Tooltip content="Account menu" position="top">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleContextMenu(
+                                    e as React.MouseEvent<HTMLButtonElement>,
+                                    'account',
+                                    account.id,
+                                  );
+                                }}
+                                onContextMenu={(e) => {
+                                  e.stopPropagation();
+                                  handleContextMenu(e, 'account', account.id);
+                                }}
+                                className="p-1.5 rounded bg-transparent hover:bg-surface-300 dark:hover:bg-surface-600 text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors flex-shrink-0"
+                              >
+                                <MoreVertical className="w-4 h-4" />
+                              </button>
+                            </Tooltip>
+                          </div>
                         </div>
 
                         {expandedAccounts.has(account.id) && (
