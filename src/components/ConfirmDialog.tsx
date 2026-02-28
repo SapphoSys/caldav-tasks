@@ -1,3 +1,4 @@
+import Loader2 from 'lucide-react/icons/loader-2';
 import X from 'lucide-react/icons/x';
 import { type ReactNode, useEffect, useState } from 'react';
 import { getButtonClasses } from '@/utils/styles';
@@ -13,6 +14,7 @@ interface ConfirmDialogProps {
   alternateLabel?: string;
   alternateDestructive?: boolean;
   delayConfirmSeconds?: number;
+  isLoading?: boolean;
   onConfirm: () => void;
   onAlternate?: () => void;
   onCancel: () => void;
@@ -29,6 +31,7 @@ export function ConfirmDialog({
   alternateLabel,
   alternateDestructive = false,
   delayConfirmSeconds,
+  isLoading = false,
   onConfirm,
   onAlternate,
   onCancel,
@@ -128,7 +131,7 @@ export function ConfirmDialog({
         <div className="p-4">
           <p
             id="confirm-dialog-description"
-            className="text-sm text-surface-600 dark:text-surface-400"
+            className="text-sm text-surface-600 dark:text-surface-400 leading-relaxed"
           >
             {message}
           </p>
@@ -138,7 +141,8 @@ export function ConfirmDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium rounded-lg border border-surface-200 dark:border-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
+            disabled={isLoading}
+            className="px-4 py-2 text-sm font-medium rounded-lg border border-surface-200 dark:border-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {cancelLabel}
           </button>
@@ -146,7 +150,8 @@ export function ConfirmDialog({
             <button
               type="button"
               onClick={onAlternate}
-              className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${getButtonClasses(alternateDestructive, !alternateDestructive && !destructive)}`}
+              disabled={isLoading}
+              className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${getButtonClasses(alternateDestructive, !alternateDestructive && !destructive)} disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {alternateLabel}
             </button>
@@ -154,9 +159,10 @@ export function ConfirmDialog({
           <button
             type="button"
             onClick={onConfirm}
-            disabled={isConfirmDisabled}
+            disabled={isConfirmDisabled || isLoading}
             className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${getButtonClasses(destructive, !alternateLabel)} disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2`}
           >
+            {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
             {isConfirmDisabled ? `${confirmLabel} (${remainingSeconds}s)` : confirmLabel}
           </button>
         </div>

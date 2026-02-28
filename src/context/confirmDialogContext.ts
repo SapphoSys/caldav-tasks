@@ -20,6 +20,7 @@ export interface ConfirmDialogContextValue {
   confirm: (options?: ConfirmOptions) => Promise<boolean>;
   confirmWithAlternate: (options?: ConfirmOptions) => Promise<ConfirmResult>;
   isOpen: boolean;
+  setLoading: (loading: boolean) => void;
   close: () => void;
 }
 
