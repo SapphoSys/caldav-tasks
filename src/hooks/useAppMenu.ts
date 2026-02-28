@@ -10,7 +10,7 @@ const log = loggers.app;
 /**
  * hook to manage macOS app menu state synchronization
  */
-export function useAppMenu() {
+export function useAppMenu(isSyncing?: boolean) {
   const { data: accounts = [] } = useAccounts();
   const { data: tasks = [] } = useTasks();
   const { data: uiState } = useUIState();
@@ -32,17 +32,37 @@ export function useAppMenu() {
       hasTasks: tasks.length > 0,
       showCompleted: uiState?.showCompletedTasks ?? true,
       sortMode,
+      isSyncing: isSyncing ?? false,
     });
-  }, [accounts.length, tasks.length, uiState?.showCompletedTasks, uiState?.sortConfig?.mode]);
+  }, [
+    accounts.length,
+    tasks.length,
+    uiState?.showCompletedTasks,
+    uiState?.sortConfig?.mode,
+    isSyncing,
+    skipMenu,
+  ]);
 
   // Rebuild menu when keyboard shortcuts change
   useEffect(() => {
+    if (skipMenu) return;
     const sortMode = uiState?.sortConfig?.mode ?? 'manual';
 
     rebuildAppMenu({
       showCompleted: uiState?.showCompletedTasks ?? true,
       sortMode,
       shortcuts: keyboardShortcuts,
+      hasAccounts: accounts.length > 0,
+      hasTasks: tasks.length > 0,
+      isSyncing: isSyncing ?? false,
     });
-  }, [keyboardShortcuts, uiState?.showCompletedTasks, uiState?.sortConfig?.mode]);
+  }, [
+    keyboardShortcuts,
+    uiState?.showCompletedTasks,
+    uiState?.sortConfig?.mode,
+    accounts.length,
+    tasks.length,
+    isSyncing,
+    skipMenu,
+  ]);
 }
