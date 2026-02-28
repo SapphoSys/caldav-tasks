@@ -1,7 +1,7 @@
 import Monitor from 'lucide-react/icons/monitor';
 import Moon from 'lucide-react/icons/moon';
 import Sun from 'lucide-react/icons/sun';
-import type { Theme } from '@/context/settingsContext';
+import type { Theme } from '@/types';
 
 /**
  * Theme options for appearance settings
