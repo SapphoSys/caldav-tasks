@@ -1,5 +1,8 @@
+/* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind CSS requires @tailwind directives */
 @tailwind base;
+/* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind CSS requires @tailwind directives */
 @tailwind components;
+/* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind CSS requires @tailwind directives */
 @tailwind utilities;
 
 * {
@@ -147,8 +150,10 @@ input[type="checkbox"]:checked::after {
 
 /* force cursor reset when modal is open */
 /* webkit specific issue. needed, otherwise it looks unpolished. 😒 */
+/* biome-ignore lint/correctness/noUnknownMediaFeatureName: Webkit-specific media query for cursor fix */
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
   html[data-modal-open="true"] {
+    /* biome-ignore lint/complexity/noImportantStyles: !important is needed here. see above */
     cursor: default !important;
   }
 }
