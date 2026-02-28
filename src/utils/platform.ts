@@ -35,3 +35,13 @@ export function isCEF(): boolean {
 
   return isCefRuntime;
 }
+
+/**
+ * Detect if running on macOS platform
+ */
+export function isMacPlatform(): boolean {
+  if (typeof navigator === 'undefined') {
+    return false;
+  }
+  return /Mac/.test(navigator.userAgent);
+}
