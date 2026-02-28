@@ -3,6 +3,7 @@
     windows_subsystem = "windows"
 )]
 
+mod app_nap;
 mod migrations;
 mod tray;
 
@@ -17,6 +18,10 @@ fn main() {
     {
         let _ = rustls::crypto::ring::default_provider().install_default();
     }
+
+    // Disable App Nap on macOS to ensure periodic sync and notifications work
+    // when the window is hidden in tray mode
+    app_nap::disable_app_nap();
 
     let db_migrations = migrations::get_migrations();
 
