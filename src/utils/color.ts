@@ -39,3 +39,19 @@ export const generateTagColor = (name: string) => {
 
   return COLOR_PRESETS[Math.abs(hash) % COLOR_PRESETS.length];
 };
+
+/**
+ * normalize a hex color by removing alpha channel if present (e.g., #ef4444FF -> #ef4444)
+ * @param color - hex color string (with or without alpha)
+ * @returns normalized hex color without alpha channel
+ */
+export const normalizeHexColor = (color: string | undefined | null): string | undefined => {
+  if (!color) return undefined;
+
+  // if color is 9 characters (#RRGGBBAA) and ends with FF, strip the alpha
+  if (color.length === 9 && color.toUpperCase().endsWith('FF')) {
+    return color.substring(0, 7);
+  }
+
+  return color;
+};

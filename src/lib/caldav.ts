@@ -1,4 +1,5 @@
 import type { Account, Calendar, Task } from '@/types';
+import { normalizeHexColor } from '@/utils/color';
 import { taskToVTodo, vtodoToTask } from '../utils/ical';
 import { createLogger } from './logger';
 import {
@@ -286,7 +287,7 @@ class CalDAVService {
         url: calendarUrl,
         ctag: result.props.getctag || undefined,
         syncToken: result.props['sync-token'] || undefined,
-        color: result.props['calendar-color'] || undefined,
+        color: normalizeHexColor(result.props['calendar-color']) || undefined,
         accountId,
         supportedComponents: supportedComponents.length > 0 ? supportedComponents : undefined,
       });
