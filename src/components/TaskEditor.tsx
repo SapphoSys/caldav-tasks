@@ -92,6 +92,8 @@ export function TaskEditor({ task }: TaskEditorProps) {
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const urlRef = useRef<HTMLInputElement>(null);
   const editorContainerRef = useRef<HTMLDivElement>(null);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const childTasks = taskData.getChildTasks(task.uid);
   const childCount = taskData.countChildren(task.uid);
   const taskTags = (task.tags || [])
@@ -145,9 +147,15 @@ export function TaskEditor({ task }: TaskEditorProps) {
       }
     };
 
-    // add listener in capture phase with high priority
+    // add listener in capture phase
     window.addEventListener('keydown', handleEsc, { capture: true });
-    return () => window.removeEventListener('keydown', handleEsc, { capture: true });
+    return () => {
+      window.removeEventListener('keydown', handleEsc, { capture: true });
+      // Clean up scroll timeout
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
   }, []);
 
   // mark as panel so it yields to modal dialogs (closes on ESC when no input is focused)
@@ -311,8 +319,25 @@ export function TaskEditor({ task }: TaskEditorProps) {
             type="text"
             value={pendingTitle}
             onChange={handleTitleChange}
+            onWheel={(e) => {
+              // handle horizontal scrolling with trackpad for input field
+              if (Math.abs(e.deltaX) > 0) {
+                e.stopPropagation();
+                e.preventDefault();
+                e.currentTarget.scrollLeft += e.deltaX;
+
+                // hide cursor during scroll to prevent visual glitch
+                setIsScrolling(true);
+                if (scrollTimeoutRef.current) {
+                  clearTimeout(scrollTimeoutRef.current);
+                }
+                scrollTimeoutRef.current = setTimeout(() => {
+                  setIsScrolling(false);
+                }, 150);
+              }
+            }}
             placeholder="Task title..."
-            className="w-full text-xl font-semibold text-surface-800 dark:text-surface-200 placeholder:text-surface-400 border-0 focus:outline-none focus:ring-0 bg-transparent"
+            className={`w-full text-xl font-semibold text-surface-800 dark:text-surface-200 placeholder:text-surface-400 border-0 focus:outline-none focus:ring-0 bg-transparent ${isScrolling ? 'caret-transparent' : ''}`}
           />
         </div>
 
