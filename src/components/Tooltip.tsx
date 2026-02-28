@@ -43,11 +43,14 @@ export function Tooltip({
   }, [isAnyModalOpen, isContextMenuOpen, isVisible]);
 
   const updatePosition = useCallback(() => {
-    if (!triggerRef.current) return;
+    if (!triggerRef.current || !tooltipRef.current) return;
 
     const rect = triggerRef.current.getBoundingClientRect();
-    const tooltipWidth = 150; // Approximate max width
+    const tooltipRect = tooltipRef.current.getBoundingClientRect();
+    const tooltipWidth = tooltipRect.width || 150; // Use actual width or fallback
+    const tooltipHeight = tooltipRect.height || 32; // Use actual height or fallback
     const offset = 8;
+    const padding = 8;
 
     let x = 0;
     let y = 0;
@@ -71,13 +74,31 @@ export function Tooltip({
         break;
     }
 
-    // keep tooltip within viewport
-    const padding = 8;
+    // Keep tooltip within viewport bounds
     if (position === 'top' || position === 'bottom') {
+      // Constrain horizontal position
       x = Math.max(
         padding + tooltipWidth / 2,
         Math.min(x, window.innerWidth - padding - tooltipWidth / 2),
       );
+      // Constrain vertical position
+      if (position === 'top') {
+        y = Math.max(padding + tooltipHeight, y);
+      } else {
+        y = Math.min(window.innerHeight - padding - tooltipHeight, y);
+      }
+    } else {
+      // Constrain vertical position for left/right tooltips
+      y = Math.max(
+        padding + tooltipHeight / 2,
+        Math.min(y, window.innerHeight - padding - tooltipHeight / 2),
+      );
+      // Constrain horizontal position
+      if (position === 'left') {
+        x = Math.max(padding + tooltipWidth, x);
+      } else {
+        x = Math.min(window.innerWidth - padding - tooltipWidth, x);
+      }
     }
 
     setCoords({ x, y });
