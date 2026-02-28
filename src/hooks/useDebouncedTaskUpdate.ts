@@ -9,7 +9,7 @@ export function useDebouncedTaskUpdate<T>(
   taskId: string,
   fieldName: string,
   initialValue: T,
-  debounceMs: number = 1000,
+  debounceMs: number = 200,
 ) {
   const updateTaskMutation = useUpdateTask();
   const [pendingValue, setPendingValue] = useState<T>(initialValue);
