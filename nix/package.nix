@@ -30,10 +30,9 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "caldav-tasks";
-  version = "0.5.31";
+  version = "0.6.0";
 
-  # for local flake builds, src is passed in
-  # for nixpkgs, use fetchFromGitHub
+  # Currently unused now that we have package-bin.nix. Keeping it here anyway
   src =
     if src != null then
       src
@@ -41,8 +40,9 @@ rustPlatform.buildRustPackage (finalAttrs: {
       fetchFromGitHub {
         owner = "SapphoSys";
         repo = "caldav-tasks";
-        tag = "v${finalAttrs.version}";
+        tag = "app-v${finalAttrs.version}";
         # Update this hash when releasing a new version
+        # This is automatically updated by GitHub Actions when a release is published
         hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
       };
 
@@ -54,7 +54,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
     inherit (finalAttrs) pname version src;
     pnpm = pnpm_9;
     fetcherVersion = 3;
-    hash = "sha256-5NJQvj9nKyp9GHsdSUgV8x+MPpYe0XAY6CCMnLapXU8="; # pnpmDeps
+    hash = "sha256-+jL84Tc8ATSjd79h0TeEDIGDrf811CsmRqAEw5d43t4="; # pnpmDeps
   };
 
   nativeBuildInputs = [

@@ -58,14 +58,11 @@
             libayatana-appindicator
           ];
 
-        caldav-tasks = pkgs.callPackage ./nix/package.nix {
-          src = ./.;
-        };
       in
       {
         packages = {
-          default = caldav-tasks;
-          inherit caldav-tasks;
+          default = pkgs.callPackage ./nix/package-bin.nix { };
+          source = pkgs.callPackage ./nix/package.nix { src = ./.; };
         };
 
         devShells.default = pkgs.mkShell {

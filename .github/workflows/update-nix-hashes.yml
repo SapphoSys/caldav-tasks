@@ -1,0 +1,137 @@
+name: 'Update Nix Binary Hashes'
+
+# Runs when a release is published (after you manually publish the draft)
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  update-hashes:
+    runs-on: ubuntu-latest
+    # Only run for app releases (not other types of releases)
+    if: startsWith(github.event.release.tag_name, 'app-v')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 1
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v25
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          VERSION="${TAG#app-v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Detected version: $VERSION"
+
+      - name: Update Nix package hashes
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          BIN_PACKAGE_FILE="nix/package-bin.nix"
+          SRC_PACKAGE_FILE="nix/package.nix"
+          BASE_URL="https://github.com/${{ github.repository }}/releases/download/app-v${VERSION}"
+
+          echo "==> Updating Nix hashes for version $VERSION"
+          echo ""
+
+          # Function to download and hash a file
+          get_hash() {
+            local url="$1"
+            local tmpfile=$(mktemp)
+            echo "  Downloading: $url"
+            if curl -sL -o "$tmpfile" "$url"; then
+              local hash=$(sha256sum "$tmpfile" | cut -d' ' -f1)
+              # Convert to SRI format (base64 encoded)
+              local sri="sha256-$(echo "$hash" | xxd -r -p | base64 | tr -d '\n')"
+              rm -f "$tmpfile"
+              echo "$sri"
+            else
+              rm -f "$tmpfile"
+              echo "DOWNLOAD_FAILED"
+            fi
+          }
+
+          echo "--- Binary Package (package-bin.nix) ---"
+          echo "Fetching hashes for pre-built release assets..."
+          echo ""
+
+          X64_LINUX_HASH=$(get_hash "${BASE_URL}/caldav-tasks_${VERSION}_amd64.deb")
+          echo "  x86_64-linux: $X64_LINUX_HASH"
+
+          ARM64_LINUX_HASH=$(get_hash "${BASE_URL}/caldav-tasks_${VERSION}_arm64.deb")
+          echo "  aarch64-linux: $ARM64_LINUX_HASH"
+
+          X64_DARWIN_HASH=$(get_hash "${BASE_URL}/caldav-tasks_${VERSION}_x64.dmg")
+          echo "  x86_64-darwin: $X64_DARWIN_HASH"
+
+          ARM64_DARWIN_HASH=$(get_hash "${BASE_URL}/caldav-tasks_${VERSION}_aarch64.dmg")
+          echo "  aarch64-darwin: $ARM64_DARWIN_HASH"
+
+          echo ""
+          echo "Updating $BIN_PACKAGE_FILE..."
+
+          # Update version in binary package
+          sed -i "s/version ? \"[^\"]*\"/version ? \"$VERSION\"/" "$BIN_PACKAGE_FILE"
+
+          # Update hashes for each platform
+          perl -i -0pe "s/(\"x86_64-linux\" = \{\s*asset = \"[^\"]+\";\s*hash = \")sha256-[^\"]+(\";)/$1$X64_LINUX_HASH$2/g" "$BIN_PACKAGE_FILE"
+          perl -i -0pe "s/(\"aarch64-linux\" = \{\s*asset = \"[^\"]+\";\s*hash = \")sha256-[^\"]+(\";)/$1$ARM64_LINUX_HASH$2/g" "$BIN_PACKAGE_FILE"
+          perl -i -0pe "s/(\"x86_64-darwin\" = \{\s*asset = \"[^\"]+\";\s*hash = \")sha256-[^\"]+(\";)/$1$X64_DARWIN_HASH$2/g" "$BIN_PACKAGE_FILE"
+          perl -i -0pe "s/(\"aarch64-darwin\" = \{\s*asset = \"[^\"]+\";\s*hash = \")sha256-[^\"]+(\";)/$1$ARM64_DARWIN_HASH$2/g" "$BIN_PACKAGE_FILE"
+
+          echo "✓ Binary package updated"
+          echo ""
+
+          echo "--- Source Package (package.nix) ---"
+          echo "Fetching hash for GitHub source tarball..."
+          echo ""
+
+          # Use nix-prefetch-url to get the correct hash for fetchFromGitHub
+          # GitHub's fetchFromGitHub uses a specific URL format
+          SOURCE_URL="https://github.com/${{ github.repository }}/archive/refs/tags/app-v${VERSION}.tar.gz"
+
+          # Use nix-prefetch-url to get the hash (it handles the unpacking correctly)
+          echo "  Prefetching: $SOURCE_URL"
+          SOURCE_HASH=$(nix-prefetch-url --unpack "$SOURCE_URL" --type sha256 | xargs nix hash convert --hash-algo sha256 --to sri)
+          echo "  Source tarball: $SOURCE_HASH"
+
+          echo ""
+          echo "Updating $SRC_PACKAGE_FILE..."
+
+          # Update version in source package
+          sed -i "s/version = \"[^\"]*\";/version = \"$VERSION\";/" "$SRC_PACKAGE_FILE"
+
+          # Update source hash (the fetchFromGitHub hash)
+          # Find the line with "# Update this hash when releasing a new version" and update the hash on the next line
+          perl -i -0pe "s/(# Update this hash when releasing a new version\s*hash = \")sha256-[^\"]+(\";)/$1$SOURCE_HASH$2/g" "$SRC_PACKAGE_FILE"
+
+          echo "✓ Source package updated"
+          echo ""
+          echo "Note: cargo and pnpm hashes in package.nix only need updating when dependencies change."
+          echo "Use './nix/update-hashes.sh' to update them if needed."
+          echo ""
+          echo "==> All package files updated!"
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add nix/package-bin.nix nix/package.nix
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit (hashes already up to date)"
+          else
+            git commit -m "chore(nix): update package hashes for v${{ steps.version.outputs.version }}"
+            git push origin master
+            echo "✓ Successfully updated and pushed Nix package hashes"
+          fi
