@@ -1,3 +1,7 @@
+import Plus from 'lucide-react/icons/plus';
+import X from 'lucide-react/icons/x';
+import { useState } from 'react';
+import { TagPickerModal } from '@/components/modals/TagPickerModal';
 import { useTags } from '@/hooks/queries';
 import { useSettingsStore } from '@/store/settingsStore';
 import { PRIORITIES } from '@/utils/priority';
@@ -6,14 +10,21 @@ import { getIconByName } from '../../../data/icons';
 export function TaskDefaultsSettings() {
   const { defaultPriority, setDefaultPriority, defaultTags, setDefaultTags } = useSettingsStore();
   const { data: tags = [] } = useTags();
+  const [showTagPicker, setShowTagPicker] = useState(false);
 
-  const handleTagToggle = (tagId: string) => {
-    if (defaultTags.includes(tagId)) {
-      setDefaultTags(defaultTags.filter((id) => id !== tagId));
-    } else {
+  const handleAddTag = (tagId: string) => {
+    if (!defaultTags.includes(tagId)) {
       setDefaultTags([...defaultTags, tagId]);
     }
   };
+
+  const handleRemoveTag = (tagId: string) => {
+    setDefaultTags(defaultTags.filter((id) => id !== tagId));
+  };
+
+  // Get selected tags and available tags
+  const selectedTags = defaultTags.map((tagId) => tags.find((t) => t.id === tagId)).filter(Boolean);
+  const availableTags = tags.filter((t) => !defaultTags.includes(t.id));
 
   return (
     <div className="space-y-4">
@@ -35,7 +46,7 @@ export function TaskDefaultsSettings() {
                 ${
                   defaultPriority === p.value
                     ? `${p.borderColor} ${p.bgColor}`
-                    : 'border-surface-200 dark:border-surface-600 hover:border-surface-300 text-surface-600 dark:text-surface-400'
+                    : 'border-surface-200 dark:border-surface-600 hover:border-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700 text-surface-600 dark:text-surface-400'
                 }
               `}
             >
@@ -50,40 +61,58 @@ export function TaskDefaultsSettings() {
           Default Tags
         </h4>
         <div className="flex flex-wrap gap-2">
-          {tags.length > 0 ? (
-            tags.map((tag) => {
-              const TagIcon = getIconByName(tag.icon || 'tag');
-              const isSelected = defaultTags.includes(tag.id);
-              return (
+          {selectedTags.map((tag) => {
+            if (!tag) return null;
+            const TagIcon = getIconByName(tag.icon || 'tag');
+            return (
+              <span
+                key={tag.id}
+                className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded border text-xs font-medium group"
+                style={{
+                  borderColor: tag.color,
+                  backgroundColor: `${tag.color}15`,
+                  color: tag.color,
+                }}
+              >
+                {tag.emoji ? (
+                  <span className="text-sm">{tag.emoji}</span>
+                ) : (
+                  <TagIcon className="w-3 h-3" />
+                )}
+                {tag.name}
                 <button
                   type="button"
-                  key={tag.id}
-                  onClick={() => handleTagToggle(tag.id)}
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium transition-all border ${
-                    isSelected ? '' : 'opacity-60 hover:opacity-75'
-                  }`}
-                  style={{
-                    borderColor: tag.color,
-                    backgroundColor: `${tag.color}15`,
-                    color: tag.color,
-                  }}
+                  onClick={() => handleRemoveTag(tag.id)}
+                  className="p-0.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
                 >
-                  {tag.emoji ? (
-                    <span className="text-sm">{tag.emoji}</span>
-                  ) : (
-                    <TagIcon className="w-3 h-3" />
-                  )}
-                  {tag.name}
+                  <X className="w-3 h-3" />
                 </button>
-              );
-            })
-          ) : (
-            <p className="text-sm text-surface-500 dark:text-surface-400">
-              No tags available. Create tags first to set defaults.
-            </p>
-          )}
+              </span>
+            );
+          })}
+
+          <button
+            type="button"
+            onClick={() => setShowTagPicker(true)}
+            className="inline-flex items-center gap-1 px-2 py-1 text-xs text-surface-500 dark:text-surface-400 border border-dashed border-surface-300 dark:border-surface-600 rounded-full hover:border-surface-400 dark:hover:border-surface-500 transition-colors"
+          >
+            <Plus className="w-3 h-3" />
+            Add tag
+          </button>
         </div>
       </div>
+
+      {/* Tag Picker Modal */}
+      {showTagPicker && (
+        <TagPickerModal
+          isOpen={showTagPicker}
+          onClose={() => setShowTagPicker(false)}
+          availableTags={availableTags}
+          onSelectTag={handleAddTag}
+          allTagsAssigned={availableTags.length === 0 && tags.length > 0}
+          noTagsExist={tags.length === 0}
+        />
+      )}
     </div>
   );
 }
