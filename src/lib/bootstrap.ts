@@ -6,6 +6,7 @@ import { getUIState } from '@/lib/database';
 import { createLogger, initLogger } from '@/lib/logger';
 import { initializeDataStore } from '@/lib/taskData';
 import { useSettingsStore } from '@/store/settingsStore';
+import type { SortMode } from '@/types';
 import { initAppMenu } from '@/utils/menu';
 import { version as AppVersion } from '../../package.json';
 
@@ -42,14 +43,7 @@ export async function initializeApp(): Promise<void> {
   log.debug('Getting UI state...');
   const uiState = await getUIState();
   const sortMode = uiState.sortConfig?.mode ?? 'manual';
-  const menuSortMode:
-    | 'manual'
-    | 'smart'
-    | 'due-date'
-    | 'priority'
-    | 'title'
-    | 'created'
-    | 'modified' = sortMode === 'start-date' ? 'manual' : sortMode;
+  const menuSortMode: SortMode = sortMode === 'start-date' ? 'manual' : sortMode;
 
   const shortcuts = useSettingsStore.getState().keyboardShortcuts;
   log.debug('Loaded keyboard shortcuts');
