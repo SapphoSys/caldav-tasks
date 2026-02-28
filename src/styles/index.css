@@ -41,6 +41,7 @@ body {
 /* Drag and drop styling */
 .dragging {
   opacity: 0.5;
+  /* biome-ignore lint/complexity/noImportantStyles: 'grabbing' makes sense here, so we force it */
   cursor: grabbing !important;
 }
 
