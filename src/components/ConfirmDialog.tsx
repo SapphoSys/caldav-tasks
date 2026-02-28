@@ -1,17 +1,18 @@
 import X from 'lucide-react/icons/x';
-import { useEffect } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { getButtonClasses } from '@/utils/styles';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
   title: string;
   subtitle?: string;
-  message: string;
+  message: ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
   destructive?: boolean;
   alternateLabel?: string;
   alternateDestructive?: boolean;
+  delayConfirmSeconds?: number;
   onConfirm: () => void;
   onAlternate?: () => void;
   onCancel: () => void;
@@ -27,10 +28,36 @@ export function ConfirmDialog({
   destructive = false,
   alternateLabel,
   alternateDestructive = false,
+  delayConfirmSeconds,
   onConfirm,
   onAlternate,
   onCancel,
 }: ConfirmDialogProps) {
+  const [remainingSeconds, setRemainingSeconds] = useState(delayConfirmSeconds || 0);
+  const isConfirmDisabled = remainingSeconds > 0;
+
+  // Reset countdown when dialog opens or closes
+  useEffect(() => {
+    if (isOpen) {
+      // Reset to the delay value if provided, otherwise reset to 0
+      setRemainingSeconds(delayConfirmSeconds || 0);
+    } else {
+      // Reset to 0 when dialog closes to prevent carryover
+      setRemainingSeconds(0);
+    }
+  }, [isOpen, delayConfirmSeconds]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (!isOpen || remainingSeconds <= 0) return;
+
+    const timer = setInterval(() => {
+      setRemainingSeconds((prev) => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isOpen, remainingSeconds]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -39,7 +66,7 @@ export function ConfirmDialog({
         e.stopPropagation();
         onCancel();
       }
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && !isConfirmDisabled) {
         e.preventDefault();
         e.stopPropagation();
         onConfirm();
@@ -51,7 +78,7 @@ export function ConfirmDialog({
       window.removeEventListener('keydown', handleKeyDown, {
         capture: true,
       } as EventListenerOptions);
-  }, [isOpen, onCancel, onConfirm]);
+  }, [isOpen, onCancel, onConfirm, isConfirmDisabled]);
 
   if (!isOpen) return null;
 
@@ -127,9 +154,10 @@ export function ConfirmDialog({
           <button
             type="button"
             onClick={onConfirm}
-            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${getButtonClasses(destructive, !alternateLabel)}`}
+            disabled={isConfirmDisabled}
+            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${getButtonClasses(destructive, !alternateLabel)} disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2`}
           >
-            {confirmLabel}
+            {isConfirmDisabled ? `${confirmLabel} (${remainingSeconds}s)` : confirmLabel}
           </button>
         </div>
       </div>

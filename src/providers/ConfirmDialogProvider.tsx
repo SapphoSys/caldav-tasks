@@ -43,7 +43,6 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
     } else {
       resolverRef.current?.(true);
     }
-    close();
   }, [close]);
 
   const handleAlternate = useCallback(() => {
@@ -61,7 +60,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
   }, [close]);
 
   return (
-    <ConfirmDialogContext.Provider value={{ confirm, confirmWithAlternate, isOpen }}>
+    <ConfirmDialogContext.Provider value={{ confirm, confirmWithAlternate, isOpen, close }}>
       {children}
       <ConfirmDialog
         isOpen={isOpen}
@@ -73,6 +72,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
         destructive={options.destructive ?? defaultConfirmOptions.destructive}
         alternateLabel={options.alternateLabel}
         alternateDestructive={options.alternateDestructive}
+        delayConfirmSeconds={options.delayConfirmSeconds}
         onConfirm={handleConfirm}
         onAlternate={handleAlternate}
         onCancel={handleCancel}

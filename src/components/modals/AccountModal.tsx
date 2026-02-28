@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ComposedInput } from '@/components/ComposedInput';
 import { getServerTypeDescription, SERVER_TYPE_OPTIONS } from '@/data/settings';
 import { useAddCalendar, useCreateAccount, useUpdateAccount } from '@/hooks/queries';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
 import { caldavService } from '@/lib/caldav';
 import { createLogger } from '@/lib/logger';
@@ -23,6 +24,7 @@ interface AccountModalProps {
 
 export function AccountModal({ account, onClose }: AccountModalProps) {
   const queryClient = useQueryClient();
+  const { confirm } = useConfirmDialog();
   const createAccountMutation = useCreateAccount();
   const updateAccountMutation = useUpdateAccount();
   const addCalendarMutation = useAddCalendar();
@@ -139,7 +141,53 @@ export function AccountModal({ account, onClose }: AccountModalProps) {
         const tempId = generateUUID();
 
         log.debug(`Connecting to ${serverUrl}...`);
-        await caldavService.connect(tempId, serverUrl, username, effectivePassword, serverType);
+        const connectionInfo = await caldavService.connect(
+          tempId,
+          serverUrl,
+          username,
+          effectivePassword,
+          serverType,
+        );
+
+        // Check if this is a Vikunja server and warn the user
+        const isVikunja = connectionInfo.calendarHome.includes('/dav/projects');
+        if (isVikunja) {
+          const proceed = await confirm({
+            title: 'Vikunja server detected',
+            message: (
+              <div className="space-y-3">
+                <p>
+                  This appears to be a{' '}
+                  <strong className="font-semibold text-surface-800 dark:text-surface-200">
+                    Vikunja server
+                  </strong>
+                  .
+                </p>
+                <p>Vikunja has several CalDAV bugs that cause unpredictable behavior.</p>
+                <p className="font-extrabold text-base text-surface-700 dark:text-surface-300">
+                  ⚠️ This app may not work reliably with Vikunja and you may even encounter data
+                  loss. ⚠️
+                </p>
+                <p className="font-bold text-surface-800 dark:text-surface-200">
+                  It's recommend you try other CalDAV servers (like RustiCal, Fastmail, Baikal,
+                  Radicale, etc.) instead.
+                </p>
+                <p>Do you want to continue anyway?</p>
+              </div>
+            ),
+            confirmLabel: 'Continue (dangerous)',
+            cancelLabel: 'Cancel',
+            destructive: true,
+            delayConfirmSeconds: 20,
+          });
+
+          if (!proceed) {
+            // User cancelled, disconnect and return
+            caldavService.disconnect(tempId);
+            setIsLoading(false);
+            return;
+          }
+        }
 
         log.debug(`Fetching calendars...`);
         const calendars = await caldavService.fetchCalendars(tempId);
