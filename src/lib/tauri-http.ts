@@ -12,6 +12,7 @@ export interface HttpResponse {
 export interface CalDAVCredentials {
   username: string;
   password: string;
+
   /** OAuth Bearer token - if provided, uses Bearer auth instead of Basic */
   bearerToken?: string;
 }
@@ -45,14 +46,10 @@ export async function tauriRequest(
   log.debug(`Response: ${response.status}`);
 
   // handle redirects manually for CalDAV
-  if (
-    response.status === 301 ||
-    response.status === 302 ||
-    response.status === 307 ||
-    response.status === 308
-  ) {
+  if ([301, 302, 307, 308].includes(response.status)) {
     const location = response.headers.get('location') || response.headers.get('Location');
     if (location) {
+      log.debug(`Following redirect to: ${location}`);
       // resolve relative URLs
       const redirectUrl = new URL(location, url).toString();
       return tauriRequest(redirectUrl, method, credentials, body, headers);
