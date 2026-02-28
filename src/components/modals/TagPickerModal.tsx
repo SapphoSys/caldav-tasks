@@ -1,4 +1,6 @@
+import Search from 'lucide-react/icons/search';
 import X from 'lucide-react/icons/x';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
 import type { Tag } from '@/types';
 import { getIconByName } from '../../data/icons';
@@ -20,8 +22,28 @@ export function TagPickerModal({
   allTagsAssigned,
   noTagsExist,
 }: TagPickerModalProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   // Handle ESC key to close modal
   useModalEscapeKey(onClose);
+
+  // Auto-focus the search input when modal opens
+  useEffect(() => {
+    if (isOpen && !noTagsExist && !allTagsAssigned) {
+      // Small delay to ensure modal is fully rendered
+      const timer = setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, noTagsExist, allTagsAssigned]);
+
+  const filteredTags = useMemo(() => {
+    if (!searchQuery.trim()) return availableTags;
+    const lowerQuery = searchQuery.toLowerCase();
+    return availableTags.filter((tag) => tag.name.toLowerCase().includes(lowerQuery));
+  }, [availableTags, searchQuery]);
 
   if (!isOpen) return null;
 
@@ -49,6 +71,22 @@ export function TagPickerModal({
           </button>
         </div>
 
+        {!noTagsExist && !allTagsAssigned && (
+          <div className="px-4 pt-3 pb-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search tags..."
+                className="w-full pl-9 pr-3 py-2 text-sm text-surface-800 dark:text-surface-200 bg-surface-50 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:border-primary-300 focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary-900/50"
+              />
+            </div>
+          </div>
+        )}
+
         <div className="p-2 max-h-80 overflow-y-auto">
           {noTagsExist ? (
             <div className="p-4 text-center text-sm text-surface-500 dark:text-surface-400">
@@ -58,9 +96,13 @@ export function TagPickerModal({
             <div className="p-4 text-center text-sm text-surface-500 dark:text-surface-400">
               All available tags have been assigned to this task.
             </div>
+          ) : filteredTags.length === 0 ? (
+            <div className="p-4 text-center text-sm text-surface-500 dark:text-surface-400">
+              No tags match your search.
+            </div>
           ) : (
             <div className="space-y-1">
-              {availableTags.map((tag) => {
+              {filteredTags.map((tag) => {
                 const TagIcon = getIconByName(tag.icon || 'tag');
                 return (
                   <button
