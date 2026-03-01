@@ -230,7 +230,23 @@ export function useSyncQuery() {
 
       for (const deletion of calendarDeletions) {
         try {
-          await caldavService.deleteTask(account.id, { href: deletion.href } as any);
+          // Create minimal task object for deletion (only href is used by caldav service)
+          await caldavService.deleteTask(account.id, {
+            id: '',
+            uid: deletion.uid,
+            href: deletion.href,
+            title: '',
+            description: '',
+            completed: false,
+            priority: 'none',
+            subtasks: [],
+            sortOrder: 0,
+            accountId: deletion.accountId,
+            calendarId: deletion.calendarId,
+            synced: true,
+            createdAt: new Date(),
+            modifiedAt: new Date(),
+          });
           taskData.clearPendingDeletion(deletion.uid);
         } catch (error) {
           log.error(
