@@ -21,15 +21,15 @@ const log = createLogger('Sync', '#06b6d4');
 
 export function useSyncQuery() {
   const queryClient = useQueryClient();
-  const { autoSync, syncInterval } = useSettingsStore();
+  const { autoSync, syncInterval, syncOnStartup } = useSettingsStore();
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncError, setLastSyncError] = useState<string | null>(null);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const pendingSyncRef = useRef(false);
   const autoSyncIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Get current accounts from data layer
+  const initialSyncScheduledRef = useRef(false);
+  const syncInProgressRef = useRef(false);
   const syncAllRef = useRef<(() => Promise<void>) | null>(null);
 
   // Handle online/offline status
@@ -397,6 +397,12 @@ export function useSyncQuery() {
    * Sync all calendars for all accounts
    */
   const syncAll = useCallback(async () => {
+    // Skip if already syncing (use ref for reliable concurrency check)
+    if (syncInProgressRef.current) {
+      log.debug('Sync already in progress, skipping...');
+      return;
+    }
+
     // Skip if offline (use ref for immediate read, not state which may be stale)
     if (isOfflineRef.current) {
       log.info('Skipping sync - offline');
@@ -405,6 +411,7 @@ export function useSyncQuery() {
     }
 
     log.info('Starting sync...');
+    syncInProgressRef.current = true;
     setIsSyncing(true);
     setLastSyncError(null);
 
@@ -466,6 +473,7 @@ export function useSyncQuery() {
       log.error('Sync error:', error);
       toastManager.error('Sync Failed', message, 'sync-error');
     } finally {
+      syncInProgressRef.current = false;
       setIsSyncing(false);
       setLastSyncTime(new Date());
     }
@@ -524,10 +532,46 @@ export function useSyncQuery() {
   }, []);
 
   // Initial sync on mount
+  // biome-ignore lint/correctness/useExhaustiveDependencies: This effect should only run once on mount to trigger initial sync. syncAll is intentionally excluded to prevent running on every syncAll recreation.
   useEffect(() => {
+    if (initialSyncScheduledRef.current) {
+      log.debug('Initial sync already scheduled, skipping duplicate');
+      return;
+    }
+
     const accounts = getAccounts();
-    if (accounts.length > 0) {
-      syncAll();
+
+    if (accounts.length > 0 && syncOnStartup) {
+      initialSyncScheduledRef.current = true;
+
+      let rafId: number;
+      let timeoutId: NodeJS.Timeout;
+
+      // wait for React to finish its render cycle and the browser to paint
+      rafId = requestAnimationFrame(() => {
+        // requestAnimationFrame runs before paint so wait one more tick after paint
+        timeoutId = setTimeout(() => {
+          log.debug('Initial sync starting after render cycle complete...');
+          syncAll();
+        }, 0);
+      });
+
+      // cleanup: cancel pending callbacks if component unmounts (React Strict Mode)
+      return () => {
+        if (rafId !== undefined) {
+          cancelAnimationFrame(rafId);
+        }
+        if (timeoutId !== undefined) {
+          clearTimeout(timeoutId);
+        }
+        // Reset the flag so the next mount can schedule sync
+        initialSyncScheduledRef.current = false;
+        log.debug('Initial sync effect cleanup: cancelled pending callbacks and reset flag');
+      };
+    } else if (accounts.length === 0) {
+      log.debug('Initial sync skipped - no accounts configured');
+    } else {
+      log.debug('Initial sync skipped - sync on startup disabled in settings');
     }
   }, []); // Only run once on mount
 
