@@ -292,17 +292,21 @@ class CalDAVService {
 
   /**
    * fetch tasks from a calendar
+   *
+   * uses the RFC 4791 recommended two-step sync process (Section 8.2.1.3):
+   * 1. calendar-query REPORT to get list of task URLs and ETags
+   * 2. calendar-multiget REPORT to fetch actual calendar-data for each tasks.
    */
-  async fetchTasks(accountId: string, calendar: Calendar): Promise<Task[]> {
+  async fetchTasks(accountId: string, calendar: Calendar): Promise<Task[] | null> {
     const conn = this.connections.get(accountId);
     if (!conn) throw new Error('Account not connected');
 
-    // use calendar-query REPORT to fetch VTODOs
-    const reportBody = `<?xml version="1.0" encoding="utf-8"?>
+    // get list of task URLs and ETags using calendar-query
+    // request only ETags, not calendar-data (RFC 4791 Section 8.2.1.3)
+    const queryBody = `<?xml version="1.0" encoding="utf-8"?>
 <c:calendar-query xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
   <d:prop>
     <d:getetag/>
-    <c:calendar-data/>
   </d:prop>
   <c:filter>
     <c:comp-filter name="VCALENDAR">
@@ -311,15 +315,98 @@ class CalDAVService {
   </c:filter>
 </c:calendar-query>`;
 
-    const response = await report(calendar.url, conn.credentials, reportBody, '1');
+    const queryResponse = await report(calendar.url, conn.credentials, queryBody, '1');
 
-    if (response.status !== 207) {
-      log.error(`Failed to fetch tasks: HTTP ${response.status}`);
-      log.error(`Response body:`, response.body);
-      return [];
+    if (queryResponse.status !== 207) {
+      log.error(`Failed to query tasks: HTTP ${queryResponse.status}`);
+      log.error(`Response body:`, queryResponse.body);
+      return null; // return null to indicate failure, not empty array
     }
 
-    const results = parseMultiStatus(response.body);
+    const queryResults = parseMultiStatus(queryResponse.body);
+
+    if (queryResults.length === 0) {
+      log.info(`No tasks found in calendar: ${calendar.displayName}`);
+      return []; // empty array means successfully found 0 tasks
+    }
+
+    // fetch actual calendar-data using calendar-multiget
+    // build list of hrefs to fetch
+    // filter out hrefs that point to the calendar collection itself (not individual tasks)
+    const hrefs = queryResults
+      .map((result) => result.href)
+      .filter((href) => {
+        if (!href || href.length === 0) return false;
+
+        const normalizedHref = href.replace(/\/$/, '');
+        const normalizedCalendarUrl = calendar.url.replace(/\/$/, '');
+
+        // extract path from calendar URL if it's absolute
+        let calendarPath = normalizedCalendarUrl;
+        if (normalizedCalendarUrl.startsWith('http')) {
+          try {
+            calendarPath = new URL(normalizedCalendarUrl).pathname;
+          } catch (_) {
+            // If URL parsing fails, use as-is
+          }
+        }
+
+        // if href equals the calendar path, it's the collection not a task
+        if (normalizedHref === calendarPath || normalizedHref === normalizedCalendarUrl) {
+          log.warn(
+            `Filtering out calendar collection href: ${normalizedHref} (matches ${calendarPath})`,
+          );
+          return false;
+        }
+
+        // valid task hrefs should end with .ics
+        if (!normalizedHref.endsWith('.ics')) {
+          log.warn(`Filtering out non-task href: ${normalizedHref} (doesn't end with .ics)`);
+          return false;
+        }
+
+        return true;
+      });
+
+    if (hrefs.length === 0) {
+      // server returned results but no valid task hrefs after filtering
+      // this could mean that the calendar is empty, returns calendar collection instead of empty response
+      // or a malformed response with wrong hrefs...
+      // if the query returned exactly 1 result and it's the calendar collection,
+      // treat this as "calendar is empty" rather than an error
+      if (queryResults.length === 1) {
+        // already filtered this out above, so if we're here with 1 result, it was the collection
+        log.warn(
+          `Server returned single result that matches calendar collection. Assuming calendar is empty.`,
+        );
+        return []; // treat as empty calendar?
+      }
+
+      // multiple invalid results.. this is a genuine error
+      log.warn(
+        `Server returned ${queryResults.length} results but 0 valid task hrefs. This may indicate a server issue.`,
+      );
+      return null;
+    }
+
+    const multigetBody = `<?xml version="1.0" encoding="utf-8"?>
+<c:calendar-multiget xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
+  <d:prop>
+    <d:getetag/>
+    <c:calendar-data/>
+  </d:prop>
+${hrefs.map((href) => `  <d:href>${href}</d:href>`).join('\n')}
+</c:calendar-multiget>`;
+
+    const multigetResponse = await report(calendar.url, conn.credentials, multigetBody, '0');
+
+    if (multigetResponse.status !== 207) {
+      log.error(`Failed to fetch task data: HTTP ${multigetResponse.status}`);
+      log.error(`Response body:`, multigetResponse.body);
+      return null; // return null to indicate failure
+    }
+
+    const results = parseMultiStatus(multigetResponse.body);
     const tasks: Task[] = [];
 
     for (const result of results) {
@@ -340,6 +427,7 @@ class CalDAVService {
       }
     }
 
+    log.info(`Fetched ${tasks.length} tasks from calendar: ${calendar.displayName}`);
     return tasks;
   }
 
