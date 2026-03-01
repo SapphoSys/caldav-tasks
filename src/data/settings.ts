@@ -2,8 +2,7 @@
  * Settings data and configuration options
  */
 
-import type { StartOfWeek } from '@/context/settingsContext';
-import type { ServerType } from '@/types';
+import type { ServerType, StartOfWeek } from '@/types';
 
 /**
  * Days of week options for calendar start day
