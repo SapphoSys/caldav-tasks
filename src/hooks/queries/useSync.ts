@@ -515,16 +515,6 @@ export function useSyncQuery() {
     }
   }, []); // Only run once on mount
 
-  // Sync when active calendar changes
-  const activeCalendarId = taskData.getUIState().activeCalendarId;
-  useEffect(() => {
-    if (activeCalendarId) {
-      syncCalendar(activeCalendarId).catch((error) =>
-        log.error('Active calendar sync failed:', error),
-      );
-    }
-  }, [activeCalendarId, syncCalendar]);
-
   // Auto-sync interval
   useEffect(() => {
     // Clear existing interval
