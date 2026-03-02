@@ -2,8 +2,16 @@ import { useSettingsStore } from '@/context/settingsContext';
 import { SYNC_INTERVAL_OPTIONS } from '@/data/settings';
 
 export function SyncSettings() {
-  const { autoSync, setAutoSync, syncInterval, setSyncInterval, syncOnStartup, setSyncOnStartup } =
-    useSettingsStore();
+  const {
+    autoSync,
+    setAutoSync,
+    syncInterval,
+    setSyncInterval,
+    syncOnStartup,
+    setSyncOnStartup,
+    syncOnReconnect,
+    setSyncOnReconnect,
+  } = useSettingsStore();
 
   return (
     <div className="space-y-4">
@@ -56,6 +64,23 @@ export function SyncSettings() {
             type="checkbox"
             checked={syncOnStartup}
             onChange={(e) => setSyncOnStartup(e.target.checked)}
+            className="rounded border-surface-300 dark:border-surface-600"
+          />
+        </label>
+
+        <label className="flex items-center justify-between">
+          <div>
+            <span className="text-sm text-surface-700 dark:text-surface-300">
+              Sync after connection comes back online
+            </span>
+            <p className="text-xs text-surface-500 dark:text-surface-400">
+              Automatically sync when reconnecting to the internet
+            </p>
+          </div>
+          <input
+            type="checkbox"
+            checked={syncOnReconnect}
+            onChange={(e) => setSyncOnReconnect(e.target.checked)}
             className="rounded border-surface-300 dark:border-surface-600"
           />
         </label>

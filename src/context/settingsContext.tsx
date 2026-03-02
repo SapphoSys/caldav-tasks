@@ -25,6 +25,7 @@ interface SettingsState {
   autoSync: boolean;
   syncInterval: number;
   syncOnStartup: boolean;
+  syncOnReconnect: boolean;
   showCompletedByDefault: boolean;
   confirmBeforeDelete: boolean;
   confirmBeforeDeleteCalendar: boolean;
@@ -58,6 +59,7 @@ interface SettingsActions {
   setAutoSync: (enabled: boolean) => void;
   setSyncInterval: (interval: number) => void;
   setSyncOnStartup: (enabled: boolean) => void;
+  setSyncOnReconnect: (enabled: boolean) => void;
   setShowCompletedByDefault: (show: boolean) => void;
   setConfirmBeforeDelete: (confirm: boolean) => void;
   setConfirmBeforeDeleteCalendar: (confirm: boolean) => void;
@@ -97,6 +99,7 @@ const defaultState: SettingsState = {
   autoSync: true,
   syncInterval: 5,
   syncOnStartup: true,
+  syncOnReconnect: true,
   showCompletedByDefault: true,
   confirmBeforeDelete: true,
   confirmBeforeDeleteCalendar: true,
@@ -188,6 +191,7 @@ export const settingsStore = {
   setAutoSync: (autoSync: boolean) => setState({ autoSync }),
   setSyncInterval: (syncInterval: number) => setState({ syncInterval }),
   setSyncOnStartup: (syncOnStartup: boolean) => setState({ syncOnStartup }),
+  setSyncOnReconnect: (syncOnReconnect: boolean) => setState({ syncOnReconnect }),
   setShowCompletedByDefault: (showCompletedByDefault: boolean) =>
     setState({ showCompletedByDefault }),
   setConfirmBeforeDelete: (confirmBeforeDelete: boolean) => setState({ confirmBeforeDelete }),
@@ -254,6 +258,7 @@ export const settingsStore = {
         autoSync: data.autoSync ?? defaultState.autoSync,
         syncInterval: data.syncInterval ?? defaultState.syncInterval,
         syncOnStartup: data.syncOnStartup ?? defaultState.syncOnStartup,
+        syncOnReconnect: data.syncOnReconnect ?? defaultState.syncOnReconnect,
         showCompletedByDefault: data.showCompletedByDefault ?? defaultState.showCompletedByDefault,
         confirmBeforeDelete: data.confirmBeforeDelete ?? defaultState.confirmBeforeDelete,
         confirmBeforeDeleteCalendar:
@@ -317,6 +322,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   );
   const setSyncOnStartup = useCallback(
     (enabled: boolean) => settingsStore.setSyncOnStartup(enabled),
+    [],
+  );
+  const setSyncOnReconnect = useCallback(
+    (enabled: boolean) => settingsStore.setSyncOnReconnect(enabled),
     [],
   );
   const setShowCompletedByDefault = useCallback(
@@ -422,6 +431,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setAutoSync,
     setSyncInterval,
     setSyncOnStartup,
+    setSyncOnReconnect,
     setShowCompletedByDefault,
     setConfirmBeforeDelete,
     setConfirmBeforeDeleteCalendar,

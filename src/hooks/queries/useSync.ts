@@ -35,8 +35,10 @@ export function useSyncQuery() {
   // Handle online/offline status
   const { isOffline, isOfflineRef } = useOffline({
     onOnline: () => {
-      log.info('Back online, triggering sync...');
-      if (syncAllRef.current) {
+      log.info('Back online');
+      const { syncOnReconnect } = settingsStore.getState();
+      if (syncOnReconnect && syncAllRef.current) {
+        log.info('Auto-sync on reconnect enabled, triggering sync');
         pendingSyncRef.current = true;
         syncAllRef.current();
       }

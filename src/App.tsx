@@ -46,6 +46,7 @@ function App() {
     toggleSidebarCollapsed,
     setSidebarWidth,
     onboardingCompleted,
+    syncOnReconnect,
   } = useSettingsStore();
 
   // show onboarding modal on first launch
@@ -188,9 +189,15 @@ function App() {
           {isOffline && (
             <div className="flex flex-row items-center text-center justify-center gap-2 p-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">
               <WifiOff className="w-5 h-5" />
-              <p>You're offline. Changes will sync when you reconnect.</p>
+              <p>
+                You're offline.
+                {syncOnReconnect
+                  ? ' Changes will sync when you reconnect.'
+                  : ' Use the sync button to sync when you reconnect.'}
+              </p>
             </div>
           )}
+
           <div className="flex-1 flex min-h-0 overflow-hidden">
             <div
               className={`flex-1 flex flex-col min-w-0 min-h-0 ${isEditorOpen && selectedTask ? 'hidden lg:flex' : ''}`}
