@@ -60,7 +60,7 @@ jobs:
           get_hash() {
             local url="$1"
             local tmpfile=$(mktemp)
-            echo "  Downloading: $url"
+            echo "  Downloading: $url" >&2
             if curl -sL -o "$tmpfile" "$url"; then
               local hash=$(sha256sum "$tmpfile" | cut -d' ' -f1)
               # Convert to SRI format (base64 encoded)
@@ -95,12 +95,23 @@ jobs:
           # Update version in binary package
           sed -i "s/version ? \"[^\"]*\"/version ? \"$VERSION\"/" "$BIN_PACKAGE_FILE"
 
-          # Update hashes for each platform using line offset ranges
-          # Use | as delimiter to avoid conflicts with forward slashes in hashes
-          sed -i '/"x86_64-linux"/,+3 s|hash = "sha256-[^"]*"|hash = "'"$X64_LINUX_HASH"'"|' "$BIN_PACKAGE_FILE"
-          sed -i '/"aarch64-linux"/,+3 s|hash = "sha256-[^"]*"|hash = "'"$ARM64_LINUX_HASH"'"|' "$BIN_PACKAGE_FILE"
-          sed -i '/"x86_64-darwin"/,+3 s|hash = "sha256-[^"]*"|hash = "'"$X64_DARWIN_HASH"'"|' "$BIN_PACKAGE_FILE"
-          sed -i '/"aarch64-darwin"/,+3 s|hash = "sha256-[^"]*"|hash = "'"$ARM64_DARWIN_HASH"'"|' "$BIN_PACKAGE_FILE"
+          # Update hashes for each platform using awk for more reliable replacement
+          awk -v x64_linux="$X64_LINUX_HASH" -v arm64_linux="$ARM64_LINUX_HASH" \
+              -v x64_darwin="$X64_DARWIN_HASH" -v arm64_darwin="$ARM64_DARWIN_HASH" '
+          {
+            if ($0 ~ /"x86_64-linux"/) { platform = "x64_linux"; }
+            else if ($0 ~ /"aarch64-linux"/) { platform = "arm64_linux"; }
+            else if ($0 ~ /"x86_64-darwin"/) { platform = "x64_darwin"; }
+            else if ($0 ~ /"aarch64-darwin"/) { platform = "arm64_darwin"; }
+
+            if ($0 ~ /hash = "sha256-/) {
+              if (platform == "x64_linux") { sub(/hash = "sha256-[^"]*"/, "hash = \"" x64_linux "\""); platform = ""; }
+              else if (platform == "arm64_linux") { sub(/hash = "sha256-[^"]*"/, "hash = \"" arm64_linux "\""); platform = ""; }
+              else if (platform == "x64_darwin") { sub(/hash = "sha256-[^"]*"/, "hash = \"" x64_darwin "\""); platform = ""; }
+              else if (platform == "arm64_darwin") { sub(/hash = "sha256-[^"]*"/, "hash = \"" arm64_darwin "\""); platform = ""; }
+            }
+            print;
+          }' "$BIN_PACKAGE_FILE" > "$BIN_PACKAGE_FILE.tmp" && mv "$BIN_PACKAGE_FILE.tmp" "$BIN_PACKAGE_FILE"
 
           echo "✓ Binary package updated"
           echo ""
@@ -124,9 +135,15 @@ jobs:
           # Update version in source package
           sed -i "s/version = \"[^\"]*\";/version = \"$VERSION\";/" "$SRC_PACKAGE_FILE"
 
-          # Update source hash (the fetchFromGitHub hash)
-          # Find the line after the comment and update it
-          sed -i '/# Update this hash when releasing a new version/{n;s|hash = "sha256-[^"]*"|hash = "'"$SOURCE_HASH"'"|;}' "$SRC_PACKAGE_FILE"
+          # Update source hash using awk for reliable replacement
+          awk -v source_hash="$SOURCE_HASH" '
+          {
+            if (prev_line ~ /# Update this hash when releasing a new version/ && $0 ~ /hash = "sha256-/) {
+              sub(/hash = "sha256-[^"]*"/, "hash = \"" source_hash "\"");
+            }
+            print;
+            prev_line = $0;
+          }' "$SRC_PACKAGE_FILE" > "$SRC_PACKAGE_FILE.tmp" && mv "$SRC_PACKAGE_FILE.tmp" "$SRC_PACKAGE_FILE"
 
           echo "✓ Source package updated"
           echo ""
