@@ -45,7 +45,7 @@ class CalDAVService {
     username: string,
     password: string,
     serverType: ServerType = 'generic',
-  ): Promise<{ principalUrl: string; displayName: string }> {
+  ): Promise<{ principalUrl: string; displayName: string; calendarHome: string }> {
     const credentials: CalDAVCredentials = { username, password };
 
     // normalize server URL - strip trailing slashes and common CalDAV paths
@@ -202,7 +202,7 @@ class CalDAVService {
       serverType,
     });
 
-    return { principalUrl, displayName };
+    return { principalUrl, displayName, calendarHome };
   }
 
   /**
