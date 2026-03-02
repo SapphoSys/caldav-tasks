@@ -38,7 +38,7 @@ function App() {
   const [preloadedConfig, setPreloadedConfig] = useState<CalDAVConfig | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const { isSyncing, isOffline, lastSyncTime, syncAll } = useSyncQuery();
+  const { isSyncing, syncingCalendarId, isOffline, lastSyncTime, syncAll } = useSyncQuery();
   const { data: accounts = [] } = useAccounts();
   const {
     sidebarCollapsed,
@@ -58,7 +58,7 @@ function App() {
 
   // system tray integration (sync button, status updates)
   useTray({
-    isSyncing: isSyncing,
+    isSyncing: isSyncing || syncingCalendarId !== null,
     lastSyncTime,
     onSyncRequest: syncAll,
   });
@@ -68,7 +68,7 @@ function App() {
     useUpdateChecker();
 
   // app menu state synchronization
-  useAppMenu();
+  useAppMenu(isSyncing || syncingCalendarId !== null);
 
   // menu handlers and modal state
   const menuHandlers = useMenuHandlers();
@@ -179,7 +179,7 @@ function App() {
 
         <main className="flex-1 flex flex-col min-w-0">
           <Header
-            isSyncing={isSyncing}
+            isSyncing={isSyncing || syncingCalendarId !== null}
             onSync={syncAll}
             disableSync={accounts.length === 0}
             isOffline={isOffline}

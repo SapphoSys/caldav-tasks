@@ -5,6 +5,7 @@ import App from './App';
 import './styles/index.css';
 import { ConnectionProvider } from '@/context/connectionContext';
 import { SettingsProvider } from '@/context/settingsContext';
+import { SyncProvider } from '@/context/syncContext';
 import { forceShowWindow, initializeApp, showBootstrapError, showWindow } from '@/lib/bootstrap';
 import { createLogger } from '@/lib/logger';
 import { queryClient } from '@/lib/queryClient';
@@ -19,11 +20,13 @@ function renderApp() {
       <QueryClientProvider client={queryClient}>
         <SettingsProvider>
           <ConnectionProvider>
-            <ModalStateProvider>
-              <ConfirmDialogProvider>
-                <App />
-              </ConfirmDialogProvider>
-            </ModalStateProvider>
+            <SyncProvider>
+              <ModalStateProvider>
+                <ConfirmDialogProvider>
+                  <App />
+                </ConfirmDialogProvider>
+              </ModalStateProvider>
+            </SyncProvider>
           </ConnectionProvider>
         </SettingsProvider>
       </QueryClientProvider>
