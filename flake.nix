@@ -60,10 +60,16 @@
 
       in
       {
-        packages = {
-          default = pkgs.callPackage ./nix/package-bin.nix { };
-          source = pkgs.callPackage ./nix/package.nix { src = ./.; };
-        };
+        packages =
+          let
+            source = pkgs.callPackage ./nix/package.nix { src = ./.; };
+            bin = pkgs.callPackage ./nix/package-bin.nix { };
+          in
+          {
+            default = if pkgs.stdenv.hostPlatform.isDarwin then bin else source;
+            caldav-tasks = source;
+            caldav-tasks-bin = bin;
+          };
 
         devShells.default = pkgs.mkShell {
           buildInputs =
