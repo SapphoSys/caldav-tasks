@@ -2,6 +2,7 @@ name: 'Update Nix Binary Hashes'
 
 # Runs when a release is published (after you manually publish the draft)
 on:
+  workflow_dispatch:
   release:
     types: [published]
 
