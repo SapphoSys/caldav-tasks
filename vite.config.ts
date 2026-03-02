@@ -26,29 +26,39 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          // react and core dependencies
-          vendor: ['react', 'react-dom', 'react/jsx-runtime'],
+          // date utilities
+          'date-fns': ['date-fns'],
+
+          // dnd for sorting, drag'n'drop and ordering
+          'dnd-kit': ['@dnd-kit/core', '@dnd-kit/sortable'],
+
+          // emoji picker
+          frimousse: ['frimousse'],
+
+          // icons
+          lucide: ['lucide-react'],
+
+          // toast notifications
+          sonner: ['sonner'],
+
+          // react-query for server state
+          state: ['@tanstack/react-query'],
 
           // tauri plugins chunk
           tauri: [
             '@tauri-apps/api',
-            '@tauri-apps/plugin-sql',
-            '@tauri-apps/plugin-updater',
-            '@tauri-apps/plugin-process',
-            '@tauri-apps/plugin-notification',
+            '@tauri-apps/plugin-dialog',
+            '@tauri-apps/plugin-fs',
+            '@tauri-apps/plugin-http',
             '@tauri-apps/plugin-log',
+            '@tauri-apps/plugin-notification',
             '@tauri-apps/plugin-opener',
             '@tauri-apps/plugin-os',
+            '@tauri-apps/plugin-process',
+            '@tauri-apps/plugin-shell',
+            '@tauri-apps/plugin-sql',
+            '@tauri-apps/plugin-updater',
           ],
-
-          // state management and queries
-          state: ['zustand', '@tanstack/react-query'],
-
-          // dnd for sorting, drag'n'drop and ordering
-          dnd: ['@dnd-kit/core', '@dnd-kit/sortable'],
-
-          // date utilities
-          date: ['date-fns'],
         },
       },
     },
