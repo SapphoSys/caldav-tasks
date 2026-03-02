@@ -126,7 +126,7 @@ jobs:
 
           # Use nix-prefetch-url to get the hash (it handles the unpacking correctly)
           echo "  Prefetching: $SOURCE_URL"
-          SOURCE_HASH=$(nix-prefetch-url --unpack "$SOURCE_URL" --type sha256 | xargs nix hash convert --hash-algo sha256 --to sri)
+          SOURCE_HASH=$(nix-prefetch-url --unpack "$SOURCE_URL" --type sha256 | xargs nix-hash --to-sri --type sha256)
           echo "  Source tarball: $SOURCE_HASH"
 
           echo ""
