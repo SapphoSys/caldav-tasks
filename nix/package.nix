@@ -30,7 +30,7 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "caldav-tasks";
-  version = "0.6.0";
+  version = "0.6.1";
 
   # Currently unused now that we have package-bin.nix. Keeping it here anyway
   src =
