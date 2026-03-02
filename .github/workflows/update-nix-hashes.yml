@@ -147,8 +147,15 @@ jobs:
 
           echo "✓ Source package updated"
           echo ""
-          echo "Note: cargo and pnpm hashes in package.nix only need updating when dependencies change."
-          echo "Use './nix/update-hashes.sh' to update them if needed."
+
+          echo "--- Updating dependency hashes ---"
+          echo "Running update-hashes.sh to update cargo and pnpm hashes..."
+          echo ""
+          
+          # Run the hash update script to update cargo and pnpm dependencies
+          chmod +x ./nix/update-hashes.sh
+          ./nix/update-hashes.sh
+          
           echo ""
           echo "==> All package files updated!"
 
