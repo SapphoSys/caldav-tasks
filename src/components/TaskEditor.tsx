@@ -462,7 +462,7 @@ export function TaskEditor({ task }: TaskEditorProps) {
                   ${
                     task.priority === p.value
                       ? `${p.borderColor} ${p.bgColor}`
-                      : 'border-surface-200 dark:border-surface-600 hover:border-surface-300 text-surface-600 dark:text-surface-400'
+                      : 'border-surface-200 dark:border-surface-600 hover:border-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700 text-surface-600 dark:text-surface-400'
                   }
                 `}
               >
