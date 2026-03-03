@@ -30,7 +30,7 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "caldav-tasks";
-  version = "0.6.3";
+  version = "0.6.4";
 
   # Currently unused now that we have package-bin.nix. Keeping it here anyway
   src =
@@ -47,7 +47,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
       };
 
   # cargo dependencies hash - update when Cargo.lock changes
-  cargoHash = "sha256-REES4m74szAVAeUXDytPAFaSISe8GGPJ1w7xG45jMXQ=";
+  cargoHash = "sha256-Y6K6BFZLZ6P3xbIlxcFNHWdGXOQqGSuZkyJ4SoWzmzo=";
 
   # pnpm dependencies for the frontend
   pnpmDeps = fetchPnpmDeps {
