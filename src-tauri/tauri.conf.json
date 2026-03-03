@@ -21,7 +21,9 @@
         "minWidth": 800,
         "minHeight": 600,
         "backgroundColor": "#18181B",
-        "visible": false
+        "visible": false,
+        "transparent": true,
+        "decorations": false
       }
     ],
     "security": {
