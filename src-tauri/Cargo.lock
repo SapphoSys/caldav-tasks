@@ -577,6 +577,7 @@ dependencies = [
 name = "caldav-tasks"
 version = "0.6.3"
 dependencies = [
+ "gtk",
  "lazy_static",
  "log",
  "objc2 0.5.2",

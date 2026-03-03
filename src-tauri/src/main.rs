@@ -4,6 +4,7 @@
 )]
 
 mod app_nap;
+mod desktop_env;
 mod migrations;
 mod tray;
 
@@ -73,6 +74,12 @@ fn main() {
             tray::initialize_tray
         ])
         .setup(|_app| {
+            // Configure titlebar BEFORE window is shown (must happen before realization)
+            #[cfg(target_os = "linux")]
+            if let Some(window) = _app.get_webview_window("main") {
+                desktop_env::configure_titlebar_for_de(&window);
+            }
+
             // tray will be initialized from frontend after reading settings
             Ok(())
         })
