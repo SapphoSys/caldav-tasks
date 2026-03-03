@@ -6,7 +6,6 @@
 mod app_nap;
 mod migrations;
 mod tray;
-mod window_effects;
 
 use tauri::{Manager, RunEvent, WindowEvent};
 use tauri_plugin_log::{Target, TargetKind};
@@ -73,12 +72,7 @@ fn main() {
             tray::get_tray_enabled,
             tray::initialize_tray
         ])
-        .setup(|app| {
-            // Apply window effects (vibrancy on macOS, transparency/decorations on Linux, mica/acrylic on Windows)
-            if let Some(window) = app.get_webview_window("main") {
-                window_effects::apply_window_effects(&window);
-            }
-
+        .setup(|_app| {
             // tray will be initialized from frontend after reading settings
             Ok(())
         })

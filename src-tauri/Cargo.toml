@@ -1,6 +1,6 @@
 [package]
 name = "caldav-tasks"
-version = "0.6.3-test"
+version = "0.6.3"
 description = "A cross-platform CalDAV task management app. Currently in very early alpha!"
 authors = ["Sapphic Angels"]
 license = "zlib"
@@ -31,14 +31,6 @@ tauri-plugin-updater = "2.9.0"
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.5"
 objc2-foundation = { version = "0.2", features = ["NSProcessInfo", "NSString"] }
-window-vibrancy = "0.5"
-
-[target.'cfg(target_os = "linux")'.dependencies]
-gtk = "0.18"
-window-vibrancy = "0.5"
-
-[target.'cfg(target_os = "windows")'.dependencies]
-window-vibrancy = "0.5"
 
 [features]
 default = []
