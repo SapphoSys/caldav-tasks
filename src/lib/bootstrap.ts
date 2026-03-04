@@ -4,7 +4,7 @@ import { arch, exeExtension, locale, platform, version } from '@tauri-apps/plugi
 import { relaunch } from '@tauri-apps/plugin-process';
 import { settingsStore } from '@/context/settingsContext';
 import { getUIState } from '@/lib/database';
-import { createLogger, initLogger } from '@/lib/logger';
+import { initLogger, loggers } from '@/lib/logger';
 import { initializeDataStore } from '@/lib/taskData';
 import { initAppMenu } from '@/utils/menu';
 import { isCEF } from '@/utils/platform';
@@ -13,7 +13,7 @@ import { version as AppVersion } from '../../package.json';
 const [currentPlatform, currentArch, currentVersion, currentExtension, currentLocale] =
   await Promise.all([platform(), arch(), version(), exeExtension(), locale()]);
 
-const log = createLogger('Bootstrap', '#a855f7');
+const log = loggers.bootstrap;
 
 export interface BootstrapResult {
   success: boolean;

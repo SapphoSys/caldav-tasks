@@ -3,9 +3,9 @@ import { differenceInSeconds, isPast } from 'date-fns';
 import { useEffect, useRef } from 'react';
 import { useSettingsStore } from '@/context/settingsContext';
 import { useTasks } from '@/hooks/queries';
-import { createLogger } from '@/lib/logger';
+import { loggers } from '@/lib/logger';
 
-const log = createLogger('Notifications', '#f43f5e');
+const log = loggers.notifications;
 
 interface NotificationOptions {
   title: string;

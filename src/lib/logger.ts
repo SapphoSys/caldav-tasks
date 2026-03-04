@@ -232,13 +232,28 @@ export function createLogger(category: string, color?: string, options?: LoggerO
 
 // Pre-configured loggers for common modules
 export const loggers = {
+  account: createLogger('Account', '#f97316'),
   app: createLogger('App', '#6366f1'),
-  taskData: createLogger('TaskData', '#10b981'),
-  database: createLogger('Database', '#8b5cf6'),
+  bootstrap: createLogger('Bootstrap', '#a855f7'),
   caldav: createLogger('CalDAV', '#f59e0b'),
-  sync: createLogger('Sync', '#3b82f6'),
+  database: createLogger('Database', '#8b5cf6'),
+  deleteHandlers: createLogger('DeleteHandlers', '#ef4444'),
+  export: createLogger('Export', '#f59e0b'),
+  fileDrop: createLogger('FileDrop', '#eab308'),
+  http: createLogger('HTTP', '#6366f1'),
+  iCal: createLogger('iCal', '#22c55e'),
+  import: createLogger('Import', '#84cc16'),
+  main: createLogger('Main', '#a855f7'),
   menu: createLogger('Menu', '#ec4899'),
+  notifications: createLogger('Notifications', '#f43f5e'),
+  platform: createLogger('Platform', '#f97316'),
+  settings: createLogger('Settings', '#d946ef'),
+  sync: createLogger('Sync', '#3b82f6'),
+  taskData: createLogger('TaskData', '#10b981'),
+  taskList: createLogger('TaskList', '#14b8a6'),
+  toastManager: createLogger('ToastManager', '#ef4444'),
   ui: createLogger('UI', '#14b8a6'),
+  updater: createLogger('Updater', '#10b981'),
 } as const;
 
 // Enable debug mode helper

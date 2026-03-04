@@ -4,9 +4,9 @@
 
 let isCefRuntime: boolean | null = null;
 
-import { createLogger } from '@/lib/logger';
+import { loggers } from '@/lib/logger';
 
-const log = createLogger('Platform', '#f97316');
+const log = loggers.platform;
 
 /**
  * Detect if running under CEF (Chromium Embedded Framework) runtime

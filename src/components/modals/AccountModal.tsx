@@ -9,14 +9,14 @@ import { useAddCalendar, useCreateAccount, useUpdateAccount } from '@/hooks/quer
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
 import { caldavService } from '@/lib/caldav';
-import { createLogger } from '@/lib/logger';
+import { loggers } from '@/lib/logger';
 import * as taskData from '@/lib/taskData';
 import type { Account, Calendar, ServerType } from '@/types';
 import { generateTagColor } from '@/utils/color';
 import { generateUUID } from '@/utils/misc';
 import type { CalDAVConfig } from '@/utils/mobileconfig';
 
-const log = createLogger('Account', '#f97316');
+const log = loggers.account;
 
 interface AccountModalProps {
   account: Account | null;

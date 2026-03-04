@@ -1,13 +1,13 @@
 import { listen } from '@tauri-apps/api/event';
 import { useEffect } from 'react';
 import { useSyncQuery, useUIState } from '@/hooks/queries';
-import { createLogger } from '@/lib/logger';
+import { loggers } from '@/lib/logger';
 import type { SortDirection, SortMode } from '@/types';
 import { DEFAULT_SORT_CONFIG } from '@/utils/constants';
 import { MENU_EVENTS } from '@/utils/menu';
 import { isCEF } from '@/utils/platform';
 
-const log = createLogger('Menu', '#0ea5e9');
+const log = loggers.menu;
 
 /**
  * Hook to listen for menu events and handle them appropriately

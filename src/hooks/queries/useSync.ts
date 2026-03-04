@@ -10,7 +10,7 @@ import { settingsStore, useSettingsStore } from '@/context/settingsContext';
 import { useSyncStore } from '@/context/syncContext';
 import { toastManager } from '@/hooks/useToast.tsx';
 import { caldavService } from '@/lib/caldav';
-import { createLogger } from '@/lib/logger';
+import { loggers } from '@/lib/logger';
 import { queryKeys } from '@/lib/queryClient';
 import * as taskData from '@/lib/taskData';
 import type { Calendar, Task } from '@/types';
@@ -18,7 +18,7 @@ import { generateTagColor } from '@/utils/color';
 import { MENU_EVENTS } from '@/utils/menu';
 import { useOffline } from '../useOffline';
 
-const log = createLogger('Sync', '#06b6d4');
+const log = loggers.sync;
 
 export function useSyncQuery() {
   const queryClient = useQueryClient();

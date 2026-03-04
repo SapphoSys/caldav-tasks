@@ -5,7 +5,7 @@ import {
   useContext,
   useSyncExternalStore,
 } from 'react';
-import { createLogger } from '@/lib/logger';
+import { loggers } from '@/lib/logger';
 import type {
   AccentColor,
   KeyboardShortcut,
@@ -17,7 +17,7 @@ import type {
 import { applyAccentColor, applyTheme } from '@/utils/color';
 import { DEFAULT_COLOR, DEFAULT_DAY_OF_WEEK, DEFAULT_SHORTCUTS } from '@/utils/constants';
 
-const log = createLogger('Settings', '#d946ef');
+const log = loggers.settings;
 
 interface SettingsState {
   theme: Theme;

@@ -2,7 +2,7 @@ import { connectionStore } from '@/context/connectionContext';
 import type { Account, Calendar, ServerType, Task } from '@/types';
 import { normalizeHexColor } from '@/utils/color';
 import { taskToVTodo, vtodoToTask } from '../utils/ical';
-import { createLogger } from './logger';
+import { loggers } from './logger';
 import {
   type CalDAVCredentials,
   del,
@@ -14,7 +14,7 @@ import {
   report,
 } from './tauri-http';
 
-const log = createLogger('CalDAV', '#3b82f6');
+const log = loggers.caldav;
 
 if (import.meta.hot) {
   import.meta.hot.accept();

@@ -1,7 +1,7 @@
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
-import { createLogger } from './logger';
+import { loggers } from './logger';
 
-const log = createLogger('HTTP', '#6366f1');
+const log = loggers.http;
 
 export interface HttpResponse {
   status: number;

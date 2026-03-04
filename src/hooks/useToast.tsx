@@ -1,7 +1,7 @@
 import { toast } from 'sonner';
-import { createLogger } from '@/lib/logger';
+import { loggers } from '@/lib/logger';
 
-const log = createLogger('ToastManager', '#ef4444');
+const log = loggers.toastManager;
 
 export interface ToastAction {
   label: string;

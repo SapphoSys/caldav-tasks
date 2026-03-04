@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
-import { createLogger } from '@/lib/logger';
+import { loggers } from '@/lib/logger';
 import { type CalDAVConfig, parseAppleConfigProfile } from '@/utils/mobileconfig';
 
-const log = createLogger('FileDrop', '#eab308');
+const log = loggers.fileDrop;
 
 // Supported file extensions for import
 const SUPPORTED_EXTENSIONS = ['.ics', '.ical', '.json', '.mobileconfig'];

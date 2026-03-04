@@ -7,11 +7,11 @@ import { useSettingsStore } from '@/context/settingsContext';
 import { useDeleteAccount, useDeleteTag, useSetAllTasksView } from '@/hooks/queries';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import { caldavService } from '@/lib/caldav';
-import { createLogger } from '@/lib/logger';
+import { loggers } from '@/lib/logger';
 import * as taskData from '@/lib/taskData';
 import type { Account, Tag } from '@/types';
 
-const log = createLogger('DeleteHandlers', '#ef4444');
+const log = loggers.deleteHandlers;
 
 /**
  * Hook providing handlers for deleting accounts, calendars, and tags

@@ -20,14 +20,14 @@ import {
   useSetSelectedTask,
   useUIState,
 } from '@/hooks/queries';
-import { createLogger } from '@/lib/logger';
+import { loggers } from '@/lib/logger';
 import * as taskData from '@/lib/taskData';
 import { DEFAULT_SORT_CONFIG, TASK_LIST_INDENT_SHIFT_SIZE } from '@/utils/constants';
 import { getMetaKeyLabel, getModifierJoiner } from '../utils/keyboard';
 import { type FlattenedTask, flattenTasks } from '../utils/tree';
 import { TaskItem } from './TaskItem';
 
-const log = createLogger('TaskList', '#14b8a6');
+const log = loggers.taskList;
 
 export function TaskList() {
   const { data: uiState } = useUIState();

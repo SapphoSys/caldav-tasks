@@ -27,9 +27,9 @@ import type {
 import { DEFAULT_SORT_CONFIG, FALLBACK_ITEM_COLOR } from '@/utils/constants';
 import { toAppleEpoch } from '@/utils/ical';
 import { generateUUID } from '@/utils/misc';
-import { createLogger } from './logger';
+import { loggers } from './logger';
 
-const log = createLogger('Database', '#8b5cf6');
+const log = loggers.database;
 
 // Database connection instance
 let db: Database | null = null;
@@ -709,10 +709,9 @@ export async function updateCalendar(
 ): Promise<void> {
   const database = await getDb();
 
-  const rows = await database.select<CalendarRow[]>(
-    'SELECT * FROM calendars WHERE id = $1',
-    [calendarId],
-  );
+  const rows = await database.select<CalendarRow[]>('SELECT * FROM calendars WHERE id = $1', [
+    calendarId,
+  ]);
 
   if (rows.length === 0) {
     log.warn(`Calendar ${calendarId} not found for update`);

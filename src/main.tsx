@@ -7,12 +7,12 @@ import { ConnectionProvider } from '@/context/connectionContext';
 import { SettingsProvider } from '@/context/settingsContext';
 import { SyncProvider } from '@/context/syncContext';
 import { forceShowWindow, initializeApp, showBootstrapError, showWindow } from '@/lib/bootstrap';
-import { createLogger } from '@/lib/logger';
+import { loggers } from '@/lib/logger';
 import { queryClient } from '@/lib/queryClient';
 import { ConfirmDialogProvider } from '@/providers/ConfirmDialogProvider';
 import { ModalStateProvider } from '@/providers/ModalStateProvider';
 
-const log = createLogger('Main', '#a855f7');
+const log = loggers.main;
 
 function renderApp() {
   ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(

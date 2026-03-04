@@ -8,13 +8,13 @@ import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
 import { useAccounts, useCreateTask } from '@/hooks/queries';
 import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
-import { createLogger } from '@/lib/logger';
+import { loggers } from '@/lib/logger';
 import type { Calendar, Task } from '@/types';
 import { generateUUID } from '@/utils/misc';
 import { pluralize } from '../../utils/format';
 import { parseIcsFile, parseJsonTasksFile } from '../../utils/ical';
 
-const log = createLogger('Import', '#84cc16');
+const log = loggers.import;
 
 interface ImportModalProps {
   isOpen: boolean;
