@@ -1,8 +1,8 @@
 import RotateCcw from 'lucide-react/icons/rotate-ccw';
 import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
-import type { KeyboardShortcut } from '@/types';
-import { formatShortcut } from '@/utils/keyboard';
+import type { KeyboardShortcut } from '$types/index';
+import { formatShortcut } from '$utils/keyboard';
 
 interface KeyboardShortcutModalProps {
   isOpen: boolean;

@@ -11,30 +11,29 @@ import Link from 'lucide-react/icons/link';
 import Share2 from 'lucide-react/icons/share-2';
 import Trash2 from 'lucide-react/icons/trash-2';
 import { useEffect, useRef, useState } from 'react';
-import { useSettingsStore } from '@/context/settingsContext';
+import { ExportModal } from '$components/modals/ExportModal';
+import { useSettingsStore } from '$context/settingsContext';
+import { getIconByName } from '$data/icons';
+import { useAccounts } from '$hooks/queries/useAccounts';
+import { useToggleTaskComplete } from '$hooks/queries/useTasks';
 import {
-  useAccounts,
   useSetActiveAccount,
   useSetActiveCalendar,
   useSetActiveTag,
   useSetEditorOpen,
   useSetSelectedTask,
-  useToggleTaskComplete,
   useUIState,
-} from '@/hooks/queries';
-import { useConfirmTaskDelete } from '@/hooks/useConfirmTaskDelete';
-import { useContextMenu } from '@/hooks/useContextMenu';
-import * as taskData from '@/lib/taskData';
-import type { Task } from '@/types';
-
-import { FALLBACK_ITEM_COLOR } from '@/utils/constants';
-import { formatDueDate } from '@/utils/date';
-import { filterCalDavDescription } from '@/utils/ical';
-import { getPriorityColor, getPriorityRingColor } from '@/utils/priority';
-import { getIconByName } from '../data/icons';
-import { getContrastTextColor } from '../utils/color';
-import { pluralize } from '../utils/format';
-import { ExportModal } from './modals/ExportModal';
+} from '$hooks/queries/useUIState';
+import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
+import { useContextMenu } from '$hooks/useContextMenu';
+import * as taskData from '$lib/taskData';
+import type { Task } from '$types/index';
+import { getContrastTextColor } from '$utils/color';
+import { FALLBACK_ITEM_COLOR } from '$utils/constants';
+import { formatDueDate } from '$utils/date';
+import { pluralize } from '$utils/format';
+import { filterCalDavDescription } from '$utils/ical';
+import { getPriorityColor, getPriorityRingColor } from '$utils/priority';
 
 interface TaskItemProps {
   task: Task;

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useUpdateTask } from '@/hooks/queries';
+import { useUpdateTask } from '$hooks/queries/useTasks';
 
 /**
  * hook to debounce task field updates

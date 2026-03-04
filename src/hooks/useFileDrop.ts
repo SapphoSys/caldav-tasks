@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import { loggers } from '@/lib/logger';
-import { type CalDAVConfig, parseAppleConfigProfile } from '@/utils/mobileconfig';
+import { loggers } from '$lib/logger';
+import { type CalDAVConfig, parseAppleConfigProfile } from '$utils/mobileconfig';
 
 const log = loggers.fileDrop;
 

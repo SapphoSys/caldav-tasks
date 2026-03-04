@@ -1,10 +1,10 @@
 import Pencil from 'lucide-react/icons/pencil';
 import RotateCcw from 'lucide-react/icons/rotate-ccw';
 import { useState } from 'react';
-import { useSettingsStore } from '@/context/settingsContext';
-import type { KeyboardShortcut } from '@/types';
-import { formatShortcut } from '@/utils/keyboard';
-import { KeyboardShortcutModal } from '../KeyboardShortcutModal';
+import { KeyboardShortcutModal } from '$components/modals/KeyboardShortcutModal';
+import { useSettingsStore } from '$context/settingsContext';
+import type { KeyboardShortcut } from '$types/index';
+import { formatShortcut } from '$utils/keyboard';
 
 export function ShortcutsSettings({
   onEditingShortcutChange,

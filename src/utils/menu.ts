@@ -7,9 +7,9 @@ import {
   PredefinedMenuItem,
   Submenu,
 } from '@tauri-apps/api/menu';
-import { loggers } from '@/lib/logger';
-import type { KeyboardShortcut, SortMode } from '@/types';
-import { isMacPlatform } from './platform';
+import { loggers } from '$lib/logger';
+import type { KeyboardShortcut, SortMode } from '$types/index';
+import { isMacPlatform } from '$utils/platform';
 
 const log = loggers.menu;
 

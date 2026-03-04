@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef } from 'react';
-import { ConfirmDialogContext } from '@/context/confirmDialogContext';
-import { hasOpenModalElements } from '@/utils/misc';
+import { ConfirmDialogContext } from '$context/confirmDialogContext';
+import { hasOpenModalElements } from '$utils/misc';
 
 // track all active modal escape handlers in order of registration
 // this allows proper nesting - only the topmost modal should handle Esc

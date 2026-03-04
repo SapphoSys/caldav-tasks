@@ -5,7 +5,7 @@ import {
   useContext,
   useSyncExternalStore,
 } from 'react';
-import { loggers } from '@/lib/logger';
+import { loggers } from '$lib/logger';
 import type {
   AccentColor,
   KeyboardShortcut,
@@ -13,9 +13,9 @@ import type {
   StartOfWeek,
   SubtaskDeletionBehavior,
   Theme,
-} from '@/types';
-import { applyAccentColor, applyTheme } from '@/utils/color';
-import { DEFAULT_COLOR, DEFAULT_DAY_OF_WEEK, DEFAULT_SHORTCUTS } from '@/utils/constants';
+} from '$types/index';
+import { applyAccentColor, applyTheme } from '$utils/color';
+import { DEFAULT_COLOR, DEFAULT_DAY_OF_WEEK, DEFAULT_SHORTCUTS } from '$utils/constants';
 
 const log = loggers.settings;
 

@@ -1,5 +1,5 @@
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
-import { loggers } from './logger';
+import { loggers } from '$lib/logger';
 
 const log = loggers.http;
 

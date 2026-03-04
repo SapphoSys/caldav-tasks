@@ -1,5 +1,5 @@
 import { toast } from 'sonner';
-import { loggers } from '@/lib/logger';
+import { loggers } from '$lib/logger';
 
 const log = loggers.toastManager;
 

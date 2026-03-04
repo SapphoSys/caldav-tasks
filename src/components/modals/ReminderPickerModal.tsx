@@ -16,8 +16,8 @@ import Clock from 'lucide-react/icons/clock';
 import Trash2 from 'lucide-react/icons/trash-2';
 import X from 'lucide-react/icons/x';
 import { useEffect, useState } from 'react';
-import { settingsStore } from '@/context/settingsContext';
-import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
+import { settingsStore } from '$context/settingsContext';
+import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import {
   createPaddedDaysArray,
   getDaysOfWeekLabels,
@@ -25,7 +25,7 @@ import {
   getWeekStartValue,
   setDateTime,
   updateTimeComponent,
-} from '@/utils/calendar';
+} from '$utils/calendar';
 
 interface ReminderPickerModalProps {
   isOpen: boolean;

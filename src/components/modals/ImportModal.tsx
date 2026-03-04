@@ -6,13 +6,14 @@ import FileText from 'lucide-react/icons/file-text';
 import Upload from 'lucide-react/icons/upload';
 import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
-import { useAccounts, useCreateTask } from '@/hooks/queries';
-import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
-import { loggers } from '@/lib/logger';
-import type { Calendar, Task } from '@/types';
-import { generateUUID } from '@/utils/misc';
-import { pluralize } from '../../utils/format';
-import { parseIcsFile, parseJsonTasksFile } from '../../utils/ical';
+import { useAccounts } from '$hooks/queries/useAccounts';
+import { useCreateTask } from '$hooks/queries/useTasks';
+import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
+import { loggers } from '$lib/logger';
+import type { Calendar, Task } from '$types/index';
+import { pluralize } from '$utils/format';
+import { parseIcsFile, parseJsonTasksFile } from '$utils/ical';
+import { generateUUID } from '$utils/misc';
 
 const log = loggers.import;
 

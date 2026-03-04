@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import { clampToViewport } from '../utils/position';
-import { useGlobalContextMenuClose } from './useGlobalContextMenu';
+import { useGlobalContextMenuClose } from '$hooks/useGlobalContextMenu';
+import { clampToViewport } from '$utils/position';
 
 /**
  * Hook for managing context menu state and handlers

@@ -4,7 +4,7 @@
 
 let isCefRuntime: boolean | null = null;
 
-import { loggers } from '@/lib/logger';
+import { loggers } from '$lib/logger';
 
 const log = loggers.platform;
 

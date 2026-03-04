@@ -7,7 +7,17 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '~': path.resolve(__dirname, './src'),
+      $components: path.resolve(__dirname, './src/components'),
+      $context: path.resolve(__dirname, './src/context'),
+      $data: path.resolve(__dirname, './src/data'),
+      $hooks: path.resolve(__dirname, './src/hooks'),
+      $lib: path.resolve(__dirname, './src/lib'),
+      $providers: path.resolve(__dirname, './src/providers'),
+      $styles: path.resolve(__dirname, './src/styles'),
+      $types: path.resolve(__dirname, './src/types'),
+      $utils: path.resolve(__dirname, './src/utils'),
+
       // Tree-shake lucide-react by resolving icons/* to individual ESM files
       'lucide-react/icons': fileURLToPath(
         new URL('./node_modules/lucide-react/dist/esm/icons', import.meta.url),

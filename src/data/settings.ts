@@ -2,7 +2,7 @@
  * Settings data and configuration options
  */
 
-import type { ServerType, StartOfWeek } from '@/types';
+import type { ServerType, StartOfWeek } from '$types/index';
 
 /**
  * Days of week options for calendar start day

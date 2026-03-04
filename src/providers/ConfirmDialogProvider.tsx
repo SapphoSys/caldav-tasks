@@ -1,11 +1,11 @@
 import { type ReactNode, useCallback, useRef, useState } from 'react';
-import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { ConfirmDialog } from '$components/ConfirmDialog';
 import {
   ConfirmDialogContext,
   type ConfirmOptions,
   type ConfirmResult,
   defaultConfirmOptions,
-} from '@/context/confirmDialogContext';
+} from '$context/confirmDialogContext';
 
 export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
   const resolverRef = useRef<((value: boolean) => void) | null>(null);

@@ -1,10 +1,10 @@
 import ChevronDown from 'lucide-react/icons/chevron-down';
 import Trash2 from 'lucide-react/icons/trash-2';
 import { useState } from 'react';
-import { useSettingsStore } from '@/context/settingsContext';
-import { useDeleteAccount } from '@/hooks/queries';
-import { useConfirmDialog } from '@/hooks/useConfirmDialog';
-import type { Account } from '@/types';
+import { useSettingsStore } from '$context/settingsContext';
+import { useDeleteAccount } from '$hooks/queries/useAccounts';
+import { useConfirmDialog } from '$hooks/useConfirmDialog';
+import type { Account } from '$types/index';
 
 interface ConnectionsSettingsProps {
   accounts: Account[];

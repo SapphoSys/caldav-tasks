@@ -6,17 +6,17 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { emit } from '@tauri-apps/api/event';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { settingsStore, useSettingsStore } from '@/context/settingsContext';
-import { useSyncStore } from '@/context/syncContext';
-import { toastManager } from '@/hooks/useToast.tsx';
-import { caldavService } from '@/lib/caldav';
-import { loggers } from '@/lib/logger';
-import { queryKeys } from '@/lib/queryClient';
-import * as taskData from '@/lib/taskData';
-import type { Calendar, Task } from '@/types';
-import { generateTagColor } from '@/utils/color';
-import { MENU_EVENTS } from '@/utils/menu';
-import { useOffline } from '../useOffline';
+import { settingsStore, useSettingsStore } from '$context/settingsContext';
+import { useSyncStore } from '$context/syncContext';
+import { useOffline } from '$hooks/useOffline';
+import { toastManager } from '$hooks/useToast.tsx';
+import { caldavService } from '$lib/caldav';
+import { loggers } from '$lib/logger';
+import { queryKeys } from '$lib/queryClient';
+import * as taskData from '$lib/taskData';
+import type { Calendar, Task } from '$types/index';
+import { generateTagColor } from '$utils/color';
+import { MENU_EVENTS } from '$utils/menu';
 
 const log = loggers.sync;
 

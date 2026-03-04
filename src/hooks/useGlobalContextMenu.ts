@@ -3,7 +3,7 @@
  * Provides a way to dismiss all context menus when clicking anywhere in the app
  */
 import { useCallback, useEffect, useState } from 'react';
-import { hasOpenModalElements } from '@/utils/misc';
+import { hasOpenModalElements } from '$utils/misc';
 
 // global registry of context menu close handlers
 const closeHandlers = new Set<() => void>();

@@ -5,8 +5,8 @@ import {
   useContext,
   useSyncExternalStore,
 } from 'react';
-import type { CalDAVCredentials } from '@/lib/tauri-http';
-import type { ServerType } from '@/types';
+import type { CalDAVCredentials } from '$lib/tauri-http';
+import type { ServerType } from '$types/index';
 
 export interface AccountConnection {
   serverUrl: string;

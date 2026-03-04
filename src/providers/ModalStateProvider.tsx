@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
-import { ModalStateContext } from '@/context/modalStateContext';
-import { hasOpenModalElements } from '@/utils/misc';
+import { ModalStateContext } from '$context/modalStateContext';
+import { hasOpenModalElements } from '$utils/misc';
 
 // This provider tracks modal state and manages hover state resets
 export function ModalStateProvider({ children }: { children: ReactNode }) {

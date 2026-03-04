@@ -16,7 +16,7 @@ import Clock from 'lucide-react/icons/clock';
 import Sun from 'lucide-react/icons/sun';
 import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
-import { useSettingsStore } from '@/context/settingsContext';
+import { useSettingsStore } from '$context/settingsContext';
 import {
   createAllDayDate,
   createPaddedDaysArray,
@@ -25,7 +25,7 @@ import {
   getWeekStartValue,
   setDateTime,
   updateTimeComponent,
-} from '@/utils/calendar';
+} from '$utils/calendar';
 
 interface DateTimePickerProps {
   value?: Date;

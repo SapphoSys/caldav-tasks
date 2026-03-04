@@ -1,11 +1,11 @@
-import type { Calendar, ExportFormat, ExportType, Task } from '@/types';
-import { pluralize } from '@/utils/format';
+import type { Calendar, ExportFormat, ExportType, Task } from '$types/index';
+import { pluralize } from '$utils/format';
 import {
   exportTasksAsCsv,
   exportTasksAsIcs,
   exportTasksAsJson,
   exportTasksAsMarkdown,
-} from '@/utils/ical';
+} from '$utils/ical';
 
 /**
  * Get export modal title based on export type

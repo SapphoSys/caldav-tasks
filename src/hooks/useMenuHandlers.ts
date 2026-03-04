@@ -1,13 +1,13 @@
 import { useCallback, useRef, useState } from 'react';
-import type { SettingsCategory, SettingsSubtab, SortDirection, SortMode } from '@/types';
+import { useAccounts } from '$hooks/queries/useAccounts';
+import { useCreateTask } from '$hooks/queries/useTasks';
 import {
-  useAccounts,
-  useCreateTask,
   useSetSelectedTask,
   useSetShowCompletedTasks,
   useSetSortConfig,
-} from './queries';
-import { useMenuEvents } from './useMenuEvents';
+} from '$hooks/queries/useUIState';
+import { useMenuEvents } from '$hooks/useMenuEvents';
+import type { SettingsCategory, SettingsSubtab, SortDirection, SortMode } from '$types/index';
 
 export function useMenuHandlers() {
   const [showSettings, setShowSettings] = useState(false);

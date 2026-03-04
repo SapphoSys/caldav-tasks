@@ -15,34 +15,34 @@ import Share2 from 'lucide-react/icons/share-2';
 import Trash2 from 'lucide-react/icons/trash-2';
 import User from 'lucide-react/icons/user';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useModalState } from '@/context/modalStateContext';
-import { settingsStore, useSettingsStore } from '@/context/settingsContext';
+import { AccountModal } from '$components/modals/AccountModal';
+import { CalendarModal } from '$components/modals/CalendarModal';
+import { CreateCalendarModal } from '$components/modals/CreateCalendarModal';
+import { ExportModal } from '$components/modals/ExportModal';
+import { TagModal } from '$components/modals/TagModal';
+import { Tooltip } from '$components/Tooltip';
+import { useModalState } from '$context/modalStateContext';
+import { settingsStore, useSettingsStore } from '$context/settingsContext';
+import { getIconByName } from '$data/icons';
+import { useAccounts } from '$hooks/queries/useAccounts';
+import { useSyncQuery } from '$hooks/queries/useSync';
+import { useTags } from '$hooks/queries/useTags';
+import { useTasks } from '$hooks/queries/useTasks';
 import {
-  useAccounts,
   useSetActiveAccount,
   useSetActiveCalendar,
   useSetActiveTag,
   useSetAllTasksView,
-  useSyncQuery,
-  useTags,
-  useTasks,
   useUIState,
-} from '@/hooks/queries';
-import { useDeleteHandlers } from '@/hooks/useDeleteHandlers';
-import { useGlobalContextMenuClose } from '@/hooks/useGlobalContextMenu';
-import * as taskData from '@/lib/taskData';
-import type { Account, Calendar as CalendarType } from '@/types';
-import { FALLBACK_ITEM_COLOR, MAX_SIDEBAR_WIDTH, MIN_SIDEBAR_WIDTH } from '@/utils/constants';
-import { getIconByName } from '../data/icons';
-import { getContrastTextColor } from '../utils/color';
-import { getMetaKeyLabel, getModifierJoiner } from '../utils/keyboard';
-import { clampToViewport } from '../utils/position';
-import { AccountModal } from './modals/AccountModal';
-import { CalendarModal } from './modals/CalendarModal';
-import { CreateCalendarModal } from './modals/CreateCalendarModal';
-import { ExportModal } from './modals/ExportModal';
-import { TagModal } from './modals/TagModal';
-import { Tooltip } from './Tooltip';
+} from '$hooks/queries/useUIState';
+import { useDeleteHandlers } from '$hooks/useDeleteHandlers';
+import { useGlobalContextMenuClose } from '$hooks/useGlobalContextMenu';
+import * as taskData from '$lib/taskData';
+import type { Account, Calendar as CalendarType } from '$types/index';
+import { getContrastTextColor } from '$utils/color';
+import { FALLBACK_ITEM_COLOR, MAX_SIDEBAR_WIDTH, MIN_SIDEBAR_WIDTH } from '$utils/constants';
+import { getMetaKeyLabel, getModifierJoiner } from '$utils/keyboard';
+import { clampToViewport } from '$utils/position';
 
 interface SidebarProps {
   onOpenSettings?: () => void;

@@ -1,6 +1,6 @@
 import X from 'lucide-react/icons/x';
 import type { ReactNode } from 'react';
-import { MODAL_SIZE_CLASSES } from '@/utils/constants';
+import { MODAL_SIZE_CLASSES } from '$utils/constants';
 
 interface ModalWrapperProps {
   isOpen?: boolean;

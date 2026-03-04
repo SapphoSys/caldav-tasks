@@ -9,20 +9,18 @@ import Settings from 'lucide-react/icons/settings';
 import User from 'lucide-react/icons/user';
 import X from 'lucide-react/icons/x';
 import { useState } from 'react';
-import { useAccounts } from '@/hooks/queries';
-import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
-import type { SettingsCategory, SettingsSubtab } from '@/types';
-import {
-  AboutSettings,
-  AppearanceSettings,
-  BehaviorSettings,
-  ConnectionsSettings,
-  DataSettings,
-  NotificationSettings,
-  ShortcutsSettings,
-  SyncSettings,
-  TaskDefaultsSettings,
-} from './settings';
+import { AboutSettings } from '$components/modals/settings/AboutSettings';
+import { AppearanceSettings } from '$components/modals/settings/AppearanceSettings';
+import { BehaviorSettings } from '$components/modals/settings/BehaviorSettings';
+import { ConnectionsSettings } from '$components/modals/settings/ConnectionsSettings';
+import { DataSettings } from '$components/modals/settings/DataSettings';
+import { NotificationSettings } from '$components/modals/settings/NotificationSettings';
+import { ShortcutsSettings } from '$components/modals/settings/ShortcutsSettings';
+import { SyncSettings } from '$components/modals/settings/SyncSettings';
+import { TaskDefaultsSettings } from '$components/modals/settings/TaskDefaultsSettings';
+import { useAccounts } from '$hooks/queries/useAccounts';
+import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
+import type { SettingsCategory, SettingsSubtab } from '$types/index';
 
 interface SettingsModalProps {
   onClose: () => void;

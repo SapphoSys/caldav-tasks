@@ -7,24 +7,24 @@ import Plus from 'lucide-react/icons/plus';
 import RefreshCw from 'lucide-react/icons/refresh-cw';
 import Search from 'lucide-react/icons/search';
 import { useEffect, useRef, useState } from 'react';
-import { ComposedInput } from '@/components/ComposedInput';
-import { useModalState } from '@/context/modalStateContext';
+import { ComposedInput } from '$components/ComposedInput';
+import { Tooltip } from '$components/Tooltip';
+import { useModalState } from '$context/modalStateContext';
+import { useCreateTask } from '$hooks/queries/useTasks';
 import {
-  useCreateTask,
   useSetSearchQuery,
   useSetSelectedTask,
   useSetShowCompletedTasks,
   useSetSortConfig,
   useUIState,
-} from '@/hooks/queries';
-import type { SortDirection, SortMode } from '@/types';
+} from '$hooks/queries/useUIState';
+import type { SortDirection, SortMode } from '$types/index';
 import {
   DEFAULT_SORT_CONFIG,
   JUST_NOW_SYNC_TEXT_MS_THRESHOLD,
   SORT_OPTIONS,
-} from '@/utils/constants';
-import { getMetaKeyLabel, getModifierJoiner } from '../utils/keyboard';
-import { Tooltip } from './Tooltip';
+} from '$utils/constants';
+import { getMetaKeyLabel, getModifierJoiner } from '$utils/keyboard';
 
 interface HeaderProps {
   isSyncing?: boolean;

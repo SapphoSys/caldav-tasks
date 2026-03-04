@@ -1,7 +1,7 @@
 import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
-import { ComposedInput } from '@/components/ComposedInput';
-import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
+import { ComposedInput } from '$components/ComposedInput';
+import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 
 interface SubtaskModalProps {
   isOpen: boolean;

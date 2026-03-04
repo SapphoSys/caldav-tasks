@@ -7,12 +7,12 @@ import Copy from 'lucide-react/icons/copy';
 import Download from 'lucide-react/icons/download';
 import X from 'lucide-react/icons/x';
 import { useState } from 'react';
-import { EXPORT_FORMATS } from '@/data/export';
-import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
-import { loggers } from '@/lib/logger';
-import type { Calendar, ExportFormat, ExportType, Task } from '@/types';
-import { getExportContent, getExportDescription, getExportTitle } from '@/utils/export';
-import { downloadFile } from '../../utils/file';
+import { EXPORT_FORMATS } from '$data/export';
+import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
+import { loggers } from '$lib/logger';
+import type { Calendar, ExportFormat, ExportType, Task } from '$types/index';
+import { getExportContent, getExportDescription, getExportTitle } from '$utils/export';
+import { downloadFile } from '$utils/file';
 
 const log = loggers.export;
 

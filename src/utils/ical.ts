@@ -3,10 +3,10 @@
  * Replaces ical.js (~266KB) with minimal implementation for VTODO support
  */
 
-import { loggers } from '@/lib/logger';
-import * as taskData from '@/lib/taskData';
-import type { Priority, Reminder, Subtask, Task } from '@/types';
-import { generateUUID } from '@/utils/misc';
+import { loggers } from '$lib/logger';
+import * as taskData from '$lib/taskData';
+import type { Priority, Reminder, Subtask, Task } from '$types/index';
+import { generateUUID } from '$utils/misc';
 
 const log = loggers.iCal;
 

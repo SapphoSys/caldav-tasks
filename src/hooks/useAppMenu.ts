@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
-import { useSettingsStore } from '@/context/settingsContext';
-import { useAccounts, useTasks, useUIState } from '@/hooks/queries';
-import { loggers } from '@/lib/logger';
-import { rebuildAppMenu, updateMenuState } from '@/utils/menu';
-import { isCEF } from '@/utils/platform';
+import { useSettingsStore } from '$context/settingsContext';
+import { useAccounts } from '$hooks/queries/useAccounts';
+import { useTasks } from '$hooks/queries/useTasks';
+import { useUIState } from '$hooks/queries/useUIState';
+import { loggers } from '$lib/logger';
+import { rebuildAppMenu, updateMenuState } from '$utils/menu';
+import { isCEF } from '$utils/platform';
 
 const log = loggers.app;
 

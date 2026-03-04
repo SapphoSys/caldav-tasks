@@ -1,5 +1,5 @@
-import type { Theme } from '@/types';
-import { COLOR_PRESETS } from './constants';
+import type { Theme } from '$types/index';
+import { COLOR_PRESETS } from '$utils/constants';
 
 /**
  * calculate the relative luminance of a color to determine appropriate contrast text color

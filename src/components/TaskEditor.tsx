@@ -13,40 +13,40 @@ import Tag from 'lucide-react/icons/tag';
 import Trash2 from 'lucide-react/icons/trash-2';
 import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
-import { ComposedInput } from '@/components/ComposedInput';
-import { ComposedTextarea } from '@/components/ComposedTextarea';
-import { useSettingsStore } from '@/context/settingsContext';
+import { ComposedInput } from '$components/ComposedInput';
+import { ComposedTextarea } from '$components/ComposedTextarea';
+import { DatePickerModal } from '$components/modals/DatePickerModal';
+import { ReminderPickerModal } from '$components/modals/ReminderPickerModal';
+import { SubtaskModal } from '$components/modals/SubtaskModal';
+import { TagPickerModal } from '$components/modals/TagPickerModal';
+import { SubtaskTreeItem } from '$components/SubtaskTreeItem';
+import { Tooltip } from '$components/Tooltip';
+import { useSettingsStore } from '$context/settingsContext';
+import { getIconByName } from '$data/icons';
+import { useAccounts } from '$hooks/queries/useAccounts';
+import { useTags } from '$hooks/queries/useTags';
 import {
-  useAccounts,
   useAddReminder,
   useAddTagToTask,
   useCreateTask,
   useDeleteSubtask,
   useRemoveReminder,
   useRemoveTagFromTask,
-  useSetEditorOpen,
-  useTags,
   useToggleSubtaskComplete,
   useUpdateReminder,
   useUpdateSubtask,
   useUpdateTask,
-} from '@/hooks/queries';
-import { useConfirmTaskDelete } from '@/hooks/useConfirmTaskDelete';
-import { useDebouncedTaskUpdate } from '@/hooks/useDebouncedTaskUpdate';
-import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
-import * as taskData from '@/lib/taskData';
-import type { Priority, Task } from '@/types';
-import { filterCalDavDescription } from '@/utils/ical';
-import { hasOpenModalElements } from '@/utils/misc';
-import { PRIORITIES } from '@/utils/priority';
-import { getIconByName } from '../data/icons';
-import { getContrastTextColor } from '../utils/color';
-import { DatePickerModal } from './modals/DatePickerModal';
-import { ReminderPickerModal } from './modals/ReminderPickerModal';
-import { SubtaskModal } from './modals/SubtaskModal';
-import { TagPickerModal } from './modals/TagPickerModal';
-import { SubtaskTreeItem } from './SubtaskTreeItem';
-import { Tooltip } from './Tooltip';
+} from '$hooks/queries/useTasks';
+import { useSetEditorOpen } from '$hooks/queries/useUIState';
+import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
+import { useDebouncedTaskUpdate } from '$hooks/useDebouncedTaskUpdate';
+import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
+import * as taskData from '$lib/taskData';
+import type { Priority, Task } from '$types/index';
+import { getContrastTextColor } from '$utils/color';
+import { filterCalDavDescription } from '$utils/ical';
+import { hasOpenModalElements } from '$utils/misc';
+import { PRIORITIES } from '$utils/priority';
 
 interface TaskEditorProps {
   task: Task;

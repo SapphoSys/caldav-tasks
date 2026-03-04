@@ -1,6 +1,6 @@
-import { useSettingsStore } from '@/context/settingsContext';
-import { THEME_OPTIONS } from '@/data/theme';
-import { ACCENT_COLORS } from '@/utils/constants';
+import { useSettingsStore } from '$context/settingsContext';
+import { THEME_OPTIONS } from '$data/theme';
+import { ACCENT_COLORS } from '$utils/constants';
 
 export function AppearanceSettings() {
   const { theme, setTheme, accentColor, setAccentColor } = useSettingsStore();

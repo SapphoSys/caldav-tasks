@@ -1,5 +1,5 @@
-import type { KeyboardShortcut } from '@/types';
-import { isMacPlatform } from './platform';
+import type { KeyboardShortcut } from '$types/index';
+import { isMacPlatform } from '$utils/platform';
 
 export function getMetaKeyLabel(): string {
   return isMacPlatform() ? '⌘' : 'Ctrl';

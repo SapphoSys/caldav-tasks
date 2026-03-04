@@ -1,9 +1,0 @@
-export { AboutSettings } from './AboutSettings';
-export { AppearanceSettings } from './AppearanceSettings';
-export { BehaviorSettings } from './BehaviorSettings';
-export { ConnectionsSettings } from './ConnectionsSettings';
-export { DataSettings } from './DataSettings';
-export { NotificationSettings } from './NotificationSettings';
-export { ShortcutsSettings } from './ShortcutsSettings';
-export { SyncSettings } from './SyncSettings';
-export { TaskDefaultsSettings } from './TaskDefaultsSettings';

@@ -3,7 +3,7 @@ import Download from 'lucide-react/icons/download';
 import ExternalLink from 'lucide-react/icons/external-link';
 import X from 'lucide-react/icons/x';
 import { useEffect } from 'react';
-import type { UpdateInfo } from '@/hooks/useUpdateChecker';
+import type { UpdateInfo } from '$hooks/useUpdateChecker';
 
 interface UpdateModalProps {
   updateInfo: UpdateInfo;

@@ -2,8 +2,8 @@ import Check from 'lucide-react/icons/check';
 import ChevronDown from 'lucide-react/icons/chevron-down';
 import ChevronRight from 'lucide-react/icons/chevron-right';
 import X from 'lucide-react/icons/x';
-import type { Task } from '@/types';
-import { getPriorityDot } from '@/utils/priority';
+import type { Task } from '$types/index';
+import { getPriorityDot } from '$utils/priority';
 
 interface SubtaskTreeItemProps {
   task: Task;

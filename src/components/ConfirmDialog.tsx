@@ -1,7 +1,7 @@
 import Loader2 from 'lucide-react/icons/loader-2';
 import X from 'lucide-react/icons/x';
 import { type ReactNode, useEffect, useState } from 'react';
-import { getButtonClasses } from '@/utils/styles';
+import { getButtonClasses } from '$utils/styles';
 
 interface ConfirmDialogProps {
   isOpen: boolean;

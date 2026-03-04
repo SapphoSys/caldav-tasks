@@ -4,8 +4,8 @@
  */
 
 import Database from '@tauri-apps/plugin-sql';
-import { settingsStore } from '@/context/settingsContext';
-
+import { settingsStore } from '$context/settingsContext';
+import { loggers } from '$lib/logger';
 import type {
   Account,
   AccountRow,
@@ -23,11 +23,10 @@ import type {
   Task,
   TaskRow,
   UIStateRow,
-} from '@/types';
-import { DEFAULT_SORT_CONFIG, FALLBACK_ITEM_COLOR } from '@/utils/constants';
-import { toAppleEpoch } from '@/utils/ical';
-import { generateUUID } from '@/utils/misc';
-import { loggers } from './logger';
+} from '$types/index';
+import { DEFAULT_SORT_CONFIG, FALLBACK_ITEM_COLOR } from '$utils/constants';
+import { toAppleEpoch } from '$utils/ical';
+import { generateUUID } from '$utils/misc';
 
 const log = loggers.database;
 

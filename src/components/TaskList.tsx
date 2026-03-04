@@ -13,19 +13,14 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import ListTodo from 'lucide-react/icons/list-todo';
 import Plus from 'lucide-react/icons/plus';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  useCreateTask,
-  useFilteredTasks,
-  useReorderTasks,
-  useSetSelectedTask,
-  useUIState,
-} from '@/hooks/queries';
-import { loggers } from '@/lib/logger';
-import * as taskData from '@/lib/taskData';
-import { DEFAULT_SORT_CONFIG, TASK_LIST_INDENT_SHIFT_SIZE } from '@/utils/constants';
-import { getMetaKeyLabel, getModifierJoiner } from '../utils/keyboard';
-import { type FlattenedTask, flattenTasks } from '../utils/tree';
-import { TaskItem } from './TaskItem';
+import { TaskItem } from '$components/TaskItem';
+import { useCreateTask, useFilteredTasks, useReorderTasks } from '$hooks/queries/useTasks';
+import { useSetSelectedTask, useUIState } from '$hooks/queries/useUIState';
+import { loggers } from '$lib/logger';
+import * as taskData from '$lib/taskData';
+import { DEFAULT_SORT_CONFIG, TASK_LIST_INDENT_SHIFT_SIZE } from '$utils/constants';
+import { getMetaKeyLabel, getModifierJoiner } from '$utils/keyboard';
+import { type FlattenedTask, flattenTasks } from '$utils/tree';
 
 const log = loggers.taskList;
 

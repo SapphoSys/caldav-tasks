@@ -1,28 +1,26 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import { useModalState } from '@/context/modalStateContext';
-import { useSettingsStore } from '@/context/settingsContext';
+import { useModalState } from '$context/modalStateContext';
+import { useSettingsStore } from '$context/settingsContext';
+import { useCreateTask, useFilteredTasks, useToggleTaskComplete } from '$hooks/queries/useTasks';
 import {
-  useCreateTask,
-  useFilteredTasks,
   useSetEditorOpen,
   useSetSearchQuery,
   useSetSelectedTask,
   useSetShowCompletedTasks,
-  useToggleTaskComplete,
   useUIState,
-} from '@/hooks/queries';
-import { useConfirmDialog } from '@/hooks/useConfirmDialog';
-import { useConfirmTaskDelete } from '@/hooks/useConfirmTaskDelete';
-import * as taskData from '@/lib/taskData';
-import type { KeyboardShortcut } from '@/types';
-import { DEFAULT_SORT_CONFIG } from '@/utils/constants';
-import { flattenTasks } from '@/utils/tree';
+} from '$hooks/queries/useUIState';
+import { useConfirmDialog } from '$hooks/useConfirmDialog';
+import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
+import * as taskData from '$lib/taskData';
+import type { KeyboardShortcut } from '$types/index';
+import { DEFAULT_SORT_CONFIG } from '$utils/constants';
 import {
   getAltKeyLabel,
   getMetaKeyLabel,
   getModifierJoiner,
   getShiftKeyLabel,
-} from '../utils/keyboard';
+} from '$utils/keyboard';
+import { flattenTasks } from '$utils/tree';
 
 interface UseKeyboardShortcutsOptions {
   onOpenSettings?: () => void;

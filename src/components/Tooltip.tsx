@@ -7,7 +7,7 @@ import {
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { useModalState } from '@/context/modalStateContext';
+import { useModalState } from '$context/modalStateContext';
 
 interface TooltipProps {
   content: ReactNode;

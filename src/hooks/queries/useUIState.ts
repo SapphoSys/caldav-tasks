@@ -4,9 +4,9 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import * as taskData from '@/lib/taskData';
-import type { SortConfig } from '@/types';
-import { DEFAULT_SORT_CONFIG } from '@/utils/constants';
+import * as taskData from '$lib/taskData';
+import type { SortConfig } from '$types/index';
+import { DEFAULT_SORT_CONFIG } from '$utils/constants';
 
 // ============================================================================
 // Query Hooks

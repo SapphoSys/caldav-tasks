@@ -4,7 +4,9 @@
  * Uses SQLite via Tauri SQL plugin with in-memory cache for synchronous access
  */
 
-import { settingsStore } from '@/context/settingsContext';
+import { settingsStore } from '$context/settingsContext';
+import * as db from '$lib/database';
+import { loggers } from '$lib/logger';
 import type {
   Account,
   Calendar,
@@ -14,12 +16,10 @@ import type {
   Subtask,
   Tag,
   Task,
-} from '@/types';
-import { DEFAULT_SORT_CONFIG, FALLBACK_ITEM_COLOR } from '@/utils/constants';
-import { toAppleEpoch } from '@/utils/ical';
-import { generateUUID } from '@/utils/misc';
-import * as db from './database';
-import { loggers } from './logger';
+} from '$types/index';
+import { DEFAULT_SORT_CONFIG, FALLBACK_ITEM_COLOR } from '$utils/constants';
+import { toAppleEpoch } from '$utils/ical';
+import { generateUUID } from '$utils/misc';
 
 const log = loggers.taskData;
 

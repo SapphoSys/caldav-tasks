@@ -1,4 +1,4 @@
-import type { KeyboardShortcut, SortDirection, SortMode } from '@/types';
+import type { KeyboardShortcut, SortDirection, SortMode } from '$types/index';
 
 // color presets for calendars, tags, etc
 export const COLOR_PRESETS = [

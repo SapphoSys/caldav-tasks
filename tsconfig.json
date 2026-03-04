@@ -18,7 +18,16 @@
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "~/*": ["./src/*"],
+      "$components/*": ["./src/components/*"],
+      "$context/*": ["./src/context/*"],
+      "$data/*": ["./src/data/*"],
+      "$hooks/*": ["./src/hooks/*"],
+      "$lib/*": ["./src/lib/*"],
+      "$providers/*": ["./src/providers/*"],
+      "$styles/*": ["./src/styles/*"],
+      "$types/*": ["./src/types/*"],
+      "$utils/*": ["./src/utils/*"]
     }
   },
   "include": ["src"],

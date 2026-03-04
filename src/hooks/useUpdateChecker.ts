@@ -1,8 +1,8 @@
 import { isTauri } from '@tauri-apps/api/core';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { useCallback, useEffect, useState } from 'react';
-import { settingsStore } from '@/context/settingsContext';
-import { loggers } from '@/lib/logger';
+import { settingsStore } from '$context/settingsContext';
+import { loggers } from '$lib/logger';
 
 const log = loggers.updater;
 

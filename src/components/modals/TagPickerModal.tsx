@@ -1,9 +1,9 @@
 import Search from 'lucide-react/icons/search';
 import X from 'lucide-react/icons/x';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
-import type { Tag } from '@/types';
-import { getIconByName } from '../../data/icons';
+import { getIconByName } from '$data/icons';
+import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
+import type { Tag } from '$types/index';
 
 interface TagPickerModalProps {
   isOpen: boolean;

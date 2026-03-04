@@ -1,4 +1,4 @@
-import { getAppInfo } from '@/utils/version';
+import { getAppInfo } from '$utils/version';
 
 export function AboutSettings() {
   const { version, name, description, author } = getAppInfo();

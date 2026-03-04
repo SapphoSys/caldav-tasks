@@ -4,9 +4,9 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { queryKeys } from '@/lib/queryClient';
-import * as taskData from '@/lib/taskData';
-import type { Account, Calendar } from '@/types';
+import { queryKeys } from '$lib/queryClient';
+import * as taskData from '$lib/taskData';
+import type { Account, Calendar } from '$types/index';
 
 // ============================================================================
 // Query Hooks

@@ -1,5 +1,5 @@
-import { useSettingsStore } from '@/context/settingsContext';
-import { isMacPlatform } from '@/utils/platform';
+import { useSettingsStore } from '$context/settingsContext';
+import { isMacPlatform } from '$utils/platform';
 
 export function NotificationSettings() {
   const { notifications, setNotifications } = useSettingsStore();

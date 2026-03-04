@@ -1,14 +1,14 @@
 import Loader2 from 'lucide-react/icons/loader-2';
 import X from 'lucide-react/icons/x';
 import { useState } from 'react';
-import { ComposedInput } from '@/components/ComposedInput';
-import { useAccounts, useUpdateAccount } from '@/hooks/queries';
-import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
-import { caldavService } from '@/lib/caldav';
-import type { Calendar } from '@/types';
-import { COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '@/utils/constants';
-import { getIconByName } from '../../data/icons';
-import { IconEmojiPicker } from '../IconEmojiPicker';
+import { ComposedInput } from '$components/ComposedInput';
+import { IconEmojiPicker } from '$components/IconEmojiPicker';
+import { getIconByName } from '$data/icons';
+import { useAccounts, useUpdateAccount } from '$hooks/queries/useAccounts';
+import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
+import { caldavService } from '$lib/caldav';
+import type { Calendar } from '$types/index';
+import { COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '$utils/constants';
 
 interface CalendarModalProps {
   calendar: Calendar;

@@ -2,8 +2,8 @@ import ChevronDown from 'lucide-react/icons/chevron-down';
 import Download from 'lucide-react/icons/download';
 import Upload from 'lucide-react/icons/upload';
 import { useState } from 'react';
-import { useSettingsStore } from '@/context/settingsContext';
-import { exportSettingsToFile, importSettingsFromFile } from '@/utils/settings';
+import { useSettingsStore } from '$context/settingsContext';
+import { exportSettingsToFile, importSettingsFromFile } from '$utils/settings';
 
 export function DataSettings() {
   const { exportSettings, importSettings } = useSettingsStore();

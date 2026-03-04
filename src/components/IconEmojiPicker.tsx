@@ -1,8 +1,8 @@
 import { EmojiPicker } from 'frimousse';
 import Search from 'lucide-react/icons/search';
 import { useEffect, useRef, useState } from 'react';
-import { CALENDAR_ICONS, getIconByName } from '@/data/icons';
-import { FALLBACK_ITEM_COLOR } from '@/utils/constants';
+import { CALENDAR_ICONS, getIconByName } from '$data/icons';
+import { FALLBACK_ITEM_COLOR } from '$utils/constants';
 
 interface IconEmojiPickerProps {
   iconValue: string;

@@ -17,8 +17,8 @@ import Sun from 'lucide-react/icons/sun';
 import Trash2 from 'lucide-react/icons/trash-2';
 import X from 'lucide-react/icons/x';
 import { useEffect, useState } from 'react';
-import { settingsStore } from '@/context/settingsContext';
-import { useModalEscapeKey } from '@/hooks/useModalEscapeKey';
+import { settingsStore } from '$context/settingsContext';
+import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import {
   createAllDayDate,
   createPaddedDaysArray,
@@ -27,7 +27,7 @@ import {
   getWeekStartValue,
   setDateTime,
   updateTimeComponent,
-} from '@/utils/calendar';
+} from '$utils/calendar';
 
 interface DatePickerModalProps {
   isOpen: boolean;
