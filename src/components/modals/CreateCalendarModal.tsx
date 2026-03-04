@@ -14,7 +14,7 @@ interface CreateCalendarModalProps {
   onClose: () => void;
 }
 
-export function CreateCalendarModal({ accountId, onClose }: CreateCalendarModalProps) {
+export const CreateCalendarModal = ({ accountId, onClose }: CreateCalendarModalProps) => {
   const addCalendarMutation = useAddCalendar();
   const { accentColor } = useSettingsStore();
 
@@ -171,4 +171,4 @@ export function CreateCalendarModal({ accountId, onClose }: CreateCalendarModalP
       </div>
     </div>
   );
-}
+};

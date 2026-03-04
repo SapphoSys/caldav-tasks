@@ -8,21 +8,21 @@ import { hasOpenModalElements } from '$utils/misc';
 // global registry of context menu close handlers
 const closeHandlers = new Set<() => void>();
 
-export function registerContextMenuClose(handler: () => void): () => void {
+export const registerContextMenuClose = (handler: () => void): (() => void) => {
   closeHandlers.add(handler);
   return () => closeHandlers.delete(handler);
-}
+};
 
-export function closeAllContextMenus(): void {
+export const closeAllContextMenus = () => {
   closeHandlers.forEach((handler) => {
     handler();
   });
-}
+};
 
 // custom event for closing context menus
 const CLOSE_CONTEXT_MENUS_EVENT = 'closeAllContextMenus';
 
-export function useGlobalContextMenuClose(onClose: () => void, isOpen: boolean): void {
+export const useGlobalContextMenuClose = (onClose: () => void, isOpen: boolean): void => {
   useEffect(() => {
     if (!isOpen) return;
 
@@ -67,12 +67,12 @@ export function useGlobalContextMenuClose(onClose: () => void, isOpen: boolean):
       document.removeEventListener(CLOSE_CONTEXT_MENUS_EVENT, handleCustomEvent);
     };
   }, [isOpen, onClose]);
-}
+};
 
 /**
  * Hook for managing a context menu state with global dismissal
  */
-export function useContextMenu() {
+export const useContextMenu = () => {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
 
   const handleOpen = useCallback((e: React.MouseEvent) => {
@@ -96,4 +96,4 @@ export function useContextMenu() {
     handleClose,
     isOpen: contextMenu !== null,
   };
-}
+};

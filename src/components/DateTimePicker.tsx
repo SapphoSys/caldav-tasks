@@ -36,14 +36,14 @@ interface DateTimePickerProps {
   onAllDayChange?: (allDay: boolean) => void; // callback for all-day toggle
 }
 
-export function DateTimePicker({
+export const DateTimePicker = ({
   value,
   onChange,
   placeholder = 'Select date...',
   showTime = true,
   allDay = false,
   onAllDayChange,
-}: DateTimePickerProps) {
+}: DateTimePickerProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(value ? new Date(value) : new Date());
   const [selectedTime, setSelectedTime] = useState(() => {
@@ -336,4 +336,4 @@ export function DateTimePicker({
       )}
     </div>
   );
-}
+};

@@ -6,7 +6,7 @@ import { clampToViewport } from '$utils/position';
  * Hook for managing context menu state and handlers
  * @returns Object with contextMenu state, handlers, and setter
  */
-export function useContextMenu() {
+export const useContextMenu = () => {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -24,4 +24,4 @@ export function useContextMenu() {
   useGlobalContextMenuClose(handleCloseContextMenu, contextMenu !== null);
 
   return { contextMenu, handleContextMenu, handleCloseContextMenu, setContextMenu };
-}
+};

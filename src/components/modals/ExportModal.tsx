@@ -25,14 +25,14 @@ interface ExportModalProps {
   onClose: () => void;
 }
 
-export function ExportModal({
+export const ExportModal = ({
   tasks,
   fileName = 'export',
   type = 'tasks',
   calendars = [],
   calendarName,
   onClose,
-}: ExportModalProps) {
+}: ExportModalProps) => {
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('ics');
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -215,4 +215,4 @@ export function ExportModal({
       </div>
     </div>
   );
-}
+};

@@ -17,13 +17,13 @@ export interface CalDAVCredentials {
   bearerToken?: string;
 }
 
-export async function tauriRequest(
+export const tauriRequest = async (
   url: string,
   method: string,
   credentials: CalDAVCredentials,
   body?: string,
   headers?: Record<string, string>,
-): Promise<HttpResponse> {
+): Promise<HttpResponse> => {
   log.debug(`${method} ${url}`);
 
   // use bearer token if provided, otherwise fall back to Basic auth
@@ -70,60 +70,60 @@ export async function tauriRequest(
     headers: headersObj,
     body: responseBody,
   };
-}
+};
 
 /**
  * PROPFIND request for CalDAV discovery and listing
  */
-export async function propfind(
+export const propfind = async (
   url: string,
   credentials: CalDAVCredentials,
   body: string,
   depth: '0' | '1' | 'infinity' = '1',
-): Promise<HttpResponse> {
+): Promise<HttpResponse> => {
   return tauriRequest(url, 'PROPFIND', credentials, body, {
     Depth: depth,
     'Content-Type': 'application/xml; charset=utf-8',
   });
-}
+};
 
 /**
  * REPORT request for CalDAV queries (fetching tasks with filters)
  */
-export async function report(
+export const report = async (
   url: string,
   credentials: CalDAVCredentials,
   body: string,
   depth: '0' | '1' = '1',
-): Promise<HttpResponse> {
+): Promise<HttpResponse> => {
   return tauriRequest(url, 'REPORT', credentials, body, {
     Depth: depth,
     'Content-Type': 'application/xml; charset=utf-8',
   });
-}
+};
 
 /**
  * PROPPATCH request for updating properties
  */
-export async function proppatch(
+export const proppatch = async (
   url: string,
   credentials: CalDAVCredentials,
   body: string,
-): Promise<HttpResponse> {
+): Promise<HttpResponse> => {
   return tauriRequest(url, 'PROPPATCH', credentials, body, {
     'Content-Type': 'application/xml; charset=utf-8',
   });
-}
+};
 
 /**
  * PUT request for creating/updating calendar objects
  */
-export async function put(
+export const put = async (
   url: string,
   credentials: CalDAVCredentials,
   body: string,
   etag?: string,
-): Promise<HttpResponse> {
+): Promise<HttpResponse> => {
   const headers: Record<string, string> = {
     'Content-Type': 'text/calendar; charset=utf-8',
   };
@@ -136,16 +136,16 @@ export async function put(
   }
 
   return tauriRequest(url, 'PUT', credentials, body, headers);
-}
+};
 
 /**
  * DELETE request for removing calendar objects
  */
-export async function del(
+export const del = async (
   url: string,
   credentials: CalDAVCredentials,
   etag?: string,
-): Promise<HttpResponse> {
+): Promise<HttpResponse> => {
   const headers: Record<string, string> = {};
 
   if (etag) {
@@ -154,23 +154,23 @@ export async function del(
   }
 
   return tauriRequest(url, 'DELETE', credentials, undefined, headers);
-}
+};
 
 /**
  * MKCALENDAR request for creating a new calendar collection
  */
-export async function mkcalendar(
+export const mkcalendar = async (
   url: string,
   credentials: CalDAVCredentials,
   body: string,
-): Promise<HttpResponse> {
+): Promise<HttpResponse> => {
   return tauriRequest(url, 'MKCALENDAR', credentials, body);
-}
+};
 
 /**
  * parse multistatus XML response
  */
-export function parseMultiStatus(xml: string): MultiStatusResponse[] {
+export const parseMultiStatus = (xml: string): MultiStatusResponse[] => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(xml, 'application/xml');
 
@@ -214,7 +214,7 @@ export function parseMultiStatus(xml: string): MultiStatusResponse[] {
   }
 
   return responses;
-}
+};
 
 export interface MultiStatusResponse {
   href: string;

@@ -18,13 +18,15 @@ export const DATE_FORMATS = {
   dayName: 'EEEE',
 } as const;
 
-export function formatDueDate(date: Date): {
+export const formatDueDate = (
+  date: Date,
+): {
   text: string;
   className: string;
   borderColor: string;
   bgColor: string;
   textColor: string;
-} {
+} => {
   const d = new Date(date);
   const now = new Date();
   const time = format(d, 'HH:mm');
@@ -109,4 +111,4 @@ export function formatDueDate(date: Date): {
       : 'text-surface-600 dark:text-surface-400 bg-surface-100 dark:bg-surface-700',
     ...colors,
   };
-}
+};

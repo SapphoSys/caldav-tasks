@@ -12,7 +12,7 @@ interface OnboardingModalProps {
   onAddAccount: () => void;
 }
 
-export function OnboardingModal({ onComplete, onAddAccount }: OnboardingModalProps) {
+export const OnboardingModal = ({ onComplete, onAddAccount }: OnboardingModalProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [initialAccountCount, setInitialAccountCount] = useState<number | null>(null);
   const { setOnboardingCompleted } = useSettingsStore();
@@ -169,4 +169,4 @@ export function OnboardingModal({ onComplete, onAddAccount }: OnboardingModalPro
       </div>
     </ModalWrapper>
   );
-}
+};

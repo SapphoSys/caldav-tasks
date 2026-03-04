@@ -12,12 +12,12 @@ export interface FlattenedTask extends Task {
  * flatten a tree of tasks into a single array suitable for dnd-kit SortableContext
  * each task gets an `ancestorIds` array to track its position in the hierarchy
  */
-export function flattenTasks(
+export const flattenTasks = (
   tasks: Task[],
   getChildTasks: (parentUid: string) => Task[],
   getSortedTasks: (tasks: Task[]) => Task[],
   ancestorIds: string[] = [],
-): FlattenedTask[] {
+): FlattenedTask[] => {
   const result: FlattenedTask[] = [];
 
   for (const task of tasks) {
@@ -47,17 +47,17 @@ export function flattenTasks(
   }
 
   return result;
-}
+};
 
 /**
  * generate new sort orders and parent assignments after a drag operation
  * returns a map of task IDs to their new { sortOrder, parentUid } values
  */
-export function calculateNewPositions(
+export const calculateNewPositions = (
   flattenedItems: FlattenedTask[],
   activeId: string,
   overId: string,
-): Map<string, { sortOrder: number; parentUid: string | undefined }> {
+): Map<string, { sortOrder: number; parentUid: string | undefined }> => {
   const updates = new Map<string, { sortOrder: number; parentUid: string | undefined }>();
 
   const activeIndex = flattenedItems.findIndex((t) => t.id === activeId);
@@ -152,4 +152,4 @@ export function calculateNewPositions(
   }
 
   return updates;
-}
+};

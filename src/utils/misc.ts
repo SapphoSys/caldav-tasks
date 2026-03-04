@@ -1,11 +1,11 @@
-export function generateUUID(): string {
+export const generateUUID = () => {
   return crypto.randomUUID();
-}
+};
 
 /**
  * Check if there are any open modal elements in the DOM
  */
-export function hasOpenModalElements(): boolean {
+export const hasOpenModalElements = () => {
   const fixedInsetElements = document.querySelectorAll('.fixed.inset-0');
   return Array.from(fixedInsetElements).some((el) => {
     const classList = el.classList;
@@ -13,4 +13,4 @@ export function hasOpenModalElements(): boolean {
       classList.contains('z-50') || classList.contains('z-[60]') || classList.contains('z-[70]')
     );
   });
-}
+};

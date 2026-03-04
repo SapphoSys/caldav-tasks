@@ -11,12 +11,12 @@ interface KeyboardShortcutModalProps {
   onSave: (id: string, updates: Partial<KeyboardShortcut>) => void;
 }
 
-export function KeyboardShortcutModal({
+export const KeyboardShortcutModal = ({
   isOpen,
   shortcut,
   onClose,
   onSave,
-}: KeyboardShortcutModalProps) {
+}: KeyboardShortcutModalProps) => {
   const [pendingShortcut, setPendingShortcut] = useState<Partial<KeyboardShortcut> | null>(null);
   const inputRef = useRef<HTMLDivElement>(null);
 
@@ -229,4 +229,4 @@ export function KeyboardShortcutModal({
       </div>
     </div>
   );
-}
+};

@@ -125,7 +125,7 @@ const defaultState: SettingsState = {
   checkForUpdatesAutomatically: true,
 };
 
-function loadFromStorage(): SettingsState {
+const loadFromStorage = (): SettingsState => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
@@ -138,15 +138,15 @@ function loadFromStorage(): SettingsState {
   }
 
   return defaultState;
-}
+};
 
-function saveToStorage(state: SettingsState) {
+const saveToStorage = (state: SettingsState) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, version: 0 }));
   } catch (e) {
     log.error('Failed to save settings to storage:', e);
   }
-}
+};
 
 // Singleton store for accessing state outside React
 let state: SettingsState = loadFromStorage();
@@ -157,26 +157,26 @@ applyAccentColor(state.accentColor);
 
 const listeners = new Set<() => void>();
 
-function emitChange() {
+const emitChange = () => {
   for (const listener of listeners) {
     listener();
   }
-}
+};
 
-function subscribe(listener: () => void) {
+const subscribe = (listener: () => void) => {
   listeners.add(listener);
   return () => listeners.delete(listener);
-}
+};
 
-function getSnapshot() {
+const getSnapshot = () => {
   return state;
-}
+};
 
-function setState(partial: Partial<SettingsState>) {
+const setState = (partial: Partial<SettingsState>) => {
   state = { ...state, ...partial };
   saveToStorage(state);
   emitChange();
-}
+};
 
 // Actions that can be called from anywhere
 export const settingsStore = {
@@ -301,7 +301,7 @@ export const settingsStore = {
 // Context for React components
 const SettingsContext = createContext<SettingsStore | null>(null);
 
-export function SettingsProvider({ children }: { children: ReactNode }) {
+export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const currentState = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
   const setTheme = useCallback((theme: Theme) => settingsStore.setTheme(theme), []);
@@ -461,12 +461,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   };
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
-}
+};
 
-export function useSettingsStore(): SettingsStore {
+export const useSettingsStore = (): SettingsStore => {
   const context = useContext(SettingsContext);
   if (!context) {
     throw new Error('useSettingsStore must be used within a SettingsProvider');
   }
   return context;
-}
+};

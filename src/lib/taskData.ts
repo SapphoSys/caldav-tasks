@@ -82,23 +82,23 @@ let initPromise: Promise<void> | null = null;
 type DataChangeListener = () => void;
 const listeners: Set<DataChangeListener> = new Set();
 
-export function subscribeToDataChanges(listener: DataChangeListener): () => void {
+export const subscribeToDataChanges = (listener: DataChangeListener): (() => void) => {
   listeners.add(listener);
   // Also subscribe to database changes
   db.subscribeToDataChanges(listener);
   return () => {
     listeners.delete(listener);
   };
-}
+};
 
-function notifyListeners(): void {
+const notifyListeners = () => {
   listeners.forEach((listener) => {
     listener();
   });
-}
+};
 
 // Initialize the database and load data into cache
-export async function initializeDataStore(): Promise<void> {
+export const initializeDataStore = async () => {
   if (isInitialized) return;
   if (initPromise) return initPromise;
 
@@ -110,83 +110,83 @@ export async function initializeDataStore(): Promise<void> {
   })();
 
   return initPromise;
-}
+};
 
 // Refresh cache from database
-async function refreshCache(): Promise<void> {
+const refreshCache = async () => {
   try {
     dataStoreCache = await db.getDataSnapshot();
   } catch (error) {
     log.error('Failed to refresh cache:', error);
   }
-}
+};
 
 // Load data from cache (must be initialized first)
-function loadDataStore(): DataStore {
+const loadDataStore = (): DataStore => {
   if (!dataStoreCache) {
     log.warn('Data store not initialized, returning defaults');
     return { ...defaultDataStore };
   }
   return dataStoreCache;
-}
+};
 
 // Save data to cache and notify listeners
 // Note: Individual operations must call db.* functions to persist to SQLite
-function saveDataStore(data: DataStore): void {
+const saveDataStore = (data: DataStore): void => {
   dataStoreCache = data;
   notifyListeners();
-}
+};
 
 // Get a snapshot of the current data
-export function getDataSnapshot(): DataStore {
+export const getDataSnapshot = (): DataStore => {
   return loadDataStore();
-}
+};
 
 // Task operations
-export function getAllTasks(): Task[] {
+export const getAllTasks = (): Task[] => {
   return loadDataStore().tasks;
-}
+};
 
-export function getTaskById(id: string): Task | undefined {
+export const getTaskById = (id: string): Task | undefined => {
   return loadDataStore().tasks.find((t) => t.id === id);
-}
+};
 
-export function getTaskByUid(uid: string): Task | undefined {
+export const getTaskByUid = (uid: string): Task | undefined => {
   return loadDataStore().tasks.find((t) => t.uid === uid);
-}
+};
 
-export function getTasksByCalendar(calendarId: string): Task[] {
+export const getTasksByCalendar = (calendarId: string): Task[] => {
   return loadDataStore().tasks.filter((t) => t.calendarId === calendarId);
-}
+};
 
 // Alias for getTasksByCalendar (for compatibility)
-export function getCalendarTasks(calendarId: string): Task[] {
+export const getCalendarTasks = (calendarId: string): Task[] => {
   return getTasksByCalendar(calendarId);
-}
+};
 
-export function getTasksByTag(tagId: string): Task[] {
+export const getTasksByTag = (tagId: string): Task[] => {
   return loadDataStore().tasks.filter((t) => (t.tags || []).includes(tagId));
-}
+};
 
-export function getChildTasks(parentUid: string): Task[] {
+export const getChildTasks = (parentUid: string): Task[] => {
   return loadDataStore().tasks.filter((t) => t.parentUid === parentUid);
-}
+};
 
-export function countChildren(parentUid: string): number {
+export const countChildren = (parentUid: string): number => {
   return loadDataStore().tasks.filter((t) => t.parentUid === parentUid).length;
-}
+};
 
-export function getAllDescendants(parentUid: string): Task[] {
+export const getAllDescendants = (parentUid: string): Task[] => {
   const tasks = loadDataStore().tasks;
   const getDescendants = (uid: string): Task[] => {
     const children = tasks.filter((t) => t.parentUid === uid);
     return [...children, ...children.flatMap((child) => getDescendants(child.uid))];
   };
   return getDescendants(parentUid);
-}
+};
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complexity is acceptable. it'd be hard to reduce this even further
-export function createTask(taskData: Partial<Task>): Task {
+export const createTask = (taskData: Partial<Task>): Task => {
   const data = loadDataStore();
   const now = new Date();
 
@@ -271,9 +271,9 @@ export function createTask(taskData: Partial<Task>): Task {
   }
 
   return task;
-}
+};
 
-export function updateTask(id: string, updates: Partial<Task>): Task | undefined {
+export const updateTask = (id: string, updates: Partial<Task>): Task | undefined => {
   const data = loadDataStore();
   let updatedTask: Task | undefined;
 
@@ -299,9 +299,9 @@ export function updateTask(id: string, updates: Partial<Task>): Task | undefined
 
   saveDataStore({ ...data, tasks });
   return updatedTask;
-}
+};
 
-export function deleteTask(id: string, deleteChildren: boolean = true): void {
+export const deleteTask = (id: string, deleteChildren: boolean = true): void => {
   const data = loadDataStore();
   const task = data.tasks.find((t) => t.id === id);
   if (!task) return;
@@ -354,9 +354,9 @@ export function deleteTask(id: string, deleteChildren: boolean = true): void {
         : data.ui.selectedTaskId,
     },
   });
-}
+};
 
-export function toggleTaskComplete(id: string): void {
+export const toggleTaskComplete = (id: string): void => {
   const data = loadDataStore();
   const task = data.tasks.find((t) => t.id === id);
   if (!task) return;
@@ -373,9 +373,9 @@ export function toggleTaskComplete(id: string): void {
 
   const tasks = data.tasks.map((t) => (t.id === id ? { ...t, ...updates } : t));
   saveDataStore({ ...data, tasks });
-}
+};
 
-export function toggleTaskCollapsed(id: string): void {
+export const toggleTaskCollapsed = (id: string): void => {
   const data = loadDataStore();
   const task = data.tasks.find((t) => t.id === id);
   if (!task) return;
@@ -391,9 +391,9 @@ export function toggleTaskCollapsed(id: string): void {
 
   const tasks = data.tasks.map((t) => (t.id === id ? { ...t, ...updates } : t));
   saveDataStore({ ...data, tasks });
-}
+};
 
-export function setTaskParent(taskId: string, parentUid: string | undefined): void {
+export const setTaskParent = (taskId: string, parentUid: string | undefined): void => {
   const data = loadDataStore();
   const task = data.tasks.find((t) => t.id === taskId);
   if (!task) return;
@@ -459,10 +459,10 @@ export function setTaskParent(taskId: string, parentUid: string | undefined): vo
   });
 
   saveDataStore({ ...data, tasks });
-}
+};
 
 // Subtask operations
-export function addSubtask(taskId: string, title: string): void {
+export const addSubtask = (taskId: string, title: string): void => {
   const data = loadDataStore();
   const subtask: Subtask = {
     id: generateUUID(),
@@ -481,9 +481,13 @@ export function addSubtask(taskId: string, title: string): void {
       : task,
   );
   saveDataStore({ ...data, tasks });
-}
+};
 
-export function updateSubtask(taskId: string, subtaskId: string, updates: Partial<Subtask>): void {
+export const updateSubtask = (
+  taskId: string,
+  subtaskId: string,
+  updates: Partial<Subtask>,
+): void => {
   const data = loadDataStore();
   const tasks = data.tasks.map((task) =>
     task.id === taskId
@@ -496,9 +500,9 @@ export function updateSubtask(taskId: string, subtaskId: string, updates: Partia
       : task,
   );
   saveDataStore({ ...data, tasks });
-}
+};
 
-export function deleteSubtask(taskId: string, subtaskId: string): void {
+export const deleteSubtask = (taskId: string, subtaskId: string): void => {
   const data = loadDataStore();
   const tasks = data.tasks.map((task) =>
     task.id === taskId
@@ -511,9 +515,9 @@ export function deleteSubtask(taskId: string, subtaskId: string): void {
       : task,
   );
   saveDataStore({ ...data, tasks });
-}
+};
 
-export function toggleSubtaskComplete(taskId: string, subtaskId: string): void {
+export const toggleSubtaskComplete = (taskId: string, subtaskId: string): void => {
   const data = loadDataStore();
   const tasks = data.tasks.map((task) =>
     task.id === taskId
@@ -528,10 +532,10 @@ export function toggleSubtaskComplete(taskId: string, subtaskId: string): void {
       : task,
   );
   saveDataStore({ ...data, tasks });
-}
+};
 
 // Tag operations on tasks
-export function addTagToTask(taskId: string, tagId: string): void {
+export const addTagToTask = (taskId: string, tagId: string): void => {
   const data = loadDataStore();
   const tasks = data.tasks.map((task) =>
     task.id === taskId
@@ -544,9 +548,9 @@ export function addTagToTask(taskId: string, tagId: string): void {
       : task,
   );
   saveDataStore({ ...data, tasks });
-}
+};
 
-export function removeTagFromTask(taskId: string, tagId: string): void {
+export const removeTagFromTask = (taskId: string, tagId: string): void => {
   const data = loadDataStore();
   const tasks = data.tasks.map((task) =>
     task.id === taskId
@@ -559,10 +563,10 @@ export function removeTagFromTask(taskId: string, tagId: string): void {
       : task,
   );
   saveDataStore({ ...data, tasks });
-}
+};
 
 // Reminder operations
-export function addReminder(taskId: string, trigger: Date): void {
+export const addReminder = (taskId: string, trigger: Date): void => {
   const data = loadDataStore();
   const reminder: Reminder = {
     id: generateUUID(),
@@ -579,9 +583,9 @@ export function addReminder(taskId: string, trigger: Date): void {
       : task,
   );
   saveDataStore({ ...data, tasks });
-}
+};
 
-export function removeReminder(taskId: string, reminderId: string): void {
+export const removeReminder = (taskId: string, reminderId: string): void => {
   const data = loadDataStore();
   const tasks = data.tasks.map((task) =>
     task.id === taskId
@@ -594,9 +598,9 @@ export function removeReminder(taskId: string, reminderId: string): void {
       : task,
   );
   saveDataStore({ ...data, tasks });
-}
+};
 
-export function updateReminder(taskId: string, reminderId: string, trigger: Date): void {
+export const updateReminder = (taskId: string, reminderId: string, trigger: Date): void => {
   const data = loadDataStore();
   const tasks = data.tasks.map((task) =>
     task.id === taskId
@@ -611,7 +615,7 @@ export function updateReminder(taskId: string, reminderId: string, trigger: Date
       : task,
   );
   saveDataStore({ ...data, tasks });
-}
+};
 
 // Task reordering
 interface FlattenedTask {
@@ -625,12 +629,12 @@ interface FlattenedTask {
 }
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: while this function is long, it does its job well
-export function reorderTasks(
+export const reorderTasks = (
   activeId: string,
   overId: string,
   flattenedItems: FlattenedTask[],
   targetIndent?: number,
-): void {
+): void => {
   const data = loadDataStore();
   const tasks = data.tasks;
   const activeTask = tasks.find((t) => t.id === activeId);
@@ -845,23 +849,23 @@ export function reorderTasks(
   });
 
   saveDataStore({ ...data, tasks: updatedTasks });
-}
+};
 
 // Tag operations
-export function getAllTags(): Tag[] {
+export const getAllTags = (): Tag[] => {
   return loadDataStore().tags;
-}
+};
 
 // Alias for getAllTags (for compatibility)
-export function getTags(): Tag[] {
+export const getTags = (): Tag[] => {
   return getAllTags();
-}
+};
 
-export function getTagById(id: string): Tag | undefined {
+export const getTagById = (id: string): Tag | undefined => {
   return loadDataStore().tags.find((t) => t.id === id);
-}
+};
 
-export function createTag(tagData: Partial<Tag>): Tag {
+export const createTag = (tagData: Partial<Tag>): Tag => {
   const data = loadDataStore();
   const tag: Tag = {
     id: generateUUID(),
@@ -876,9 +880,9 @@ export function createTag(tagData: Partial<Tag>): Tag {
 
   saveDataStore({ ...data, tags: [...data.tags, tag] });
   return tag;
-}
+};
 
-export function updateTag(id: string, updates: Partial<Tag>): Tag | undefined {
+export const updateTag = (id: string, updates: Partial<Tag>): Tag | undefined => {
   const data = loadDataStore();
   let updatedTag: Tag | undefined;
 
@@ -897,9 +901,9 @@ export function updateTag(id: string, updates: Partial<Tag>): Tag | undefined {
 
   saveDataStore({ ...data, tags });
   return updatedTag;
-}
+};
 
-export function deleteTag(id: string): void {
+export const deleteTag = (id: string): void => {
   const data = loadDataStore();
 
   // Persist to SQLite
@@ -917,18 +921,18 @@ export function deleteTag(id: string): void {
       activeTagId: data.ui.activeTagId === id ? null : data.ui.activeTagId,
     },
   });
-}
+};
 
 // Account operations
-export function getAllAccounts(): Account[] {
+export const getAllAccounts = (): Account[] => {
   return loadDataStore().accounts;
-}
+};
 
-export function getAccountById(id: string): Account | undefined {
+export const getAccountById = (id: string): Account | undefined => {
   return loadDataStore().accounts.find((a) => a.id === id);
-}
+};
 
-export function createAccount(accountData: Partial<Account>): Account {
+export const createAccount = (accountData: Partial<Account>): Account => {
   const data = loadDataStore();
   const account: Account = {
     id: accountData.id || generateUUID(),
@@ -950,9 +954,9 @@ export function createAccount(accountData: Partial<Account>): Account {
     ui: data.ui,
   });
   return account;
-}
+};
 
-export function updateAccount(id: string, updates: Partial<Account>): Account | undefined {
+export const updateAccount = (id: string, updates: Partial<Account>): Account | undefined => {
   const data = loadDataStore();
   let updatedAccount: Account | undefined;
 
@@ -971,9 +975,9 @@ export function updateAccount(id: string, updates: Partial<Account>): Account | 
 
   saveDataStore({ ...data, accounts });
   return updatedAccount;
-}
+};
 
-export function deleteAccount(id: string): void {
+export const deleteAccount = (id: string): void => {
   const data = loadDataStore();
   const newAccounts = data.accounts.filter((acc) => acc.id !== id);
   const deletedAccount = data.accounts.find((acc) => acc.id === id);
@@ -1002,9 +1006,9 @@ export function deleteAccount(id: string): void {
     },
     tasks: data.tasks.filter((task) => task.accountId !== id),
   });
-}
+};
 
-export function addCalendar(accountId: string, calendarData: Partial<Calendar>): void {
+export const addCalendar = (accountId: string, calendarData: Partial<Calendar>): void => {
   const data = loadDataStore();
   const calendar: Calendar = {
     ...calendarData,
@@ -1061,13 +1065,13 @@ export function addCalendar(accountId: string, calendarData: Partial<Calendar>):
     tasks: updatedTasks,
     ui: data.ui,
   });
-}
+};
 
-export function updateCalendar(
+export const updateCalendar = (
   accountId: string,
   calendarId: string,
   updates: Partial<Calendar>,
-): void {
+): void => {
   const data = loadDataStore();
 
   // Persist to SQLite
@@ -1089,9 +1093,9 @@ export function updateCalendar(
         : acc,
     ),
   });
-}
+};
 
-export function deleteCalendar(accountId: string, calendarId: string): void {
+export const deleteCalendar = (accountId: string, calendarId: string): void => {
   const data = loadDataStore();
 
   // Persist to SQLite
@@ -1135,14 +1139,14 @@ export function deleteCalendar(accountId: string, calendarId: string): void {
       isEditorOpen: false,
     },
   });
-}
+};
 
 // Pending deletion
-export function getPendingDeletions(): PendingDeletion[] {
+export const getPendingDeletions = (): PendingDeletion[] => {
   return loadDataStore().pendingDeletions;
-}
+};
 
-export function clearPendingDeletion(uid: string): void {
+export const clearPendingDeletion = (uid: string): void => {
   const data = loadDataStore();
 
   // Persist to SQLite
@@ -1154,14 +1158,14 @@ export function clearPendingDeletion(uid: string): void {
     ...data,
     pendingDeletions: data.pendingDeletions.filter((d) => d.uid !== uid),
   });
-}
+};
 
 // UI state operations
-export function getUIState(): UIState {
+export const getUIState = (): UIState => {
   return loadDataStore().ui;
-}
+};
 
-export function setActiveAccount(id: string | null): void {
+export const setActiveAccount = (id: string | null): void => {
   const data = loadDataStore();
 
   // Persist to SQLite
@@ -1171,9 +1175,9 @@ export function setActiveAccount(id: string | null): void {
     ...data,
     ui: { ...data.ui, activeAccountId: id, activeCalendarId: null },
   });
-}
+};
 
-export function setActiveCalendar(id: string | null): void {
+export const setActiveCalendar = (id: string | null): void => {
   const data = loadDataStore();
 
   // Persist to SQLite
@@ -1189,9 +1193,9 @@ export function setActiveCalendar(id: string | null): void {
       isEditorOpen: false,
     },
   });
-}
+};
 
-export function setActiveTag(id: string | null): void {
+export const setActiveTag = (id: string | null): void => {
   const data = loadDataStore();
 
   // Persist to SQLite
@@ -1207,9 +1211,9 @@ export function setActiveTag(id: string | null): void {
       isEditorOpen: false,
     },
   });
-}
+};
 
-export function setAllTasksView(): void {
+export const setAllTasksView = () => {
   const data = loadDataStore();
 
   // Persist to SQLite
@@ -1225,9 +1229,9 @@ export function setAllTasksView(): void {
       isEditorOpen: false,
     },
   });
-}
+};
 
-export function setSelectedTask(id: string | null): void {
+export const setSelectedTask = (id: string | null): void => {
   const data = loadDataStore();
 
   // Persist to SQLite
@@ -1241,9 +1245,9 @@ export function setSelectedTask(id: string | null): void {
       isEditorOpen: id !== null,
     },
   });
-}
+};
 
-export function setEditorOpen(open: boolean): void {
+export const setEditorOpen = (open: boolean): void => {
   const data = loadDataStore();
 
   // Persist to SQLite
@@ -1257,9 +1261,9 @@ export function setEditorOpen(open: boolean): void {
       selectedTaskId: open ? data.ui.selectedTaskId : null,
     },
   });
-}
+};
 
-export function setSearchQuery(query: string): void {
+export const setSearchQuery = (query: string): void => {
   const data = loadDataStore();
 
   // Persist to SQLite
@@ -1269,9 +1273,9 @@ export function setSearchQuery(query: string): void {
     ...data,
     ui: { ...data.ui, searchQuery: query },
   });
-}
+};
 
-export function setSortConfig(config: SortConfig): void {
+export const setSortConfig = (config: SortConfig): void => {
   const data = loadDataStore();
 
   // Persist to SQLite
@@ -1281,9 +1285,9 @@ export function setSortConfig(config: SortConfig): void {
     ...data,
     ui: { ...data.ui, sortConfig: config },
   });
-}
+};
 
-export function setShowCompletedTasks(show: boolean): void {
+export const setShowCompletedTasks = (show: boolean): void => {
   const data = loadDataStore();
 
   // Persist to SQLite
@@ -1293,7 +1297,7 @@ export function setShowCompletedTasks(show: boolean): void {
     ...data,
     ui: { ...data.ui, showCompletedTasks: show },
   });
-}
+};
 
 // Filtering and sorting helpers
 const priorityOrder: Record<Priority, number> = {
@@ -1303,7 +1307,7 @@ const priorityOrder: Record<Priority, number> = {
   none: 3,
 };
 
-export function getFilteredTasks(): Task[] {
+export const getFilteredTasks = (): Task[] => {
   const data = loadDataStore();
   const { searchQuery, showCompletedTasks, activeCalendarId, activeTagId } = data.ui;
 
@@ -1337,9 +1341,9 @@ export function getFilteredTasks(): Task[] {
 
     return true;
   });
-}
+};
 
-export function getSortedTasks(tasks: Task[], sortConfig?: SortConfig): Task[] {
+export const getSortedTasks = (tasks: Task[], sortConfig?: SortConfig): Task[] => {
   const config = sortConfig || loadDataStore().ui.sortConfig;
   const { mode, direction } = config;
   const multiplier = direction === 'asc' ? 1 : -1;
@@ -1378,13 +1382,15 @@ export function getSortedTasks(tasks: Task[], sortConfig?: SortConfig): Task[] {
         return 0;
     }
   });
-}
+};
 
 // Export helpers
-export function exportTaskAndChildren(taskId: string): { task: Task; descendants: Task[] } | null {
+export const exportTaskAndChildren = (
+  taskId: string,
+): { task: Task; descendants: Task[] } | null => {
   const data = loadDataStore();
   const task = data.tasks.find((t) => t.id === taskId);
   if (!task) return null;
 
   return { task, descendants: getAllDescendants(task.uid) };
-}
+};

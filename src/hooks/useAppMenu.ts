@@ -12,7 +12,7 @@ const log = loggers.app;
 /**
  * hook to manage macOS app menu state synchronization
  */
-export function useAppMenu(isSyncing?: boolean) {
+export const useAppMenu = (isSyncing?: boolean) => {
   const { data: accounts = [] } = useAccounts();
   const { data: tasks = [] } = useTasks();
   const { data: uiState } = useUIState();
@@ -67,4 +67,4 @@ export function useAppMenu(isSyncing?: boolean) {
     isSyncing,
     skipMenu,
   ]);
-}
+};

@@ -18,7 +18,7 @@ const log = loggers.deleteHandlers;
 /**
  * Hook providing handlers for deleting accounts, calendars, and tags
  */
-export function useDeleteHandlers() {
+export const useDeleteHandlers = () => {
   const queryClient = useQueryClient();
   const { confirm, setLoading, close } = useConfirmDialog();
   const { confirmBeforeDeleteAccount, confirmBeforeDeleteCalendar, confirmBeforeDeleteTag } =
@@ -124,4 +124,4 @@ export function useDeleteHandlers() {
     handleDeleteTag,
     handleDeleteCalendar,
   };
-}
+};

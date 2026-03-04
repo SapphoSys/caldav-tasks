@@ -19,7 +19,7 @@ const CONNECTIVITY_ENDPOINTS = [
 const CHECK_INTERVAL = 5000;
 const REQUEST_TIMEOUT = 3000;
 
-export function useOffline(options: UseOfflineOptions = {}) {
+export const useOffline = (options: UseOfflineOptions = {}) => {
   const [isOffline, setIsOffline] = useState(false);
   const isOfflineRef = useRef(false); // Synchronous ref for immediate reads
   const checkIntervalRef = useRef<number | null>(null);
@@ -114,4 +114,4 @@ export function useOffline(options: UseOfflineOptions = {}) {
   }, [checkConnectivity]);
 
   return { isOffline, isOfflineRef };
-}
+};

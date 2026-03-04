@@ -43,7 +43,7 @@ interface TaskItemProps {
   isOverlay?: boolean;
 }
 
-export function TaskItem({ task, depth, ancestorIds, isDragEnabled, isOverlay }: TaskItemProps) {
+export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }: TaskItemProps) => {
   const { data: uiState } = useUIState();
   const { data: accounts = [] } = useAccounts();
   const toggleTaskCompleteMutation = useToggleTaskComplete();
@@ -455,4 +455,4 @@ export function TaskItem({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
       )}
     </>
   );
-}
+};

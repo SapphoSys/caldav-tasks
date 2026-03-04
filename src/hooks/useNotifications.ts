@@ -13,7 +13,7 @@ interface NotificationOptions {
   icon?: string;
 }
 
-async function showNotification(options: NotificationOptions): Promise<void> {
+const showNotification = async (options: NotificationOptions): Promise<void> => {
   if (isTauri()) {
     try {
       // dynamic import for Tauri notification plugin
@@ -55,12 +55,12 @@ async function showNotification(options: NotificationOptions): Promise<void> {
       }
     }
   }
-}
+};
 
 /**
  * hook that monitors tasks and shows notifications for due tasks and reminders
  */
-export function useNotifications() {
+export const useNotifications = () => {
   const { data: tasks = [] } = useTasks();
   const { notifications } = useSettingsStore();
   const notifiedTasksRef = useRef<Set<string>>(new Set());
@@ -149,4 +149,4 @@ export function useNotifications() {
       }
     };
   }, [tasks, notifications]);
-}
+};

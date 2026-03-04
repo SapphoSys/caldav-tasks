@@ -16,7 +16,7 @@ import '$styles/index.css';
 
 const log = loggers.main;
 
-function renderApp() {
+const renderApp = () => {
   ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
@@ -34,13 +34,13 @@ function renderApp() {
       </QueryClientProvider>
     </React.StrictMode>,
   );
-}
+};
 
-async function bootstrap(): Promise<void> {
+const bootstrap = async () => {
   await initializeApp();
   renderApp();
   await showWindow();
-}
+};
 
 await bootstrap().catch((error) => {
   log.error('Failed to initialize app:', error);

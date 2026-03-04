@@ -60,7 +60,7 @@ export const normalizeHexColor = (color: string | undefined | null): string | un
 /**
  * apply the theme to the document
  */
-export function applyTheme(theme: Theme): void {
+export const applyTheme = (theme: Theme): void => {
   const root = document.documentElement;
 
   if (theme === 'system') {
@@ -69,10 +69,10 @@ export function applyTheme(theme: Theme): void {
   } else {
     root.classList.toggle('dark', theme === 'dark');
   }
-}
+};
 
 // Helper function to convert RGB to HSL
-function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
+const rgbToHsl = (r: number, g: number, b: number): [number, number, number] => {
   r /= 255;
   g /= 255;
   b /= 255;
@@ -99,10 +99,10 @@ function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
   }
 
   return [h * 360, s * 100, l * 100];
-}
+};
 
 // Helper function to convert HSL to RGB
-function hslToRgb(h: number, s: number, l: number): [number, number, number] {
+const hslToRgb = (h: number, s: number, l: number): [number, number, number] => {
   h /= 360;
   s /= 100;
   l /= 100;
@@ -129,13 +129,13 @@ function hslToRgb(h: number, s: number, l: number): [number, number, number] {
   }
 
   return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-}
+};
 
 /**
  * apply accent color as CSS custom properties
  * generates a palette of shades from the base accent color
  */
-export function applyAccentColor(color: string): void {
+export const applyAccentColor = (color: string): void => {
   const root = document.documentElement;
 
   // parse hex color to RGB
@@ -166,4 +166,4 @@ export function applyAccentColor(color: string): void {
     const [sr, sg, sb] = hslToRgb(h, s, l);
     root.style.setProperty(`--color-primary-${shade}`, `${sr} ${sg} ${sb}`);
   }
-}
+};

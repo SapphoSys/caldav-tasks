@@ -9,7 +9,7 @@ import {
 import { useMenuEvents } from '$hooks/useMenuEvents';
 import type { SettingsCategory, SettingsSubtab, SortDirection, SortMode } from '$types/index';
 
-export function useMenuHandlers() {
+export const useMenuHandlers = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [settingsInitialTab, setSettingsInitialTab] = useState<{
     category?: SettingsCategory;
@@ -172,4 +172,4 @@ export function useMenuHandlers() {
     // Handlers
     handleOpenSettings,
   };
-}
+};

@@ -33,20 +33,20 @@ type ConnectionStore = ConnectionState & ConnectionActions;
 let state: ConnectionState = { connections: {} };
 const listeners = new Set<() => void>();
 
-function emitChange() {
+const emitChange = () => {
   for (const listener of listeners) {
     listener();
   }
-}
+};
 
-function subscribe(listener: () => void) {
+const subscribe = (listener: () => void) => {
   listeners.add(listener);
   return () => listeners.delete(listener);
-}
+};
 
-function getSnapshot() {
+const getSnapshot = () => {
   return state;
-}
+};
 
 // Actions that can be called from anywhere
 export const connectionStore = {
@@ -77,7 +77,7 @@ export const connectionStore = {
 // Context for React components
 const ConnectionContext = createContext<ConnectionStore | null>(null);
 
-export function ConnectionProvider({ children }: { children: ReactNode }) {
+export const ConnectionProvider = ({ children }: { children: ReactNode }) => {
   const currentState = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
   const setConnection = useCallback((accountId: string, connection: AccountConnection) => {
@@ -105,12 +105,12 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
   };
 
   return <ConnectionContext.Provider value={value}>{children}</ConnectionContext.Provider>;
-}
+};
 
-export function useConnectionStore(): ConnectionStore {
+export const useConnectionStore = (): ConnectionStore => {
   const context = useContext(ConnectionContext);
   if (!context) {
     throw new Error('useConnectionStore must be used within a ConnectionProvider');
   }
   return context;
-}
+};

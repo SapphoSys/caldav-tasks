@@ -9,10 +9,10 @@ import { downloadFile } from '$utils/file';
 /**
  * Export settings to a file
  */
-export async function exportSettingsToFile(
+export const exportSettingsToFile = async (
   settingsJson: string,
   fileName = 'caldav-settings.json',
-) {
+) => {
   try {
     const path = await save({
       defaultPath: fileName,
@@ -26,14 +26,14 @@ export async function exportSettingsToFile(
     // Fallback to browser download
     downloadFile(settingsJson, fileName, 'application/json');
   }
-}
+};
 
 /**
  * Import settings from a file
  */
-export async function importSettingsFromFile(
+export const importSettingsFromFile = async (
   onImport: (content: string) => boolean,
-): Promise<void> {
+): Promise<void> => {
   try {
     const path = await open({
       filters: [{ name: 'JSON', extensions: ['json'] }],
@@ -66,4 +66,4 @@ export async function importSettingsFromFile(
 
     input.click();
   }
-}
+};

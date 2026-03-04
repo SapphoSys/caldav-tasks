@@ -39,7 +39,7 @@ interface DatePickerModalProps {
   onAllDayChange?: (allDay: boolean) => void;
 }
 
-export function DatePickerModal({
+export const DatePickerModal = ({
   isOpen,
   onClose,
   value,
@@ -47,7 +47,7 @@ export function DatePickerModal({
   title,
   allDay = false,
   onAllDayChange,
-}: DatePickerModalProps) {
+}: DatePickerModalProps) => {
   const [currentMonth, setCurrentMonth] = useState(value ? new Date(value) : new Date());
   const [localValue, setLocalValue] = useState<Date | undefined>(value);
   const [initialValue, setInitialValue] = useState<Date | undefined>(value);
@@ -348,4 +348,4 @@ export function DatePickerModal({
       </div>
     </div>
   );
-}
+};

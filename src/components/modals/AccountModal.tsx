@@ -24,7 +24,7 @@ interface AccountModalProps {
   preloadedConfig?: CalDAVConfig;
 }
 
-export function AccountModal({ account, onClose, preloadedConfig }: AccountModalProps) {
+export const AccountModal = ({ account, onClose, preloadedConfig }: AccountModalProps) => {
   const queryClient = useQueryClient();
   const { confirm } = useConfirmDialog();
   const createAccountMutation = useCreateAccount();
@@ -401,4 +401,4 @@ export function AccountModal({ account, onClose, preloadedConfig }: AccountModal
       </div>
     </div>
   );
-}
+};

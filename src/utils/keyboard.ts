@@ -1,23 +1,23 @@
 import type { KeyboardShortcut } from '$types/index';
 import { isMacPlatform } from '$utils/platform';
 
-export function getMetaKeyLabel(): string {
+export const getMetaKeyLabel = () => {
   return isMacPlatform() ? '⌘' : 'Ctrl';
-}
+};
 
-export function getAltKeyLabel(): string {
+export const getAltKeyLabel = () => {
   return isMacPlatform() ? '⌥' : 'Alt';
-}
+};
 
-export function getShiftKeyLabel(): string {
+export const getShiftKeyLabel = () => {
   return 'Shift';
-}
+};
 
-export function getModifierJoiner(): string {
+export const getModifierJoiner = () => {
   return isMacPlatform() ? '' : '+';
-}
+};
 
-export function formatShortcut(shortcut: KeyboardShortcut | Partial<KeyboardShortcut>): string {
+export const formatShortcut = (shortcut: KeyboardShortcut | Partial<KeyboardShortcut>) => {
   const parts: string[] = [];
   if (shortcut.meta) parts.push(getMetaKeyLabel());
   if (shortcut.ctrl && !shortcut.meta) parts.push('Ctrl');
@@ -33,4 +33,4 @@ export function formatShortcut(shortcut: KeyboardShortcut | Partial<KeyboardShor
     parts.push(keyDisplay);
   }
   return parts.join(' + ') || 'Press keys...';
-}
+};

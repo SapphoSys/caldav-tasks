@@ -1,7 +1,7 @@
 import { useSettingsStore } from '$context/settingsContext';
 import { SYNC_INTERVAL_OPTIONS } from '$data/settings';
 
-export function SyncSettings() {
+export const SyncSettings = () => {
   const {
     autoSync,
     setAutoSync,
@@ -87,4 +87,4 @@ export function SyncSettings() {
       </div>
     </div>
   );
-}
+};

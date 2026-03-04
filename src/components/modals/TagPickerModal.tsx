@@ -14,14 +14,14 @@ interface TagPickerModalProps {
   noTagsExist: boolean;
 }
 
-export function TagPickerModal({
+export const TagPickerModal = ({
   isOpen,
   onClose,
   availableTags,
   onSelectTag,
   allTagsAssigned,
   noTagsExist,
-}: TagPickerModalProps) {
+}: TagPickerModalProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -138,4 +138,4 @@ export function TagPickerModal({
       </div>
     </div>
   );
-}
+};

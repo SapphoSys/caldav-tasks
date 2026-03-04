@@ -61,7 +61,7 @@ const forwardToTauri = (level: LogLevel, category: string, message: string): voi
 
 // Attach console to receive logs from Rust side (for Webview target)
 let consoleAttached = false;
-export async function initLogger(): Promise<void> {
+export const initLogger = async () => {
   if (consoleAttached) return;
   try {
     await attachConsole();
@@ -69,7 +69,7 @@ export async function initLogger(): Promise<void> {
   } catch (e) {
     console.warn('Failed to attach console to Tauri logger:', e);
   }
-}
+};
 
 class Logger {
   private category: string;
@@ -226,9 +226,9 @@ class Logger {
  * log.info('Task created:', task.id);
  * log.error('Failed to save task:', error);
  */
-export function createLogger(category: string, color?: string, options?: LoggerOptions): Logger {
+export const createLogger = (category: string, color?: string, options?: LoggerOptions): Logger => {
   return new Logger(category, color, options);
-}
+};
 
 // Pre-configured loggers for common modules
 export const loggers = {
@@ -257,21 +257,21 @@ export const loggers = {
 } as const;
 
 // Enable debug mode helper
-export function enableDebugMode(): void {
+export const enableDebugMode = () => {
   localStorage.setItem('caldav-tasks-debug', 'true');
   console.log(
     '%c[Logger] Debug mode enabled. Reload to see all debug logs.',
     'color: #10b981; font-weight: bold;',
   );
-}
+};
 
-export function disableDebugMode(): void {
+export const disableDebugMode = () => {
   localStorage.removeItem('caldav-tasks-debug');
   console.log(
     '%c[Logger] Debug mode disabled. Reload to hide debug logs.',
     'color: #f59e0b; font-weight: bold;',
   );
-}
+};
 
 // Expose to window for debugging
 if (typeof window !== 'undefined') {

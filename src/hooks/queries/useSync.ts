@@ -20,7 +20,7 @@ import { MENU_EVENTS } from '$utils/menu';
 
 const log = loggers.sync;
 
-export function useSyncQuery() {
+export const useSyncQuery = () => {
   const queryClient = useQueryClient();
   const { autoSync, syncInterval } = useSettingsStore();
   const { syncingCalendarId, setSyncingCalendarId } = useSyncStore();
@@ -651,4 +651,4 @@ export function useSyncQuery() {
     pushTask,
     removeTaskFromServer,
   };
-}
+};

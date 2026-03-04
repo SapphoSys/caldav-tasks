@@ -25,35 +25,35 @@ const DEFAULT_CALDAV_DESCRIPTIONS = [
  * @param description the description to check
  * @returns true if the description should be filtered out
  */
-export function isDefaultCalDavDescription(description: string | undefined | null): boolean {
+export const isDefaultCalDavDescription = (description: string | undefined | null): boolean => {
   if (!description) return false;
   return DEFAULT_CALDAV_DESCRIPTIONS.includes(description.trim());
-}
+};
 
 /**
  * filter out default CalDAV descriptions, returning empty string if it's a default
  * @param description the description to filter
  * @returns the description if not a default, empty string otherwise
  */
-export function filterCalDavDescription(description: string | undefined | null): string {
+export const filterCalDavDescription = (description: string | undefined | null): string => {
   if (!description) return '';
   if (isDefaultCalDavDescription(description)) return '';
   return description;
-}
+};
 
 // Apple epoch: January 1, 2001 00:00:00 GMT in milliseconds since Unix epoch
 // Used for X-APPLE-SORT-ORDER which stores seconds since Apple epoch
 export const APPLE_EPOCH = 978307200000;
 
 // Convert Unix timestamp (milliseconds) to Apple epoch (seconds)
-export function toAppleEpoch(timestamp: number): number {
+export const toAppleEpoch = (timestamp: number): number => {
   return Math.floor((timestamp - APPLE_EPOCH) / 1000);
-}
+};
 
 // Convert Apple epoch (seconds) to Unix timestamp (milliseconds)
-export function fromAppleEpoch(appleSeconds: number): number {
+export const fromAppleEpoch = (appleSeconds: number): number => {
   return appleSeconds * 1000 + APPLE_EPOCH;
-}
+};
 
 // Priority mapping: iCalendar uses 1-9 (1 = highest, 9 = lowest)
 // We map: high = 1, medium = 5, low = 9, none = 0
@@ -75,7 +75,7 @@ const icalToPriority = (priority: number): Priority => {
  * Format a Date as iCalendar datetime (UTC)
  * Format: YYYYMMDDTHHMMSSZ
  */
-function formatICalDate(date: Date): string {
+const formatICalDate = (date: Date): string => {
   const pad = (n: number) => n.toString().padStart(2, '0');
   return (
     date.getUTCFullYear().toString() +
@@ -87,23 +87,23 @@ function formatICalDate(date: Date): string {
     pad(date.getUTCSeconds()) +
     'Z'
   );
-}
+};
 
 /**
  * Format a Date as iCalendar date (no time component)
  * Format: YYYYMMDD (VALUE=DATE)
  */
-function formatICalDateOnly(date: Date): string {
+const formatICalDateOnly = (date: Date): string => {
   const pad = (n: number) => n.toString().padStart(2, '0');
   // Use local date parts for all-day dates
   return date.getFullYear().toString() + pad(date.getMonth() + 1) + pad(date.getDate());
-}
+};
 
 /**
  * Parse an iCalendar datetime string to Date
  * Supports: YYYYMMDDTHHMMSSZ, YYYYMMDDTHHMMSS, YYYYMMDD
  */
-function parseICalDate(value: string): Date | undefined {
+const parseICalDate = (value: string): Date | undefined => {
   if (!value) return undefined;
 
   // Remove any parameters before the value (e.g., TZID=...)
@@ -149,35 +149,35 @@ function parseICalDate(value: string): Date | undefined {
   }
 
   return undefined;
-}
+};
 
 /**
  * Escape text for iCalendar format
  * Escapes: backslash, semicolon, comma, newline
  */
-function escapeICalText(text: string): string {
+const escapeICalText = (text: string): string => {
   return text
     .replace(/\\/g, '\\\\')
     .replace(/;/g, '\\;')
     .replace(/,/g, '\\,')
     .replace(/\n/g, '\\n');
-}
+};
 
 /**
  * Unescape iCalendar text
  */
-function unescapeICalText(text: string): string {
+const unescapeICalText = (text: string): string => {
   return text
     .replace(/\\n/g, '\n')
     .replace(/\\,/g, ',')
     .replace(/\\;/g, ';')
     .replace(/\\\\/g, '\\');
-}
+};
 
 /**
  * Fold long lines according to RFC 5545 (max 75 octets per line)
  */
-function foldLine(line: string): string {
+const foldLine = (line: string): string => {
   const maxLength = 75;
   if (line.length <= maxLength) return line;
 
@@ -195,18 +195,18 @@ function foldLine(line: string): string {
   }
 
   return lines.join('\r\n');
-}
+};
 
 /**
  * Unfold iCalendar content lines (join lines that start with space/tab)
  */
-function unfoldLines(content: string): string {
+const unfoldLines = (content: string): string => {
   // Normalize line endings
   return content
     .replace(/\r\n/g, '\n')
     .replace(/\r/g, '\n')
     .replace(/\n[ \t]/g, '');
-}
+};
 
 interface ICalProperty {
   name: string;
@@ -218,7 +218,7 @@ interface ICalProperty {
  * Parse a single iCalendar property line
  * Format: NAME;PARAM=value:VALUE or NAME:VALUE
  */
-function parseProperty(line: string): ICalProperty | null {
+const parseProperty = (line: string): ICalProperty | null => {
   const colonIndex = line.indexOf(':');
   if (colonIndex === -1) return null;
 
@@ -245,7 +245,7 @@ function parseProperty(line: string): ICalProperty | null {
   }
 
   return { name, params, value };
-}
+};
 
 interface ParsedVAlarm {
   action?: string;
@@ -278,7 +278,7 @@ interface ParsedVTodo {
 /**
  * Parse VALARM content into structured data
  */
-function parseVAlarm(valarmContent: string): ParsedVAlarm {
+const parseVAlarm = (valarmContent: string): ParsedVAlarm => {
   const result: ParsedVAlarm = {};
   const lines = unfoldLines(valarmContent).split('\n');
 
@@ -313,12 +313,12 @@ function parseVAlarm(valarmContent: string): ParsedVAlarm {
   }
 
   return result;
-}
+};
 
 /**
  * Extract VALARM blocks from VTODO content
  */
-function extractVAlarms(vtodoContent: string): string[] {
+const extractVAlarms = (vtodoContent: string): string[] => {
   const alarms: string[] = [];
   const content = unfoldLines(vtodoContent);
   const lines = content.split('\n');
@@ -344,12 +344,12 @@ function extractVAlarms(vtodoContent: string): string[] {
   }
 
   return alarms;
-}
+};
 
 /**
  * Parse VTODO content into structured data
  */
-function parseVTodo(vtodoContent: string): ParsedVTodo {
+const parseVTodo = (vtodoContent: string): ParsedVTodo => {
   const result: ParsedVTodo = {};
   const lines = unfoldLines(vtodoContent).split('\n');
 
@@ -430,12 +430,12 @@ function parseVTodo(vtodoContent: string): ParsedVTodo {
   }
 
   return result;
-}
+};
 
 /**
  * Extract VTODO blocks from iCalendar content
  */
-function extractVTodos(icalContent: string): string[] {
+const extractVTodos = (icalContent: string): string[] => {
   const vtodos: string[] = [];
   const content = unfoldLines(icalContent);
   const lines = content.split('\n');
@@ -461,12 +461,12 @@ function extractVTodos(icalContent: string): string[] {
   }
 
   return vtodos;
-}
+};
 
 /**
  * Generate a VALARM component as string
  */
-function generateVAlarm(reminder: Reminder): string {
+const generateVAlarm = (reminder: Reminder): string => {
   const lines: string[] = [];
 
   lines.push('BEGIN:VALARM');
@@ -475,12 +475,12 @@ function generateVAlarm(reminder: Reminder): string {
   lines.push('END:VALARM');
 
   return lines.join('\r\n');
-}
+};
 
 /**
  * Generate a VTODO component as string
  */
-function generateVTodo(task: Task): string {
+const generateVTodo = (task: Task): string => {
   const lines: string[] = [];
 
   lines.push('BEGIN:VTODO');
@@ -565,12 +565,12 @@ function generateVTodo(task: Task): string {
 
   // Fold long lines
   return lines.map(foldLine).join('\r\n');
-}
+};
 
 /**
  * Generate a complete VCALENDAR with VTODOs
  */
-function generateVCalendar(vtodos: string[]): string {
+const generateVCalendar = (vtodos: string[]): string => {
   const lines: string[] = [];
   lines.push('BEGIN:VCALENDAR');
   lines.push('VERSION:2.0');
@@ -583,30 +583,26 @@ function generateVCalendar(vtodos: string[]): string {
   lines.push('END:VCALENDAR');
 
   return lines.join('\r\n');
-}
-
-// ============================================================================
-// Public API - Drop-in replacements for ical.js functions
-// ============================================================================
+};
 
 /**
  * Convert a Task to iCalendar VTODO format
  */
-export function taskToVTodo(task: Task): string {
+export const taskToVTodo = (task: Task): string => {
   const vtodo = generateVTodo(task);
   return generateVCalendar([vtodo]);
-}
+};
 
 /**
  * Parse iCalendar string and convert to Task
  */
-export function vtodoToTask(
+export const vtodoToTask = (
   icalString: string,
   accountId: string,
   calendarId: string,
   href?: string,
   etag?: string,
-): Task | null {
+): Task | null => {
   try {
     const vtodos = extractVTodos(icalString);
     if (vtodos.length === 0) return null;
@@ -676,19 +672,19 @@ export function vtodoToTask(
     log.error('Error parsing VTODO:', error);
     return null;
   }
-}
+};
 
 /**
  * Generate a unique iCalendar UID
  */
-export function generateICalUid(): string {
+export const generateICalUid = () => {
   return `${generateUUID()}@caldav-tasks`;
-}
+};
 
 /**
  * Export a single task as iCalendar format with all its child tasks
  */
-export function exportTaskAsIcs(task: Task, childTasks: Task[] = []): string {
+export const exportTaskAsIcs = (task: Task, childTasks: Task[] = []): string => {
   const vtodos: string[] = [];
   vtodos.push(generateVTodo(task));
 
@@ -697,27 +693,27 @@ export function exportTaskAsIcs(task: Task, childTasks: Task[] = []): string {
   }
 
   return generateVCalendar(vtodos);
-}
+};
 
 /**
  * Export multiple tasks as iCalendar format
  */
-export function exportTasksAsIcs(tasks: Task[]): string {
+export const exportTasksAsIcs = (tasks: Task[]): string => {
   const vtodos = tasks.map((task) => generateVTodo(task));
   return generateVCalendar(vtodos);
-}
+};
 
 /**
  * Export tasks as JSON for backup/export
  */
-export function exportTasksAsJson(tasks: Task[]): string {
+export const exportTasksAsJson = (tasks: Task[]): string => {
   return JSON.stringify(tasks, null, 2);
-}
+};
 
 /**
  * Export tasks as Markdown checklist format
  */
-export function exportTasksAsMarkdown(tasks: Task[], level: number = 0): string {
+export const exportTasksAsMarkdown = (tasks: Task[], level: number = 0): string => {
   let markdown = '';
 
   for (const task of tasks) {
@@ -749,12 +745,12 @@ export function exportTasksAsMarkdown(tasks: Task[], level: number = 0): string 
   }
 
   return markdown;
-}
+};
 
 /**
  * Export tasks as CSV format
  */
-export function exportTasksAsCsv(tasks: Task[]): string {
+export const exportTasksAsCsv = (tasks: Task[]): string => {
   const headers = [
     'Title',
     'Description',
@@ -779,13 +775,13 @@ export function exportTasksAsCsv(tasks: Task[]): string {
   ]);
 
   return [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
-}
+};
 
 /**
  * Parse an ICS file and extract all tasks (VTODOs)
  * Returns parsed tasks without accountId/calendarId - caller must assign them
  */
-export function parseIcsFile(icsContent: string): Partial<Task>[] {
+export const parseIcsFile = (icsContent: string): Partial<Task>[] => {
   try {
     const vtodos = extractVTodos(icsContent);
     const tasks: Partial<Task>[] = [];
@@ -853,12 +849,12 @@ export function parseIcsFile(icsContent: string): Partial<Task>[] {
     log.error('Error parsing ICS file:', error);
     return [];
   }
-}
+};
 
 /**
  * Parse a JSON file containing tasks (exported from this app)
  */
-export function parseJsonTasksFile(jsonContent: string): Partial<Task>[] {
+export const parseJsonTasksFile = (jsonContent: string): Partial<Task>[] => {
   try {
     const data = JSON.parse(jsonContent);
 
@@ -876,4 +872,4 @@ export function parseJsonTasksFile(jsonContent: string): Partial<Task>[] {
     log.error('Error parsing JSON tasks file:', error);
     return [];
   }
-}
+};

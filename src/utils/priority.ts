@@ -78,27 +78,27 @@ export const PRIORITY_DOTS: Record<Priority, string> = {
 /**
  * Get priority configuration by priority value
  */
-export function getPriorityConfig(priority: Priority) {
+export const getPriorityConfig = (priority: Priority) => {
   return PRIORITY_CONFIG[priority];
-}
+};
 
 /**
  * Get priority color classes for task items
  */
-export function getPriorityColor(priority: Priority): string {
+export const getPriorityColor = (priority: Priority): string => {
   return PRIORITY_COLORS[priority];
-}
+};
 
 /**
  * Get ring color classes for selected task items based on priority
  */
-export function getPriorityRingColor(priority: Priority): string {
+export const getPriorityRingColor = (priority: Priority): string => {
   return RING_COLORS[priority];
-}
+};
 
 /**
  * Get priority dot color class for subtasks
  */
-export function getPriorityDot(priority: Priority): string {
+export const getPriorityDot = (priority: Priority): string => {
   return PRIORITY_DOTS[priority];
-}
+};

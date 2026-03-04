@@ -29,7 +29,7 @@ import { useUpdateChecker } from '$hooks/useUpdateChecker';
 import type { CalDAVConfig } from '$utils/mobileconfig';
 import { initWebKitDragFix } from '$utils/webkit';
 
-function App() {
+const App = () => {
   // Initialize WebKit drag-and-drop fix for Safari/Tauri
   useEffect(() => {
     initWebKitDragFix();
@@ -297,6 +297,6 @@ function App() {
       </div>
     </>
   );
-}
+};
 
 export default App;

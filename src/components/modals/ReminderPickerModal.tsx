@@ -36,14 +36,14 @@ interface ReminderPickerModalProps {
   title?: string;
 }
 
-export function ReminderPickerModal({
+export const ReminderPickerModal = ({
   isOpen,
   onClose,
   value,
   onSave,
   onClear,
   title = 'Add Reminder',
-}: ReminderPickerModalProps) {
+}: ReminderPickerModalProps) => {
   const [currentMonth, setCurrentMonth] = useState(value ? new Date(value) : new Date());
   const [localValue, setLocalValue] = useState<Date | undefined>(value);
   const [initialValue, setInitialValue] = useState<Date | undefined>(value);
@@ -307,4 +307,4 @@ export function ReminderPickerModal({
       </div>
     </div>
   );
-}
+};

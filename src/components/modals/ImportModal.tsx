@@ -24,7 +24,7 @@ interface ImportModalProps {
   onFileDrop?: () => void;
 }
 
-export function ImportModal({ isOpen, onClose, preloadedFile, onFileDrop }: ImportModalProps) {
+export const ImportModal = ({ isOpen, onClose, preloadedFile, onFileDrop }: ImportModalProps) => {
   const { data: accounts = [] } = useAccounts();
   const createTaskMutation = useCreateTask();
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
@@ -428,4 +428,4 @@ export function ImportModal({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
       </div>
     </div>
   );
-}
+};

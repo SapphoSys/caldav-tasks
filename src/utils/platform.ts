@@ -12,7 +12,7 @@ const log = loggers.platform;
  * Detect if running under CEF (Chromium Embedded Framework) runtime
  * CEF has IPC limitations that require some features to be disabled
  */
-export function isCEF(): boolean {
+export const isCEF = () => {
   if (isCefRuntime !== null) {
     return isCefRuntime;
   }
@@ -34,14 +34,14 @@ export function isCEF(): boolean {
   });
 
   return isCefRuntime;
-}
+};
 
 /**
  * Detect if running on macOS platform
  */
-export function isMacPlatform(): boolean {
+export const isMacPlatform = () => {
   if (typeof navigator === 'undefined') {
     return false;
   }
   return /Mac/.test(navigator.userAgent);
-}
+};

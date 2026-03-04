@@ -9,16 +9,16 @@
 
 let initialized = false;
 
-export function isPureWebKit(): boolean {
+export const isPureWebKit = () => {
   return (
     'webkitURL' in window &&
     CSS.supports('-webkit-appearance', 'none') &&
     !('chrome' in window) && // exclude chrome
     !/Edge|Edg\//.test(navigator.userAgent) // exclude edge because for some reason it returns 'true' to some webkit checks
   );
-}
+};
 
-export function initWebKitDragFix(): void {
+export const initWebKitDragFix = () => {
   if (initialized) return;
   if (!isPureWebKit()) return;
 
@@ -40,4 +40,4 @@ export function initWebKitDragFix(): void {
     },
     { capture: true },
   );
-}
+};

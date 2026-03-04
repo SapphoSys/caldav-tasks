@@ -81,19 +81,19 @@ const defaultUIState: UIState = {
 type DataChangeListener = () => void;
 const listeners: Set<DataChangeListener> = new Set();
 
-export function subscribeToDataChanges(listener: DataChangeListener): () => void {
+export const subscribeToDataChanges = (listener: DataChangeListener): (() => void) => {
   listeners.add(listener);
   return () => listeners.delete(listener);
-}
+};
 
-function notifyListeners(): void {
+const notifyListeners = () => {
   listeners.forEach((listener) => {
     listener();
   });
-}
+};
 
 // Initialize database connection
-export async function initDatabase(): Promise<Database> {
+export const initDatabase = async (): Promise<Database> => {
   if (db) return db;
 
   try {
@@ -105,18 +105,18 @@ export async function initDatabase(): Promise<Database> {
     log.error('Failed to connect:', error);
     throw error;
   }
-}
+};
 
 // Get database instance (ensures initialization)
-async function getDb(): Promise<Database> {
+const getDb = async (): Promise<Database> => {
   if (!db) {
     await initDatabase();
   }
   return db!;
-}
+};
 
 // Helper to convert database row to Task
-function rowToTask(row: TaskRow): Task {
+const rowToTask = (row: TaskRow): Task => {
   return {
     id: row.id,
     uid: row.uid,
@@ -151,10 +151,10 @@ function rowToTask(row: TaskRow): Task {
     synced: row.synced === 1,
     localOnly: row.local_only === null ? undefined : row.local_only === 1,
   };
-}
+};
 
 // Helper to convert database row to Account (with calendars)
-function rowToAccount(row: AccountRow, calendars: Calendar[]): Account {
+const rowToAccount = (row: AccountRow, calendars: Calendar[]): Account => {
   return {
     id: row.id,
     name: row.name,
@@ -166,10 +166,10 @@ function rowToAccount(row: AccountRow, calendars: Calendar[]): Account {
     lastSync: row.last_sync ? new Date(row.last_sync) : undefined,
     isActive: row.is_active === 1,
   };
-}
+};
 
 // Helper to convert database row to Calendar
-function rowToCalendar(row: CalendarRow): Calendar {
+const rowToCalendar = (row: CalendarRow): Calendar => {
   return {
     id: row.id,
     displayName: row.display_name,
@@ -184,10 +184,10 @@ function rowToCalendar(row: CalendarRow): Calendar {
       ? JSON.parse(row.supported_components)
       : undefined,
   };
-}
+};
 
 // Helper to convert database row to Tag
-function rowToTag(row: TagRow): Tag {
+const rowToTag = (row: TagRow): Tag => {
   return {
     id: row.id,
     name: row.name,
@@ -195,62 +195,62 @@ function rowToTag(row: TagRow): Tag {
     icon: row.icon || undefined,
     emoji: row.emoji || undefined,
   };
-}
+};
 
 // task operations
 
-export async function getAllTasks(): Promise<Task[]> {
+export const getAllTasks = async (): Promise<Task[]> => {
   const database = await getDb();
   const rows = await database.select<TaskRow[]>('SELECT * FROM tasks');
   return rows.map(rowToTask);
-}
+};
 
-export async function getTaskById(id: string): Promise<Task | undefined> {
+export const getTaskById = async (id: string): Promise<Task | undefined> => {
   const database = await getDb();
   const rows = await database.select<TaskRow[]>('SELECT * FROM tasks WHERE id = $1', [id]);
   return rows.length > 0 ? rowToTask(rows[0]) : undefined;
-}
+};
 
-export async function getTaskByUid(uid: string): Promise<Task | undefined> {
+export const getTaskByUid = async (uid: string): Promise<Task | undefined> => {
   const database = await getDb();
   const rows = await database.select<TaskRow[]>('SELECT * FROM tasks WHERE uid = $1', [uid]);
   return rows.length > 0 ? rowToTask(rows[0]) : undefined;
-}
+};
 
-export async function getTasksByCalendar(calendarId: string): Promise<Task[]> {
+export const getTasksByCalendar = async (calendarId: string): Promise<Task[]> => {
   const database = await getDb();
   const rows = await database.select<TaskRow[]>('SELECT * FROM tasks WHERE calendar_id = $1', [
     calendarId,
   ]);
   return rows.map(rowToTask);
-}
+};
 
-export async function getTasksByTag(tagId: string): Promise<Task[]> {
+export const getTasksByTag = async (tagId: string): Promise<Task[]> => {
   const database = await getDb();
   const rows = await database.select<TaskRow[]>('SELECT * FROM tasks WHERE tags LIKE $1', [
     `%"${tagId}"%`,
   ]);
   return rows.map(rowToTask);
-}
+};
 
-export async function getChildTasks(parentUid: string): Promise<Task[]> {
+export const getChildTasks = async (parentUid: string): Promise<Task[]> => {
   const database = await getDb();
   const rows = await database.select<TaskRow[]>('SELECT * FROM tasks WHERE parent_uid = $1', [
     parentUid,
   ]);
   return rows.map(rowToTask);
-}
+};
 
-export async function countChildren(parentUid: string): Promise<number> {
+export const countChildren = async (parentUid: string): Promise<number> => {
   const database = await getDb();
   const rows = await database.select<Array<{ count: number }>>(
     'SELECT COUNT(*) as count FROM tasks WHERE parent_uid = $1',
     [parentUid],
   );
   return rows[0]?.count || 0;
-}
+};
 
-export async function createTask(taskData: Partial<Task>): Promise<Task> {
+export const createTask = async (taskData: Partial<Task>): Promise<Task> => {
   const database = await getDb();
 
   const now = new Date();
@@ -364,9 +364,9 @@ export async function createTask(taskData: Partial<Task>): Promise<Task> {
 
   notifyListeners();
   return task;
-}
+};
 
-export async function updateTask(id: string, updates: Partial<Task>): Promise<Task | undefined> {
+export const updateTask = async (id: string, updates: Partial<Task>): Promise<Task | undefined> => {
   const database = await getDb();
   const existing = await getTaskById(id);
   if (!existing) return undefined;
@@ -422,9 +422,9 @@ export async function updateTask(id: string, updates: Partial<Task>): Promise<Ta
 
   notifyListeners();
   return updatedTask;
-}
+};
 
-export async function deleteTask(id: string, deleteChildren: boolean = true): Promise<void> {
+export const deleteTask = async (id: string, deleteChildren: boolean = true) => {
   const database = await getDb();
   const task = await getTaskById(id);
   if (!task) return;
@@ -472,9 +472,9 @@ export async function deleteTask(id: string, deleteChildren: boolean = true): Pr
   }
 
   notifyListeners();
-}
+};
 
-export async function toggleTaskComplete(id: string): Promise<void> {
+export const toggleTaskComplete = async (id: string) => {
   const task = await getTaskById(id);
   if (!task) return;
 
@@ -482,23 +482,23 @@ export async function toggleTaskComplete(id: string): Promise<void> {
     completed: !task.completed,
     completedAt: !task.completed ? new Date() : undefined,
   });
-}
+};
 
 // tag operations
 
-export async function getAllTags(): Promise<Tag[]> {
+export const getAllTags = async (): Promise<Tag[]> => {
   const database = await getDb();
   const rows = await database.select<TagRow[]>('SELECT * FROM tags');
   return rows.map(rowToTag);
-}
+};
 
-export async function getTagById(id: string): Promise<Tag | undefined> {
+export const getTagById = async (id: string): Promise<Tag | undefined> => {
   const database = await getDb();
   const rows = await database.select<TagRow[]>('SELECT * FROM tags WHERE id = $1', [id]);
   return rows.length > 0 ? rowToTag(rows[0]) : undefined;
-}
+};
 
-export async function createTag(tagData: Partial<Tag>): Promise<Tag> {
+export const createTag = async (tagData: Partial<Tag>): Promise<Tag> => {
   const database = await getDb();
 
   const tag: Tag = {
@@ -516,9 +516,9 @@ export async function createTag(tagData: Partial<Tag>): Promise<Tag> {
 
   notifyListeners();
   return tag;
-}
+};
 
-export async function updateTag(id: string, updates: Partial<Tag>): Promise<Tag | undefined> {
+export const updateTag = async (id: string, updates: Partial<Tag>): Promise<Tag | undefined> => {
   const database = await getDb();
   const existing = await getTagById(id);
   if (!existing) return undefined;
@@ -532,9 +532,9 @@ export async function updateTag(id: string, updates: Partial<Tag>): Promise<Tag 
 
   notifyListeners();
   return updatedTag;
-}
+};
 
-export async function deleteTag(id: string): Promise<void> {
+export const deleteTag = async (id: string) => {
   const database = await getDb();
 
   // Remove tag from all tasks
@@ -553,11 +553,11 @@ export async function deleteTag(id: string): Promise<void> {
   }
 
   notifyListeners();
-}
+};
 
 // account operations
 
-export async function getAllAccounts(): Promise<Account[]> {
+export const getAllAccounts = async (): Promise<Account[]> => {
   const database = await getDb();
 
   const accountRows = await database.select<AccountRow[]>('SELECT * FROM accounts');
@@ -565,14 +565,14 @@ export async function getAllAccounts(): Promise<Account[]> {
   const calendars = calendarRows.map(rowToCalendar);
 
   return accountRows.map((row) => rowToAccount(row, calendars));
-}
+};
 
-export async function getAccountById(id: string): Promise<Account | undefined> {
+export const getAccountById = async (id: string): Promise<Account | undefined> => {
   const accounts = await getAllAccounts();
   return accounts.find((a) => a.id === id);
-}
+};
 
-export async function createAccount(accountData: Partial<Account>): Promise<Account> {
+export const createAccount = async (accountData: Partial<Account>): Promise<Account> => {
   const database = await getDb();
 
   const account: Account = {
@@ -609,12 +609,12 @@ export async function createAccount(accountData: Partial<Account>): Promise<Acco
 
   notifyListeners();
   return account;
-}
+};
 
-export async function updateAccount(
+export const updateAccount = async (
   id: string,
   updates: Partial<Account>,
-): Promise<Account | undefined> {
+): Promise<Account | undefined> => {
   const database = await getDb();
   const existing = await getAccountById(id);
   if (!existing) return undefined;
@@ -638,9 +638,9 @@ export async function updateAccount(
 
   notifyListeners();
   return updatedAccount;
-}
+};
 
-export async function deleteAccount(id: string): Promise<void> {
+export const deleteAccount = async (id: string) => {
   const database = await getDb();
 
   // Delete cascades to calendars and tasks via foreign keys
@@ -656,12 +656,9 @@ export async function deleteAccount(id: string): Promise<void> {
   }
 
   notifyListeners();
-}
+};
 
-export async function addCalendar(
-  accountId: string,
-  calendarData: Partial<Calendar>,
-): Promise<void> {
+export const addCalendar = async (accountId: string, calendarData: Partial<Calendar>) => {
   const database = await getDb();
 
   const calendar: Calendar = {
@@ -700,12 +697,9 @@ export async function addCalendar(
   }
 
   notifyListeners();
-}
+};
 
-export async function updateCalendar(
-  calendarId: string,
-  updates: Partial<Calendar>,
-): Promise<void> {
+export const updateCalendar = async (calendarId: string, updates: Partial<Calendar>) => {
   const database = await getDb();
 
   const rows = await database.select<CalendarRow[]>('SELECT * FROM calendars WHERE id = $1', [
@@ -745,9 +739,9 @@ export async function updateCalendar(
   );
 
   notifyListeners();
-}
+};
 
-export async function deleteCalendar(_accountId: string, calendarId: string): Promise<void> {
+export const deleteCalendar = async (_accountId: string, calendarId: string) => {
   const database = await getDb();
 
   // Get tasks to track for server deletion
@@ -776,11 +770,11 @@ export async function deleteCalendar(_accountId: string, calendarId: string): Pr
   }
 
   notifyListeners();
-}
+};
 
 // pending deletions operations
 
-export async function getPendingDeletions(): Promise<PendingDeletion[]> {
+export const getPendingDeletions = async (): Promise<PendingDeletion[]> => {
   const database = await getDb();
   const rows = await database.select<PendingDeletionRow[]>('SELECT * FROM pending_deletions');
   return rows.map((row) => ({
@@ -789,17 +783,17 @@ export async function getPendingDeletions(): Promise<PendingDeletion[]> {
     accountId: row.account_id,
     calendarId: row.calendar_id,
   }));
-}
+};
 
-export async function clearPendingDeletion(uid: string): Promise<void> {
+export const clearPendingDeletion = async (uid: string) => {
   const database = await getDb();
   await database.execute('DELETE FROM pending_deletions WHERE uid = $1', [uid]);
   notifyListeners();
-}
+};
 
 // ui state operations
 
-export async function getUIState(): Promise<UIState> {
+export const getUIState = async (): Promise<UIState> => {
   const database = await getDb();
   const rows = await database.select<UIStateRow[]>('SELECT * FROM ui_state WHERE id = 1');
 
@@ -821,54 +815,54 @@ export async function getUIState(): Promise<UIState> {
     showCompletedTasks: row.show_completed_tasks === 1,
     isEditorOpen: row.is_editor_open === 1,
   };
-}
+};
 
-export async function setActiveAccount(id: string | null): Promise<void> {
+export const setActiveAccount = async (id: string | null) => {
   const database = await getDb();
   await database.execute(
     `UPDATE ui_state SET active_account_id = $1, active_calendar_id = NULL WHERE id = 1`,
     [id],
   );
   notifyListeners();
-}
+};
 
-export async function setActiveCalendar(id: string | null): Promise<void> {
+export const setActiveCalendar = async (id: string | null) => {
   const database = await getDb();
   await database.execute(
     `UPDATE ui_state SET active_calendar_id = $1, active_tag_id = NULL, selected_task_id = NULL, is_editor_open = 0 WHERE id = 1`,
     [id],
   );
   notifyListeners();
-}
+};
 
-export async function setActiveTag(id: string | null): Promise<void> {
+export const setActiveTag = async (id: string | null) => {
   const database = await getDb();
   await database.execute(
     `UPDATE ui_state SET active_tag_id = $1, active_calendar_id = NULL, selected_task_id = NULL, is_editor_open = 0 WHERE id = 1`,
     [id],
   );
   notifyListeners();
-}
+};
 
-export async function setAllTasksView(): Promise<void> {
+export const setAllTasksView = async () => {
   const database = await getDb();
   await database.execute(
     `UPDATE ui_state SET active_calendar_id = NULL, active_tag_id = NULL, selected_task_id = NULL, is_editor_open = 0 WHERE id = 1`,
     [],
   );
   notifyListeners();
-}
+};
 
-export async function setSelectedTask(id: string | null): Promise<void> {
+export const setSelectedTask = async (id: string | null) => {
   const database = await getDb();
   await database.execute(
     `UPDATE ui_state SET selected_task_id = $1, is_editor_open = $2 WHERE id = 1`,
     [id, id !== null ? 1 : 0],
   );
   notifyListeners();
-}
+};
 
-export async function setEditorOpen(open: boolean): Promise<void> {
+export const setEditorOpen = async (open: boolean) => {
   const database = await getDb();
   const uiState = await getUIState();
   await database.execute(
@@ -876,34 +870,34 @@ export async function setEditorOpen(open: boolean): Promise<void> {
     [open ? 1 : 0, open ? uiState.selectedTaskId : null],
   );
   notifyListeners();
-}
+};
 
-export async function setSearchQuery(query: string): Promise<void> {
+export const setSearchQuery = async (query: string) => {
   const database = await getDb();
   await database.execute(`UPDATE ui_state SET search_query = $1 WHERE id = 1`, [query]);
   notifyListeners();
-}
+};
 
-export async function setSortConfig(config: SortConfig): Promise<void> {
+export const setSortConfig = async (config: SortConfig) => {
   const database = await getDb();
   await database.execute(`UPDATE ui_state SET sort_mode = $1, sort_direction = $2 WHERE id = 1`, [
     config.mode,
     config.direction,
   ]);
   notifyListeners();
-}
+};
 
-export async function setShowCompletedTasks(show: boolean): Promise<void> {
+export const setShowCompletedTasks = async (show: boolean) => {
   const database = await getDb();
   await database.execute(`UPDATE ui_state SET show_completed_tasks = $1 WHERE id = 1`, [
     show ? 1 : 0,
   ]);
   notifyListeners();
-}
+};
 
 // snapshot
 
-export async function getDataSnapshot(): Promise<DataStore> {
+export const getDataSnapshot = async (): Promise<DataStore> => {
   const [tasks, tags, accounts, pendingDeletions, ui] = await Promise.all([
     getAllTasks(),
     getAllTags(),
@@ -913,4 +907,4 @@ export async function getDataSnapshot(): Promise<DataStore> {
   ]);
 
   return { tasks, tags, accounts, pendingDeletions, ui };
-}
+};

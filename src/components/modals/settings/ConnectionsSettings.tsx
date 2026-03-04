@@ -10,7 +10,7 @@ interface ConnectionsSettingsProps {
   accounts: Account[];
 }
 
-export function ConnectionsSettings({ accounts }: ConnectionsSettingsProps) {
+export const ConnectionsSettings = ({ accounts }: ConnectionsSettingsProps) => {
   const deleteAccountMutation = useDeleteAccount();
   const { confirm } = useConfirmDialog();
   const { confirmBeforeDeleteAccount } = useSettingsStore();
@@ -135,4 +135,4 @@ export function ConnectionsSettings({ accounts }: ConnectionsSettingsProps) {
       </div>
     </div>
   );
-}
+};

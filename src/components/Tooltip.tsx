@@ -17,13 +17,13 @@ interface TooltipProps {
   className?: string;
 }
 
-export function Tooltip({
+export const Tooltip = ({
   content,
   children,
   delay = 0,
   position = 'top',
   className = '',
-}: TooltipProps) {
+}: TooltipProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [coords, setCoords] = useState({ x: 0, y: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -220,4 +220,4 @@ export function Tooltip({
         )}
     </>
   );
-}
+};

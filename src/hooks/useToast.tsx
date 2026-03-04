@@ -88,7 +88,7 @@ export const toastManager = new ToastManager();
 /**
  * Hook for showing toast notifications
  */
-export function useToast() {
+export const useToast = () => {
   return {
     showToast: (
       title: string,
@@ -105,4 +105,4 @@ export function useToast() {
     success: (title: string, message: string, groupKey?: string) =>
       toastManager.success(title, message, groupKey),
   };
-}
+};

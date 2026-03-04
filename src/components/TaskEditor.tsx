@@ -52,7 +52,7 @@ interface TaskEditorProps {
   task: Task;
 }
 
-export function TaskEditor({ task }: TaskEditorProps) {
+export const TaskEditor = ({ task }: TaskEditorProps) => {
   const updateTaskMutation = useUpdateTask();
   const setEditorOpenMutation = useSetEditorOpen();
   const createTaskMutation = useCreateTask();
@@ -814,4 +814,4 @@ export function TaskEditor({ task }: TaskEditorProps) {
       )}
     </div>
   );
-}
+};

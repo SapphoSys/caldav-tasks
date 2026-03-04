@@ -63,6 +63,6 @@ export const SERVER_TYPE_OPTIONS: ServerTypeOption[] = [
 /**
  * Get description for a server type
  */
-export function getServerTypeDescription(type: ServerType): string {
+export const getServerTypeDescription = (type: ServerType): string => {
   return SERVER_TYPE_OPTIONS.find((opt) => opt.value === type)?.description || '';
-}
+};

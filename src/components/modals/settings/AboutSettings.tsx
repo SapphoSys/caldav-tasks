@@ -1,6 +1,6 @@
 import { getAppInfo } from '$utils/version';
 
-export function AboutSettings() {
+export const AboutSettings = () => {
   const { version, name, description, author } = getAppInfo();
 
   return (
@@ -25,4 +25,4 @@ export function AboutSettings() {
       </div>
     </div>
   );
-}
+};

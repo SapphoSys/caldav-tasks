@@ -61,7 +61,7 @@ export const CALENDAR_ICONS: { name: string; icon: LucideIcon }[] = [
  * @param name - Icon name
  * @returns Icon component
  */
-export function getIconByName(name: string): LucideIcon {
+export const getIconByName = (name: string): LucideIcon => {
   const found = CALENDAR_ICONS.find((i) => i.name === name);
   return found?.icon ?? Calendar;
-}
+};

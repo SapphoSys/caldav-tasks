@@ -10,7 +10,7 @@ export interface AppInfo {
 /**
  * Get application information from package.json
  */
-export function getAppInfo() {
+export const getAppInfo = () => {
   const pkg = packageJson satisfies AppInfo;
 
   return {
@@ -19,4 +19,4 @@ export function getAppInfo() {
     description: pkg.description,
     author: pkg.author,
   } as const;
-}
+};

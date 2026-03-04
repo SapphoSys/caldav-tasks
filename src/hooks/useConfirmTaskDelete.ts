@@ -4,7 +4,7 @@ import { useDeleteTask, useTasks } from '$hooks/queries/useTasks';
 import { useConfirmDialog } from '$hooks/useConfirmDialog';
 import { pluralize } from '$utils/format';
 
-export function useConfirmTaskDelete() {
+export const useConfirmTaskDelete = () => {
   const { confirmBeforeDelete, deleteSubtasksWithParent } = useSettingsStore();
   const { data: tasks = [] } = useTasks();
   const deleteTaskMutation = useDeleteTask();
@@ -64,4 +64,4 @@ export function useConfirmTaskDelete() {
   );
 
   return { confirmAndDelete };
-}
+};

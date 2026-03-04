@@ -24,7 +24,7 @@ export interface UseUpdateCheckerResult {
   downloadProgress: number;
 }
 
-export function useUpdateChecker(): UseUpdateCheckerResult {
+export const useUpdateChecker = (): UseUpdateCheckerResult => {
   const [updateAvailable, setUpdateAvailable] = useState<UpdateInfo | null>(null);
   const [isChecking, setIsChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -157,4 +157,4 @@ export function useUpdateChecker(): UseUpdateCheckerResult {
     isDownloading,
     downloadProgress,
   };
-}
+};

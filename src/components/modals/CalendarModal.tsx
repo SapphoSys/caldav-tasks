@@ -16,7 +16,7 @@ interface CalendarModalProps {
   onClose: () => void;
 }
 
-export function CalendarModal({ calendar, accountId, onClose }: CalendarModalProps) {
+export const CalendarModal = ({ calendar, accountId, onClose }: CalendarModalProps) => {
   const { data: accounts = [] } = useAccounts();
   const updateAccountMutation = useUpdateAccount();
 
@@ -248,4 +248,4 @@ export function CalendarModal({ calendar, accountId, onClose }: CalendarModalPro
       </div>
     </div>
   );
-}
+};

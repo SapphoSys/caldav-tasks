@@ -9,7 +9,7 @@ interface SubtaskModalProps {
   onAdd: (title: string) => void;
 }
 
-export function SubtaskModal({ isOpen, onClose, onAdd }: SubtaskModalProps) {
+export const SubtaskModal = ({ isOpen, onClose, onAdd }: SubtaskModalProps) => {
   const [title, setTitle] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -109,4 +109,4 @@ export function SubtaskModal({ isOpen, onClose, onAdd }: SubtaskModalProps) {
       </div>
     </div>
   );
-}
+};

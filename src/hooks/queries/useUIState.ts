@@ -8,14 +8,10 @@ import * as taskData from '$lib/taskData';
 import type { SortConfig } from '$types/index';
 import { DEFAULT_SORT_CONFIG } from '$utils/constants';
 
-// ============================================================================
-// Query Hooks
-// ============================================================================
-
 /**
  * Hook to get the full UI state
  */
-export function useUIState() {
+export const useUIState = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -29,80 +25,76 @@ export function useUIState() {
     queryFn: () => taskData.getUIState(),
     staleTime: Infinity,
   });
-}
+};
 
 /**
  * Hook to get active calendar ID
  */
-export function useActiveCalendarId() {
+export const useActiveCalendarId = () => {
   const { data: uiState } = useUIState();
   return uiState?.activeCalendarId ?? null;
-}
+};
 
 /**
  * Hook to get active tag ID
  */
-export function useActiveTagId() {
+export const useActiveTagId = () => {
   const { data: uiState } = useUIState();
   return uiState?.activeTagId ?? null;
-}
+};
 
 /**
  * Hook to get active account ID
  */
-export function useActiveAccountId() {
+export const useActiveAccountId = () => {
   const { data: uiState } = useUIState();
   return uiState?.activeAccountId ?? null;
-}
+};
 
 /**
  * Hook to get selected task ID
  */
-export function useSelectedTaskId() {
+export const useSelectedTaskId = () => {
   const { data: uiState } = useUIState();
   return uiState?.selectedTaskId ?? null;
-}
+};
 
 /**
  * Hook to get editor open state
  */
-export function useIsEditorOpen() {
+export const useIsEditorOpen = () => {
   const { data: uiState } = useUIState();
   return uiState?.isEditorOpen ?? false;
-}
+};
 
 /**
  * Hook to get search query
  */
-export function useSearchQuery() {
+export const useSearchQuery = () => {
   const { data: uiState } = useUIState();
   return uiState?.searchQuery ?? '';
-}
+};
 
 /**
  * Hook to get sort config
  */
-export function useSortConfig() {
+export const useSortConfig = () => {
   const { data: uiState } = useUIState();
   return uiState?.sortConfig ?? DEFAULT_SORT_CONFIG;
-}
+};
 
 /**
  * Hook to get show completed tasks setting
  */
-export function useShowCompletedTasks() {
+export const useShowCompletedTasks = () => {
   const { data: uiState } = useUIState();
   return uiState?.showCompletedTasks ?? true;
-}
-
-// ============================================================================
-// Mutation Hooks
-// ============================================================================
+};
 
 /**
  * Hook to set active account
  */
-export function useSetActiveAccount() {
+export const useSetActiveAccount = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -114,12 +106,12 @@ export function useSetActiveAccount() {
       queryClient.invalidateQueries({ queryKey: ['uiState'] });
     },
   });
-}
+};
 
 /**
  * Hook to set active calendar
  */
-export function useSetActiveCalendar() {
+export const useSetActiveCalendar = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -132,12 +124,12 @@ export function useSetActiveCalendar() {
       queryClient.invalidateQueries({ queryKey: ['filteredTasks'] });
     },
   });
-}
+};
 
 /**
  * Hook to set active tag
  */
-export function useSetActiveTag() {
+export const useSetActiveTag = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -150,12 +142,12 @@ export function useSetActiveTag() {
       queryClient.invalidateQueries({ queryKey: ['filteredTasks'] });
     },
   });
-}
+};
 
 /**
  * Hook to set all tasks view
  */
-export function useSetAllTasksView() {
+export const useSetAllTasksView = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -168,12 +160,12 @@ export function useSetAllTasksView() {
       queryClient.invalidateQueries({ queryKey: ['filteredTasks'] });
     },
   });
-}
+};
 
 /**
  * Hook to set selected task
  */
-export function useSetSelectedTask() {
+export const useSetSelectedTask = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -185,12 +177,12 @@ export function useSetSelectedTask() {
       queryClient.invalidateQueries({ queryKey: ['uiState'] });
     },
   });
-}
+};
 
 /**
  * Hook to set editor open state
  */
-export function useSetEditorOpen() {
+export const useSetEditorOpen = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -202,12 +194,12 @@ export function useSetEditorOpen() {
       queryClient.invalidateQueries({ queryKey: ['uiState'] });
     },
   });
-}
+};
 
 /**
  * Hook to set search query
  */
-export function useSetSearchQuery() {
+export const useSetSearchQuery = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -220,12 +212,12 @@ export function useSetSearchQuery() {
       queryClient.invalidateQueries({ queryKey: ['filteredTasks'] });
     },
   });
-}
+};
 
 /**
  * Hook to set sort config
  */
-export function useSetSortConfig() {
+export const useSetSortConfig = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -237,12 +229,12 @@ export function useSetSortConfig() {
       queryClient.invalidateQueries({ queryKey: ['uiState'] });
     },
   });
-}
+};
 
 /**
  * Hook to set show completed tasks
  */
-export function useSetShowCompletedTasks() {
+export const useSetShowCompletedTasks = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -255,4 +247,4 @@ export function useSetShowCompletedTasks() {
       queryClient.invalidateQueries({ queryKey: ['filteredTasks'] });
     },
   });
-}
+};

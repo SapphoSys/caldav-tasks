@@ -2,7 +2,7 @@ interface DragOverlayProps {
   isUnsupportedFile: boolean;
 }
 
-export function DragOverlay({ isUnsupportedFile }: DragOverlayProps) {
+export const DragOverlay = ({ isUnsupportedFile }: DragOverlayProps) => {
   return (
     <div
       className={`pointer-events-none fixed inset-0 z-[80] flex items-center justify-center backdrop-blur-sm ${
@@ -22,4 +22,4 @@ export function DragOverlay({ isUnsupportedFile }: DragOverlayProps) {
       </div>
     </div>
   );
-}
+};

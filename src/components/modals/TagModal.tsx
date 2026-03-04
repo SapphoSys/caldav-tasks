@@ -1,7 +1,8 @@
 import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
 import { ComposedInput } from '$components/ComposedInput';
-import { getIconByName, IconEmojiPicker } from '$components/IconEmojiPicker';
+import { IconEmojiPicker } from '$components/IconEmojiPicker';
+import { getIconByName } from '$data/icons';
 import { useCreateTag, useTags, useUpdateTag } from '$hooks/queries/useTags';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import { COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '$utils/constants';
@@ -11,7 +12,7 @@ interface TagModalProps {
   onClose: () => void;
 }
 
-export function TagModal({ tagId, onClose }: TagModalProps) {
+export const TagModal = ({ tagId, onClose }: TagModalProps) => {
   const { data: tags = [] } = useTags();
   const createTagMutation = useCreateTag();
   const updateTagMutation = useUpdateTag();
@@ -177,4 +178,4 @@ export function TagModal({ tagId, onClose }: TagModalProps) {
       </div>
     </div>
   );
-}
+};

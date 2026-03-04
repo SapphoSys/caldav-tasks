@@ -13,7 +13,7 @@ export interface CalDAVConfig {
 /**
  * Parse an Apple Configuration Profile XML and extract CalDAV settings
  */
-export function parseAppleConfigProfile(xmlContent: string): CalDAVConfig | null {
+export const parseAppleConfigProfile = (xmlContent: string): CalDAVConfig | null => {
   try {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlContent, 'text/xml');
@@ -112,4 +112,4 @@ export function parseAppleConfigProfile(xmlContent: string): CalDAVConfig | null
     console.error('Failed to parse Apple Configuration Profile:', error);
     return null;
   }
-}
+};

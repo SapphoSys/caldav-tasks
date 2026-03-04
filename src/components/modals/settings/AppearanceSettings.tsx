@@ -2,7 +2,7 @@ import { useSettingsStore } from '$context/settingsContext';
 import { THEME_OPTIONS } from '$data/theme';
 import { ACCENT_COLORS } from '$utils/constants';
 
-export function AppearanceSettings() {
+export const AppearanceSettings = () => {
   const { theme, setTheme, accentColor, setAccentColor } = useSettingsStore();
 
   return (
@@ -54,4 +54,4 @@ export function AppearanceSettings() {
       </div>
     </div>
   );
-}
+};

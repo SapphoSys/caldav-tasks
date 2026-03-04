@@ -7,7 +7,7 @@ import { getIconByName } from '$data/icons';
 import { useTags } from '$hooks/queries/useTags';
 import { PRIORITIES } from '$utils/priority';
 
-export function TaskDefaultsSettings() {
+export const TaskDefaultsSettings = () => {
   const { defaultPriority, setDefaultPriority, defaultTags, setDefaultTags } = useSettingsStore();
   const { data: tags = [] } = useTags();
   const [showTagPicker, setShowTagPicker] = useState(false);
@@ -115,4 +115,4 @@ export function TaskDefaultsSettings() {
       )}
     </div>
   );
-}
+};

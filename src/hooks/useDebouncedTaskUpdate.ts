@@ -5,12 +5,12 @@ import { useUpdateTask } from '$hooks/queries/useTasks';
  * hook to debounce task field updates
  * provides local state that updates immediately, while database updates are debounced
  */
-export function useDebouncedTaskUpdate<T>(
+export const useDebouncedTaskUpdate = <T>(
   taskId: string,
   fieldName: string,
   initialValue: T,
   debounceMs: number = 200,
-) {
+) => {
   const updateTaskMutation = useUpdateTask();
   const [pendingValue, setPendingValue] = useState<T>(initialValue);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -65,4 +65,4 @@ export function useDebouncedTaskUpdate<T>(
   }, []);
 
   return [pendingValue, updateValue] as const;
-}
+};

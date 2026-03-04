@@ -24,7 +24,7 @@ import { type FlattenedTask, flattenTasks } from '$utils/tree';
 
 const log = loggers.taskList;
 
-export function TaskList() {
+export const TaskList = () => {
   const { data: uiState } = useUIState();
   const { data: filteredTasksData = [] } = useFilteredTasks();
   const createTaskMutation = useCreateTask();
@@ -392,4 +392,4 @@ export function TaskList() {
       </button>
     </div>
   );
-}
+};

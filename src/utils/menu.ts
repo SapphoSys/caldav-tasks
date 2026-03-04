@@ -55,7 +55,7 @@ const menuItemRefs: {
 /**
  * converts a KeyboardShortcut to Tauri accelerator format
  */
-function shortcutToAccelerator(shortcut?: KeyboardShortcut): string | undefined {
+const shortcutToAccelerator = (shortcut?: KeyboardShortcut) => {
   if (!shortcut) return undefined;
 
   const parts: string[] = [];
@@ -79,32 +79,29 @@ function shortcutToAccelerator(shortcut?: KeyboardShortcut): string | undefined 
   }
 
   return parts.length > 0 ? parts.join('+') : undefined;
-}
+};
 
 /**
  * gets the accelerator for a specific shortcut ID from the shortcuts array
  */
-function getAcceleratorById(
-  shortcuts: KeyboardShortcut[] | undefined,
-  id: string,
-): string | undefined {
+const getAcceleratorById = (shortcuts: KeyboardShortcut[] | undefined, id: string) => {
   if (!shortcuts) return undefined;
   const shortcut = shortcuts.find((s) => s.id === id);
   return shortcutToAccelerator(shortcut);
-}
+};
 
 /**
  * creates and sets the macOS application menu
  * only called on macOS
  */
-export async function createMacMenu(options?: {
+export const createMacMenu = async (options?: {
   showCompleted?: boolean;
   sortMode?: SortMode;
   shortcuts?: KeyboardShortcut[];
   hasAccounts?: boolean;
   hasTasks?: boolean;
   isSyncing?: boolean;
-}): Promise<Menu> {
+}): Promise<Menu> => {
   const showCompleted = options?.showCompleted ?? true;
   const sortMode = options?.sortMode ?? 'manual';
   const shortcuts = options?.shortcuts;
@@ -439,20 +436,20 @@ export async function createMacMenu(options?: {
   });
 
   return menu;
-}
+};
 
 /**
  * Initializes the application menu
  * Should be called during app bootstrap
  */
-export async function initAppMenu(options?: {
+export const initAppMenu = async (options?: {
   showCompleted?: boolean;
   sortMode?: SortMode;
   shortcuts?: KeyboardShortcut[];
   hasAccounts?: boolean;
   hasTasks?: boolean;
   isSyncing?: boolean;
-}): Promise<void> {
+}): Promise<void> => {
   // Only create menu on macOS
   if (!isMacPlatform()) return;
 
@@ -463,34 +460,34 @@ export async function initAppMenu(options?: {
   } catch (error) {
     log.error('Failed to initialize menu:', error);
   }
-}
+};
 
 /**
  * Rebuilds the app menu with new shortcuts
  * Call this when keyboard shortcuts are changed in settings
  */
-export async function rebuildAppMenu(options?: {
+export const rebuildAppMenu = async (options?: {
   showCompleted?: boolean;
   sortMode?: SortMode;
   shortcuts?: KeyboardShortcut[];
   hasAccounts?: boolean;
   hasTasks?: boolean;
   isSyncing?: boolean;
-}): Promise<void> {
+}): Promise<void> => {
   await initAppMenu(options);
-}
+};
 
 /**
  * Updates a specific menu item's state
  */
-export async function updateMenuItem(
+export const updateMenuItem = async (
   menuId: string,
   updates: {
     text?: string;
     enabled?: boolean;
     checked?: boolean;
   },
-): Promise<void> {
+): Promise<void> => {
   try {
     // Use stored references instead of searching the menu
     let item: MenuItem | IconMenuItem | CheckMenuItem | undefined;
@@ -553,18 +550,18 @@ export async function updateMenuItem(
   } catch (error) {
     log.error(`Failed to update menu item "${menuId}":`, error);
   }
-}
+};
 
 /**
  * updates the menu state based on app state
  */
-export async function updateMenuState(options: {
+export const updateMenuState = async (options: {
   hasAccounts?: boolean;
   hasTasks?: boolean;
   showCompleted?: boolean;
   sortMode?: SortMode;
   isSyncing?: boolean;
-}): Promise<void> {
+}): Promise<void> => {
   if (options.hasAccounts !== undefined || options.isSyncing !== undefined) {
     const hasAccounts = options.hasAccounts ?? true;
     const isSyncing = options.isSyncing ?? false;
@@ -598,4 +595,4 @@ export async function updateMenuState(options: {
       });
     }
   }
-}
+};

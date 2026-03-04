@@ -3,7 +3,7 @@ import { ModalStateContext } from '$context/modalStateContext';
 import { hasOpenModalElements } from '$utils/misc';
 
 // This provider tracks modal state and manages hover state resets
-export function ModalStateProvider({ children }: { children: ReactNode }) {
+export const ModalStateProvider = ({ children }: { children: ReactNode }) => {
   const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
@@ -53,4 +53,4 @@ export function ModalStateProvider({ children }: { children: ReactNode }) {
   );
 
   return <ModalStateContext.Provider value={value}>{children}</ModalStateContext.Provider>;
-}
+};

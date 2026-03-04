@@ -27,7 +27,7 @@ interface UseKeyboardShortcutsOptions {
   onSync?: () => void;
 }
 
-export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) {
+export const useKeyboardShortcuts = (options: UseKeyboardShortcutsOptions = {}) => {
   const { onOpenSettings, onSync } = options;
   const { data: uiState } = useUIState();
   const { data: filteredTasks = [] } = useFilteredTasks();
@@ -251,9 +251,9 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
   }, [keyboardShortcuts, actionHandlers, isConfirmDialogOpen, isAnyModalOpen]);
 
   return { shortcuts: keyboardShortcuts };
-}
+};
 
-export function getShortcutDisplay(shortcut: KeyboardShortcut): string {
+export const getShortcutDisplay = (shortcut: KeyboardShortcut): string => {
   const parts: string[] = [];
 
   if (shortcut.meta) {
@@ -273,4 +273,4 @@ export function getShortcutDisplay(shortcut: KeyboardShortcut): string {
   parts.push(keyDisplay);
 
   return parts.join(getModifierJoiner());
-}
+};

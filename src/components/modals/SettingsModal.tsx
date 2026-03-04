@@ -30,7 +30,7 @@ interface SettingsModalProps {
 
 type SettingsSubtabInfo = { id: SettingsSubtab; label: string; icon: React.ReactNode };
 
-export function SettingsModal({ onClose, initialCategory, initialSubtab }: SettingsModalProps) {
+export const SettingsModal = ({ onClose, initialCategory, initialSubtab }: SettingsModalProps) => {
   const [activeCategory, setActiveCategory] = useState<SettingsCategory>(
     initialCategory || 'general',
   );
@@ -184,4 +184,4 @@ export function SettingsModal({ onClose, initialCategory, initialSubtab }: Setti
       </div>
     </div>
   );
-}
+};

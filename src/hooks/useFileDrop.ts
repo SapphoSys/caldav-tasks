@@ -7,10 +7,10 @@ const log = loggers.fileDrop;
 // Supported file extensions for import
 const SUPPORTED_EXTENSIONS = ['.ics', '.ical', '.json', '.mobileconfig'];
 
-function isSupportedFile(filename: string): boolean {
+const isSupportedFile = (filename: string): boolean => {
   const lower = filename.toLowerCase();
   return SUPPORTED_EXTENSIONS.some((ext) => lower.endsWith(ext));
-}
+};
 
 export interface FileDropResult {
   name: string;
@@ -37,7 +37,7 @@ export interface UseFileDropReturn {
  * Supports .ics, .ical, and .json files for task import
  * Supports .mobileconfig files for CalDAV account configuration
  */
-export function useFileDrop(options: UseFileDropOptions = {}): UseFileDropReturn {
+export const useFileDrop = (options: UseFileDropOptions = {}): UseFileDropReturn => {
   const { onFileDrop, onConfigProfileDrop } = options;
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUnsupportedFile, setIsUnsupportedFile] = useState(false);
@@ -172,4 +172,4 @@ export function useFileDrop(options: UseFileDropOptions = {}): UseFileDropReturn
     handleDragLeave,
     clearDragState,
   };
-}
+};

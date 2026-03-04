@@ -4,7 +4,7 @@ import { WEEK_START_OPTIONS } from '$data/settings';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import type { StartOfWeek, SubtaskDeletionBehavior } from '$types/index';
 
-export function BehaviorSettings() {
+export const BehaviorSettings = () => {
   const {
     confirmBeforeDelete,
     setConfirmBeforeDelete,
@@ -239,4 +239,4 @@ export function BehaviorSettings() {
       </div>
     </div>
   );
-}
+};

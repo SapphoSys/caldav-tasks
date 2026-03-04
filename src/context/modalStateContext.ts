@@ -7,7 +7,7 @@ interface ModalStateContextValue {
 
 export const ModalStateContext = createContext<ModalStateContextValue | null>(null);
 
-export function useModalState() {
+export const useModalState = () => {
   const context = useContext(ModalStateContext);
   return context ?? { isAnyModalOpen: false, isContextMenuOpen: false };
-}
+};

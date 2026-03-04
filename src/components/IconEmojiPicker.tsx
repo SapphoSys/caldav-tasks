@@ -12,15 +12,13 @@ interface IconEmojiPickerProps {
   color?: string;
 }
 
-export { getIconByName };
-
-export function IconEmojiPicker({
+export const IconEmojiPicker = ({
   iconValue,
   emojiValue = '',
   onIconChange,
   onEmojiChange,
   color = FALLBACK_ITEM_COLOR,
-}: IconEmojiPickerProps) {
+}: IconEmojiPickerProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'icon' | 'emoji'>('icon');
   const containerRef = useRef<HTMLDivElement>(null);
@@ -198,4 +196,4 @@ export function IconEmojiPicker({
       )}
     </div>
   );
-}
+};

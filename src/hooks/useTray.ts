@@ -10,7 +10,7 @@ interface UseTrayOptions {
   onSyncRequest: () => void;
 }
 
-export function useTray({ isSyncing, lastSyncTime, onSyncRequest }: UseTrayOptions) {
+export const useTray = ({ isSyncing, lastSyncTime, onSyncRequest }: UseTrayOptions) => {
   const { data: accounts = [] } = useAccounts();
   const { enableSystemTray } = useSettingsStore();
 
@@ -53,4 +53,4 @@ export function useTray({ isSyncing, lastSyncTime, onSyncRequest }: UseTrayOptio
       console.error('Failed to update sync button state:', err);
     });
   }, [accounts.length]);
-}
+};

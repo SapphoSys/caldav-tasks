@@ -7,7 +7,7 @@ import {
   defaultConfirmOptions,
 } from '$context/confirmDialogContext';
 
-export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
+export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => {
   const resolverRef = useRef<((value: boolean) => void) | null>(null);
   const alternateResolverRef = useRef<((value: ConfirmResult) => void) | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -84,4 +84,4 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
       />
     </ConfirmDialogContext.Provider>
   );
-}
+};

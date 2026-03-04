@@ -6,11 +6,11 @@ import { useSettingsStore } from '$context/settingsContext';
 import type { KeyboardShortcut } from '$types/index';
 import { formatShortcut } from '$utils/keyboard';
 
-export function ShortcutsSettings({
+export const ShortcutsSettings = ({
   onEditingShortcutChange,
 }: {
   onEditingShortcutChange?: (editing: boolean) => void;
-}) {
+}) => {
   const { keyboardShortcuts, updateShortcut, resetShortcuts } = useSettingsStore();
   const [editingShortcut, setEditingShortcut] = useState<KeyboardShortcut | null>(null);
 

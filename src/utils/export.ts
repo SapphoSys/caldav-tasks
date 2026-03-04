@@ -10,7 +10,7 @@ import {
 /**
  * Get export modal title based on export type
  */
-export function getExportTitle(type: ExportType) {
+export const getExportTitle = (type: ExportType) => {
   switch (type) {
     case 'all-calendars':
       return 'Export All Calendars';
@@ -19,17 +19,17 @@ export function getExportTitle(type: ExportType) {
     case 'tasks':
       return 'Export Tasks';
   }
-}
+};
 
 /**
  * Get export modal description based on type
  */
-export function getExportDescription(
+export const getExportDescription = (
   type: ExportType,
   tasks: Task[],
   calendars: Calendar[],
   calendarName?: string,
-) {
+) => {
   switch (type) {
     case 'all-calendars':
       return `${calendars.length} ${pluralize(calendars.length, 'calendar')}, ${tasks.length} ${pluralize(tasks.length, 'task')}`;
@@ -49,12 +49,12 @@ export function getExportDescription(
       return `${tasks.length} ${pluralize(tasks.length, 'task')}`;
     }
   }
-}
+};
 
 /**
  * Get export content string based on format
  */
-export function getExportContent(format: ExportFormat, tasks: Task[]) {
+export const getExportContent = (format: ExportFormat, tasks: Task[]) => {
   switch (format) {
     case 'ics':
       return exportTasksAsIcs(tasks);
@@ -67,4 +67,4 @@ export function getExportContent(format: ExportFormat, tasks: Task[]) {
     default:
       return '';
   }
-}
+};

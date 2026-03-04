@@ -13,7 +13,7 @@ interface ModalWrapperProps {
   preventClose?: boolean;
 }
 
-export function ModalWrapper({
+export const ModalWrapper = ({
   isOpen = true,
   onClose,
   title,
@@ -22,7 +22,7 @@ export function ModalWrapper({
   footer,
   size = 'md',
   preventClose = false,
-}: ModalWrapperProps) {
+}: ModalWrapperProps) => {
   if (!isOpen) return null;
 
   const handleBackdropClick = () => {
@@ -82,4 +82,4 @@ export function ModalWrapper({
       </div>
     </div>
   );
-}
+};

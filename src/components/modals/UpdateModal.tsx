@@ -14,13 +14,13 @@ interface UpdateModalProps {
   downloadProgress: number;
 }
 
-export function UpdateModal({
+export const UpdateModal = ({
   updateInfo,
   onDownload,
   onClose,
   isDownloading,
   downloadProgress,
-}: UpdateModalProps) {
+}: UpdateModalProps) => {
   // handle ESC key to close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -112,4 +112,4 @@ export function UpdateModal({
       </div>
     </div>
   );
-}
+};

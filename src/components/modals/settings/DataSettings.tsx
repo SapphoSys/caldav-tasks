@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useSettingsStore } from '$context/settingsContext';
 import { exportSettingsToFile, importSettingsFromFile } from '$utils/settings';
 
-export function DataSettings() {
+export const DataSettings = () => {
   const { exportSettings, importSettings } = useSettingsStore();
   const [showIncluded, setShowIncluded] = useState(false);
 
@@ -74,4 +74,4 @@ export function DataSettings() {
       </div>
     </div>
   );
-}
+};

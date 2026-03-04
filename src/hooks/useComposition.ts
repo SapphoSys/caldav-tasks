@@ -6,10 +6,10 @@ import { useCallback, useRef, useState } from 'react';
  * @param externalValue - the current value from props/external state
  * @param onUpdate - callback when the value should be committed to external state
  */
-export function useComposition<T extends HTMLInputElement | HTMLTextAreaElement>(
+export const useComposition = <T extends HTMLInputElement | HTMLTextAreaElement>(
   externalValue: string,
   onUpdate: (value: string, cursorPos: number | null) => void,
-) {
+) => {
   const isComposingRef = useRef(false);
   const [localValue, setLocalValue] = useState<string | null>(null);
 
@@ -59,4 +59,4 @@ export function useComposition<T extends HTMLInputElement | HTMLTextAreaElement>
       onCompositionEnd,
     },
   };
-}
+};

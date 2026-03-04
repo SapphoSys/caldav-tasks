@@ -55,7 +55,7 @@ interface SidebarProps {
   onUpdateClick?: () => void;
 }
 
-export function Sidebar({
+export const Sidebar = ({
   onOpenSettings,
   onOpenImport,
   isCollapsed,
@@ -64,7 +64,7 @@ export function Sidebar({
   onWidthChange,
   updateAvailable,
   onUpdateClick,
-}: SidebarProps) {
+}: SidebarProps) => {
   const { data: accounts = [] } = useAccounts();
   const { data: tags = [] } = useTags();
   const { data: uiState } = useUIState();
@@ -1096,4 +1096,4 @@ export function Sidebar({
       )}
     </>
   );
-}
+};

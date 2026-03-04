@@ -34,13 +34,13 @@ interface HeaderProps {
   disableSync?: boolean;
 }
 
-export function Header({
+export const Header = ({
   isSyncing = false,
   isOffline = false,
   lastSyncTime,
   onSync,
   disableSync = false,
-}: HeaderProps) {
+}: HeaderProps) => {
   const { data: uiState } = useUIState();
   const setSearchQueryMutation = useSetSearchQuery();
   const setSortConfigMutation = useSetSortConfig();
@@ -295,4 +295,4 @@ export function Header({
       </div>
     </header>
   );
-}
+};

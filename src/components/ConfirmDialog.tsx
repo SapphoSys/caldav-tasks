@@ -20,7 +20,7 @@ interface ConfirmDialogProps {
   onCancel: () => void;
 }
 
-export function ConfirmDialog({
+export const ConfirmDialog = ({
   isOpen,
   title,
   subtitle,
@@ -35,7 +35,7 @@ export function ConfirmDialog({
   onConfirm,
   onAlternate,
   onCancel,
-}: ConfirmDialogProps) {
+}: ConfirmDialogProps) => {
   const [remainingSeconds, setRemainingSeconds] = useState(delayConfirmSeconds || 0);
   const isConfirmDisabled = remainingSeconds > 0;
 
@@ -168,4 +168,4 @@ export function ConfirmDialog({
       </div>
     </div>
   );
-}
+};

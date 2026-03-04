@@ -17,7 +17,7 @@ interface SubtaskTreeItemProps {
   countChildren: (parentUid: string) => number;
 }
 
-export function SubtaskTreeItem({
+export const SubtaskTreeItem = ({
   task,
   depth,
   checkmarkColor,
@@ -27,7 +27,7 @@ export function SubtaskTreeItem({
   confirmAndDelete,
   getChildTasks,
   countChildren,
-}: SubtaskTreeItemProps) {
+}: SubtaskTreeItemProps) => {
   const childTasks = getChildTasks(task.uid);
   const childCount = countChildren(task.uid);
   const isExpanded = expandedSubtasks.has(task.id);
@@ -141,4 +141,4 @@ export function SubtaskTreeItem({
       )}
     </div>
   );
-}
+};

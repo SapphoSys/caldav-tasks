@@ -14,7 +14,7 @@ const log = loggers.menu;
  * Hook to listen for menu events and handle them appropriately
  * Should be used in the root App component
  */
-export function useMenuEvents(callbacks: {
+export const useMenuEvents = (callbacks: {
   onNewTask?: React.RefObject<(() => void) | null>;
   onOpenSettings?: React.RefObject<(() => void) | null>;
   onOpenImport?: React.RefObject<(() => void) | null>;
@@ -29,7 +29,7 @@ export function useMenuEvents(callbacks: {
   onSetSortMode?: React.RefObject<
     ((mode: SortMode, currentMode: SortMode, currentDirection: SortDirection) => void) | null
   >;
-}) {
+}) => {
   const { syncAll } = useSyncQuery();
   const { data: uiState } = useUIState();
 
@@ -220,4 +220,4 @@ export function useMenuEvents(callbacks: {
       });
     };
   }, [syncAll, callbacks, uiState]);
-}
+};

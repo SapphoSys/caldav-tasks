@@ -15,10 +15,10 @@ const activeHandlers: Set<symbol> = new Set();
  * @param options.isPanel - if true, this is a panel (like TaskEditor) that should yield to modals
  * @param options.enabled - if false, the handler will not be registered (useful for conditionally mounted modals)
  */
-export function useModalEscapeKey(
+export const useModalEscapeKey = (
   onClose: () => void,
   options?: { isPanel?: boolean; enabled?: boolean },
-) {
+) => {
   const confirmDialogContext = useContext(ConfirmDialogContext);
   const handlerIdRef = useRef<symbol | null>(null);
   const isPanelRef = useRef(options?.isPanel ?? false);
@@ -107,4 +107,4 @@ export function useModalEscapeKey(
       window.removeEventListener('keydown', handleEsc, { capture: true } as EventListenerOptions);
     };
   }, [enabled]); // Re-run when enabled changes
-}
+};

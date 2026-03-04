@@ -20,7 +20,7 @@ export interface BootstrapResult {
   error?: Error;
 }
 
-export async function initializeApp(): Promise<void> {
+export const initializeApp = async () => {
   // Initialize logger first so all subsequent logs are captured
   await initLogger();
   log.info('Starting application initialization...');
@@ -72,9 +72,9 @@ export async function initializeApp(): Promise<void> {
   }
 
   log.info('Application initialization complete');
-}
+};
 
-export async function showWindow(delay: number = 200): Promise<void> {
+export const showWindow = async (delay: number = 200): Promise<void> => {
   return new Promise((resolve) => {
     setTimeout(async () => {
       const { getCurrentWindow } = await import('@tauri-apps/api/window');
@@ -85,12 +85,12 @@ export async function showWindow(delay: number = 200): Promise<void> {
       resolve();
     }, delay);
   });
-}
+};
 
 /**
  * delete the database file and restart the app (for worst-case recovery)
  */
-export async function deleteDatabase(): Promise<void> {
+export const deleteDatabase = async () => {
   try {
     log.warn('Deleting database file...');
     const baseDir =
@@ -105,14 +105,14 @@ export async function deleteDatabase(): Promise<void> {
     log.error('Failed to delete database:', error);
     throw error;
   }
-}
+};
 
 /**
  * display an error message in the DOM when initialization fails
  *
  * @param error - the error that occurred during initialization
  */
-export function showBootstrapError(error: unknown): void {
+export const showBootstrapError = (error: unknown): void => {
   const root = document.getElementById('root');
   if (root) {
     root.innerHTML = `
@@ -238,9 +238,9 @@ ${error}
       });
     }
   }
-}
+};
 
-export async function forceShowWindow(): Promise<void> {
+export const forceShowWindow = async () => {
   const { getCurrentWindow } = await import('@tauri-apps/api/window');
   await getCurrentWindow().show();
-}
+};

@@ -8,14 +8,10 @@ import { queryKeys } from '$lib/queryClient';
 import * as taskData from '$lib/taskData';
 import type { Tag } from '$types/index';
 
-// ============================================================================
-// Query Hooks
-// ============================================================================
-
 /**
  * Hook to get all tags
  */
-export function useTags() {
+export const useTags = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -29,12 +25,12 @@ export function useTags() {
     queryFn: () => taskData.getAllTags(),
     staleTime: Infinity,
   });
-}
+};
 
 /**
  * Hook to get a single tag by ID
  */
-export function useTag(id: string | null) {
+export const useTag = (id: string | null) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -51,12 +47,12 @@ export function useTag(id: string | null) {
     enabled: !!id,
     staleTime: Infinity,
   });
-}
+};
 
 /**
  * Hook to get tasks by tag
  */
-export function useTasksByTag(tagId: string | null) {
+export const useTasksByTag = (tagId: string | null) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -73,16 +69,12 @@ export function useTasksByTag(tagId: string | null) {
     enabled: !!tagId,
     staleTime: Infinity,
   });
-}
-
-// ============================================================================
-// Mutation Hooks
-// ============================================================================
+};
 
 /**
  * Hook to create a tag
  */
-export function useCreateTag() {
+export const useCreateTag = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -93,12 +85,12 @@ export function useCreateTag() {
       queryClient.invalidateQueries({ queryKey: queryKeys.tags.all });
     },
   });
-}
+};
 
 /**
  * Hook to update a tag
  */
-export function useUpdateTag() {
+export const useUpdateTag = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -110,12 +102,12 @@ export function useUpdateTag() {
       queryClient.invalidateQueries({ queryKey: queryKeys.tags.byId(id) });
     },
   });
-}
+};
 
 /**
  * Hook to delete a tag
  */
-export function useDeleteTag() {
+export const useDeleteTag = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -128,4 +120,4 @@ export function useDeleteTag() {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
     },
   });
-}
+};

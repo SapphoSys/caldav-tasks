@@ -5,7 +5,7 @@ import { applyAccentColor, applyTheme } from '$utils/color';
 /**
  * hook that applies the theme and accent color, and listens for system preference changes
  */
-export function useTheme() {
+export const useTheme = () => {
   const { theme, accentColor } = useSettingsStore();
 
   // apply theme
@@ -32,4 +32,4 @@ export function useTheme() {
   }, [accentColor]);
 
   return { theme, accentColor };
-}
+};

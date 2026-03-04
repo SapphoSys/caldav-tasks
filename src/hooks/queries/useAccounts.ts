@@ -8,14 +8,10 @@ import { queryKeys } from '$lib/queryClient';
 import * as taskData from '$lib/taskData';
 import type { Account, Calendar } from '$types/index';
 
-// ============================================================================
-// Query Hooks
-// ============================================================================
-
 /**
  * Hook to get all accounts
  */
-export function useAccounts() {
+export const useAccounts = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -29,12 +25,12 @@ export function useAccounts() {
     queryFn: () => taskData.getAllAccounts(),
     staleTime: Infinity,
   });
-}
+};
 
 /**
  * Hook to get a single account by ID
  */
-export function useAccount(id: string | null) {
+export const useAccount = (id: string | null) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -51,16 +47,12 @@ export function useAccount(id: string | null) {
     enabled: !!id,
     staleTime: Infinity,
   });
-}
-
-// ============================================================================
-// Mutation Hooks
-// ============================================================================
+};
 
 /**
  * Hook to create an account
  */
-export function useCreateAccount() {
+export const useCreateAccount = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -71,12 +63,12 @@ export function useCreateAccount() {
       queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
     },
   });
-}
+};
 
 /**
  * Hook to update an account
  */
-export function useUpdateAccount() {
+export const useUpdateAccount = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -88,12 +80,12 @@ export function useUpdateAccount() {
       queryClient.invalidateQueries({ queryKey: queryKeys.accounts.byId(id) });
     },
   });
-}
+};
 
 /**
  * Hook to delete an account
  */
-export function useDeleteAccount() {
+export const useDeleteAccount = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -106,12 +98,12 @@ export function useDeleteAccount() {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
     },
   });
-}
+};
 
 /**
  * Hook to add a calendar to an account
  */
-export function useAddCalendar() {
+export const useAddCalendar = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -129,4 +121,4 @@ export function useAddCalendar() {
       queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
     },
   });
-}
+};
