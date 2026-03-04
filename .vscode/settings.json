@@ -1,41 +1,46 @@
 {
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "biomejs.biome",
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "explicit"
   },
-  "[typescript]": {
-    "editor.defaultFormatter": "biomejs.biome"
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+
+  "files.associations": {
+    "*.css": "tailwindcss"
   },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "biomejs.biome"
+
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+
+  "rust-analyzer.cargo.buildScripts.enable": true,
+  "rust-analyzer.cargo.extraEnv": {
+    "RUSTC_BOOTSTRAP": "1"
   },
+  "rust-analyzer.procMacro.enable": true,
+  "rust-analyzer.server.path": "rust-analyzer",
+
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ],
+
   "[javascript]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
   "[json]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
+  "[nix]": {
+    "editor.defaultFormatter": "jnoortheen.nix-ide"
+  },
   "[rust]": {
     "editor.defaultFormatter": "rust-lang.rust-analyzer",
     "editor.formatOnSave": true
   },
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "files.associations": {
-    "*.css": "tailwindcss"
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
   },
-  "tailwindCSS.experimental.classRegex": [
-    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
-    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
-  ],
-  "rust-analyzer.server.path": "rust-analyzer",
-  "rust-analyzer.cargo.extraEnv": {
-    "RUSTC_BOOTSTRAP": "1"
-  },
-  "rust-analyzer.cargo.buildScripts.enable": true,
-  "rust-analyzer.procMacro.enable": true,
-  "[nix]": {
-    "editor.defaultFormatter": "jnoortheen.nix-ide"
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
   }
 }
