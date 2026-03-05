@@ -628,12 +628,12 @@ interface FlattenedTask {
   sortOrder: number;
 }
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: while this function is long, it does its job well
 export const reorderTasks = (
   activeId: string,
   overId: string,
   flattenedItems: FlattenedTask[],
   targetIndent?: number,
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: while this function is long, it does its job well
 ): void => {
   const data = loadDataStore();
   const tasks = data.tasks;
