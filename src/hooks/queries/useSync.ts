@@ -6,9 +6,10 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { emit } from '@tauri-apps/api/event';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { settingsStore, useSettingsStore } from '$context/settingsContext';
-import { useSyncStore } from '$context/syncContext';
+import { settingsStore } from '$context/settingsContext';
 import { useOffline } from '$hooks/useOffline';
+import { useSettingsStore } from '$hooks/useSettingsStore';
+import { useSyncStore } from '$hooks/useSyncStore';
 import { toastManager } from '$hooks/useToast.tsx';
 import { caldavService } from '$lib/caldav';
 import { loggers } from '$lib/logger';

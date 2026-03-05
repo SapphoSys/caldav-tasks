@@ -12,7 +12,6 @@ import Share2 from 'lucide-react/icons/share-2';
 import Trash2 from 'lucide-react/icons/trash-2';
 import { useEffect, useRef, useState } from 'react';
 import { ExportModal } from '$components/modals/ExportModal';
-import { useSettingsStore } from '$context/settingsContext';
 import { getIconByName } from '$data/icons';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useToggleTaskComplete } from '$hooks/queries/useTasks';
@@ -26,6 +25,7 @@ import {
 } from '$hooks/queries/useUIState';
 import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
 import { useContextMenu } from '$hooks/useContextMenu';
+import { useSettingsStore } from '$hooks/useSettingsStore';
 import * as taskData from '$lib/taskData';
 import type { Task } from '$types/index';
 import { getContrastTextColor } from '$utils/color';

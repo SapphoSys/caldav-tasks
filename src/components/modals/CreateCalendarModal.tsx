@@ -3,9 +3,9 @@ import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
 import { ComposedInput } from '$components/ComposedInput';
 import { IconEmojiPicker } from '$components/IconEmojiPicker';
-import { useSettingsStore } from '$context/settingsContext';
 import { useAddCalendar } from '$hooks/queries/useAccounts';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
+import { useSettingsStore } from '$hooks/useSettingsStore';
 import { caldavService } from '$lib/caldav';
 import { COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '$utils/constants';
 

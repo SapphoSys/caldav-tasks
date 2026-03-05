@@ -1,10 +1,4 @@
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useSyncExternalStore,
-} from 'react';
+import { createContext } from 'react';
 import type { CalDAVCredentials } from '$lib/tauri-http';
 import type { ServerType } from '$types/index';
 
@@ -27,7 +21,7 @@ interface ConnectionActions {
   hasConnection: (accountId: string) => boolean;
 }
 
-type ConnectionStore = ConnectionState & ConnectionActions;
+export type ConnectionStore = ConnectionState & ConnectionActions;
 
 // Singleton store for accessing state outside React
 let state: ConnectionState = { connections: {} };
@@ -51,6 +45,8 @@ const getSnapshot = () => {
 // Actions that can be called from anywhere
 export const connectionStore = {
   getState: () => state,
+  subscribe,
+  getSnapshot,
 
   setConnection: (accountId: string, connection: AccountConnection) => {
     state = {
@@ -75,42 +71,4 @@ export const connectionStore = {
 };
 
 // Context for React components
-const ConnectionContext = createContext<ConnectionStore | null>(null);
-
-export const ConnectionProvider = ({ children }: { children: ReactNode }) => {
-  const currentState = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-
-  const setConnection = useCallback((accountId: string, connection: AccountConnection) => {
-    connectionStore.setConnection(accountId, connection);
-  }, []);
-
-  const getConnection = useCallback((accountId: string) => {
-    return connectionStore.getConnection(accountId);
-  }, []);
-
-  const deleteConnection = useCallback((accountId: string) => {
-    connectionStore.deleteConnection(accountId);
-  }, []);
-
-  const hasConnection = useCallback((accountId: string) => {
-    return connectionStore.hasConnection(accountId);
-  }, []);
-
-  const value: ConnectionStore = {
-    ...currentState,
-    setConnection,
-    getConnection,
-    deleteConnection,
-    hasConnection,
-  };
-
-  return <ConnectionContext.Provider value={value}>{children}</ConnectionContext.Provider>;
-};
-
-export const useConnectionStore = (): ConnectionStore => {
-  const context = useContext(ConnectionContext);
-  if (!context) {
-    throw new Error('useConnectionStore must be used within a ConnectionProvider');
-  }
-  return context;
-};
+export const ConnectionContext = createContext<ConnectionStore | null>(null);

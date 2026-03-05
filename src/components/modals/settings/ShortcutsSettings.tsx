@@ -2,7 +2,7 @@ import Pencil from 'lucide-react/icons/pencil';
 import RotateCcw from 'lucide-react/icons/rotate-ccw';
 import { useState } from 'react';
 import { KeyboardShortcutModal } from '$components/modals/KeyboardShortcutModal';
-import { useSettingsStore } from '$context/settingsContext';
+import { useSettingsStore } from '$hooks/useSettingsStore';
 import type { KeyboardShortcut } from '$types/index';
 import { formatShortcut } from '$utils/keyboard';
 
@@ -95,4 +95,4 @@ export const ShortcutsSettings = ({
       />
     </>
   );
-}
+};

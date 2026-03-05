@@ -1,15 +1,15 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-
-import { ConnectionProvider } from '$context/connectionContext';
-import { SettingsProvider } from '$context/settingsContext';
-import { SyncProvider } from '$context/syncContext';
 import { forceShowWindow, initializeApp, showBootstrapError, showWindow } from '$lib/bootstrap';
 import { loggers } from '$lib/logger';
 import { queryClient } from '$lib/queryClient';
 import { ConfirmDialogProvider } from '$providers/ConfirmDialogProvider';
+import { ConnectionProvider } from '$providers/ConnectionProvider';
 import { ModalStateProvider } from '$providers/ModalStateProvider';
+import { SettingsProvider } from '$providers/SettingsProvider';
+import { SyncProvider } from '$providers/SyncProvider';
+import { ToastProvider } from '$providers/ToastProvider';
 
 import App from '~/App';
 import '$styles/index.css';
@@ -25,6 +25,7 @@ const renderApp = () => {
             <SyncProvider>
               <ModalStateProvider>
                 <ConfirmDialogProvider>
+                  <ToastProvider />
                   <App />
                 </ConfirmDialogProvider>
               </ModalStateProvider>

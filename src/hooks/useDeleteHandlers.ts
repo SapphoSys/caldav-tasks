@@ -3,11 +3,11 @@
  */
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useSettingsStore } from '$context/settingsContext';
 import { useDeleteAccount } from '$hooks/queries/useAccounts';
 import { useDeleteTag } from '$hooks/queries/useTags';
 import { useSetAllTasksView } from '$hooks/queries/useUIState';
 import { useConfirmDialog } from '$hooks/useConfirmDialog';
+import { useSettingsStore } from '$hooks/useSettingsStore';
 import { caldavService } from '$lib/caldav';
 import { loggers } from '$lib/logger';
 import * as taskData from '$lib/taskData';

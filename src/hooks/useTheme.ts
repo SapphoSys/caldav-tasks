@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useSettingsStore } from '$context/settingsContext';
+import { useSettingsStore } from '$hooks/useSettingsStore';
 import { applyAccentColor, applyTheme } from '$utils/color';
 
 /**

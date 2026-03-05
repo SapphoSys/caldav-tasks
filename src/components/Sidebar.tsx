@@ -22,7 +22,7 @@ import { ExportModal } from '$components/modals/ExportModal';
 import { TagModal } from '$components/modals/TagModal';
 import { Tooltip } from '$components/Tooltip';
 import { useModalState } from '$context/modalStateContext';
-import { settingsStore, useSettingsStore } from '$context/settingsContext';
+import { settingsStore } from '$context/settingsContext';
 import { getIconByName } from '$data/icons';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useSyncQuery } from '$hooks/queries/useSync';
@@ -37,6 +37,7 @@ import {
 } from '$hooks/queries/useUIState';
 import { useDeleteHandlers } from '$hooks/useDeleteHandlers';
 import { useGlobalContextMenuClose } from '$hooks/useGlobalContextMenu';
+import { useSettingsStore } from '$hooks/useSettingsStore';
 import * as taskData from '$lib/taskData';
 import type { Account, Calendar as CalendarType } from '$types/index';
 import { getContrastTextColor } from '$utils/color';

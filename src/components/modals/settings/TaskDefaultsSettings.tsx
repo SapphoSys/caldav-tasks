@@ -2,9 +2,9 @@ import Plus from 'lucide-react/icons/plus';
 import X from 'lucide-react/icons/x';
 import { useState } from 'react';
 import { TagPickerModal } from '$components/modals/TagPickerModal';
-import { useSettingsStore } from '$context/settingsContext';
 import { getIconByName } from '$data/icons';
 import { useTags } from '$hooks/queries/useTags';
+import { useSettingsStore } from '$hooks/useSettingsStore';
 import { PRIORITIES } from '$utils/priority';
 
 export const TaskDefaultsSettings = () => {

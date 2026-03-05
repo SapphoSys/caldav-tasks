@@ -1,5 +1,5 @@
-import { useSettingsStore } from '$context/settingsContext';
 import { THEME_OPTIONS } from '$data/theme';
+import { useSettingsStore } from '$hooks/useSettingsStore';
 import { ACCENT_COLORS } from '$utils/constants';
 
 export const AppearanceSettings = () => {

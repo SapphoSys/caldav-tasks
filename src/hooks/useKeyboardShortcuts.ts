@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useModalState } from '$context/modalStateContext';
-import { useSettingsStore } from '$context/settingsContext';
 import { useCreateTask, useFilteredTasks, useToggleTaskComplete } from '$hooks/queries/useTasks';
 import {
   useSetEditorOpen,
@@ -11,7 +10,7 @@ import {
 } from '$hooks/queries/useUIState';
 import { useConfirmDialog } from '$hooks/useConfirmDialog';
 import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
-import * as taskData from '$lib/taskData';
+import { useSettingsStore } from '$hooks/useSettingsStore';
 import type { KeyboardShortcut } from '$types/index';
 import { DEFAULT_SORT_CONFIG } from '$utils/constants';
 import {
