@@ -1,5 +1,4 @@
-use lazy_static::lazy_static;
-use std::sync::Mutex;
+use std::sync::{LazyLock, Mutex};
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{TrayIconBuilder, TrayIconEvent, TrayIconId},
@@ -14,12 +13,12 @@ type AppRuntime = tauri::Wry;
 type AppRuntime = tauri::Cef;
 
 // global storage for the last sync menu item updater function
-lazy_static! {
-    static ref MENU_UPDATER: Mutex<Option<Box<dyn Fn(String) + Send>>> = Mutex::new(None);
-    static ref SYNC_ITEM: Mutex<Option<MenuItem<AppRuntime>>> = Mutex::new(None);
-    static ref TRAY_VISIBLE: Mutex<bool> = Mutex::new(true);
-    static ref TRAY_ENABLED: Mutex<bool> = Mutex::new(true);
-}
+static MENU_UPDATER: LazyLock<Mutex<Option<Box<dyn Fn(String) + Send>>>> =
+    LazyLock::new(|| Mutex::new(None));
+static SYNC_ITEM: LazyLock<Mutex<Option<MenuItem<AppRuntime>>>> =
+    LazyLock::new(|| Mutex::new(None));
+static TRAY_VISIBLE: LazyLock<Mutex<bool>> = LazyLock::new(|| Mutex::new(true));
+static TRAY_ENABLED: LazyLock<Mutex<bool>> = LazyLock::new(|| Mutex::new(true));
 
 /// check if the system tray is currently enabled
 pub fn is_tray_enabled() -> bool {

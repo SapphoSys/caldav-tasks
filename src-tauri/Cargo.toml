@@ -21,7 +21,6 @@ tauri-plugin-sql = { version = "2", features = ["sqlite"] }
 tauri-plugin-log = { version = "2", features = ["colored"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-lazy_static = "1.5.0"
 tauri-plugin-process = "2"
 tauri-plugin-os = "2"
 log = "0.4"
