@@ -23,6 +23,8 @@ jobs:
             args: ''
           - platform: 'windows-latest'
             args: ''
+          - platform: 'windows-11-arm'
+            args: ''
           - platform: 'ubuntu-22.04-arm'
             args: ''
 
