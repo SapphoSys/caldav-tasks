@@ -127,7 +127,6 @@ jobs:
             args: ''
           - platform: 'windows-latest'
             args: ''
-          # Use the native ARM runner (available for public repos)
           - platform: 'ubuntu-22.04-arm'
             args: ''
 
@@ -135,7 +134,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Updated condition to catch both 'ubuntu-22.04' and 'ubuntu-22.04-arm'
       - name: install dependencies (ubuntu only)
         if: startsWith(matrix.platform, 'ubuntu')
         run: |
