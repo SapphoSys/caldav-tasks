@@ -23,11 +23,11 @@ export const createAccount = (accountData: Partial<Account>) => {
   const data = loadDataStore();
 
   const account: Account = {
-    id: accountData.id || generateUUID(),
-    name: accountData.name || 'New Account',
-    serverUrl: accountData.serverUrl || '',
-    username: accountData.username || '',
-    password: accountData.password || '',
+    id: accountData.id ?? generateUUID(),
+    name: accountData.name ?? 'New Account',
+    serverUrl: accountData.serverUrl ?? '',
+    username: accountData.username ?? '',
+    password: accountData.password ?? '',
     serverType: accountData.serverType,
     calendars: [],
     isActive: true,
@@ -69,7 +69,7 @@ export const deleteAccount = (id: string) => {
   const data = loadDataStore();
   const newAccounts = data.accounts.filter((acc) => acc.id !== id);
   const deletedAccount = data.accounts.find((acc) => acc.id === id);
-  const deletedCalendarIds = deletedAccount?.calendars.map((c) => c.id) || [];
+  const deletedCalendarIds = deletedAccount?.calendars.map((c) => c.id) ?? [];
 
   db.deleteAccount(id).catch((e) => log.error('Failed to persist account deletion:', e));
 

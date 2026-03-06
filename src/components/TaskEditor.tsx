@@ -532,7 +532,7 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
           <div className="flex flex-wrap gap-2" role="group" aria-labelledby="tag-label">
             {taskTags.map((tag) => {
               if (!tag) return null;
-              const TagIcon = getIconByName(tag.icon || 'tag');
+              const TagIcon = getIconByName(tag.icon ?? 'tag');
               return (
                 <span
                   key={tag.id}
@@ -579,11 +579,11 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
             className="flex items-center gap-2 text-sm font-medium text-surface-600 dark:text-surface-400 mb-2"
           >
             <Bell className="w-4 h-4" />
-            Reminders {(task.reminders?.length || 0) > 0 && `(${task.reminders?.length})`}
+            Reminders {(task.reminders?.length ?? 0) > 0 && `(${task.reminders?.length})`}
           </div>
           {/* biome-ignore lint/a11y/useSemanticElements: fieldset would change semantic structure; div with role="group" is appropriate here */}
           <div className="space-y-2" role="group" aria-labelledby="reminders-label">
-            {(task.reminders || []).map((reminder) => (
+            {(task.reminders ?? []).map((reminder) => (
               // biome-ignore lint/a11y/useSemanticElements: Using div with role=button to allow nested delete button without button nesting
               <div
                 key={reminder.id}

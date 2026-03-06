@@ -68,11 +68,11 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
       {children}
       <ConfirmDialog
         isOpen={isOpen}
-        title={options.title || defaultConfirmOptions.title}
+        title={options.title ?? defaultConfirmOptions.title}
         subtitle={options.subtitle}
-        message={options.message || defaultConfirmOptions.message}
-        confirmLabel={options.confirmLabel || defaultConfirmOptions.confirmLabel}
-        cancelLabel={options.cancelLabel || defaultConfirmOptions.cancelLabel}
+        message={options.message ?? defaultConfirmOptions.message}
+        confirmLabel={options.confirmLabel ?? defaultConfirmOptions.confirmLabel}
+        cancelLabel={options.cancelLabel ?? defaultConfirmOptions.cancelLabel}
         destructive={options.destructive ?? defaultConfirmOptions.destructive}
         alternateLabel={options.alternateLabel}
         alternateDestructive={options.alternateDestructive}

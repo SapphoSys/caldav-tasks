@@ -146,8 +146,8 @@ const rowToTask = (row: TaskRow): Task => {
     isCollapsed: row.is_collapsed === null ? undefined : row.is_collapsed === 1,
     sortOrder: row.sort_order,
     url: row.url || undefined,
-    accountId: row.account_id || '',
-    calendarId: row.calendar_id || '',
+    accountId: row.account_id ?? '',
+    calendarId: row.calendar_id ?? '',
     synced: row.synced === 1,
     localOnly: row.local_only === null ? undefined : row.local_only === 1,
   };
@@ -260,11 +260,11 @@ export const createTask = async (taskData: Partial<Task>): Promise<Task> => {
   const uiState = await getUIState();
 
   // Determine calendar and account to use
-  let calendarId = taskData.calendarId || uiState.activeCalendarId;
-  let accountId = taskData.accountId || uiState.activeAccountId;
+  let calendarId = taskData.calendarId ?? uiState.activeCalendarId;
+  let accountId = taskData.accountId ?? uiState.activeAccountId;
 
   // Handle tags
-  let tags = taskData.tags || [];
+  let tags = taskData.tags ?? [];
   if (uiState.activeTagId && !tags.includes(uiState.activeTagId)) {
     tags = [uiState.activeTagId, ...tags];
   }
@@ -307,14 +307,14 @@ export const createTask = async (taskData: Partial<Task>): Promise<Task> => {
   const task: Task = {
     id: generateUUID(),
     uid: generateUUID(),
-    title: taskData.title || 'New Task',
-    description: taskData.description || '',
+    title: taskData.title ?? 'New Task',
+    description: taskData.description ?? '',
     completed: false,
-    priority: taskData.priority || defaultPriority,
-    subtasks: taskData.subtasks || [],
+    priority: taskData.priority ?? defaultPriority,
+    subtasks: taskData.subtasks ?? [],
     sortOrder: maxSortOrder + 1,
-    accountId: accountId || '',
-    calendarId: calendarId || '',
+    accountId: accountId ?? '',
+    calendarId: calendarId ?? '',
     synced: false,
     createdAt: now,
     modifiedAt: now,
@@ -503,7 +503,7 @@ export const createTag = async (tagData: Partial<Tag>): Promise<Tag> => {
 
   const tag: Tag = {
     id: generateUUID(),
-    name: tagData.name || 'New Tag',
+    name: tagData.name ?? 'New Tag',
     color: tagData.color ?? FALLBACK_ITEM_COLOR,
     icon: tagData.icon,
     emoji: tagData.emoji,
@@ -540,7 +540,7 @@ export const deleteTag = async (id: string) => {
   // Remove tag from all tasks
   const tasks = await getTasksByTag(id);
   for (const task of tasks) {
-    const newTags = (task.tags || []).filter((t) => t !== id);
+    const newTags = (task.tags ?? []).filter((t) => t !== id);
     await updateTask(task.id, { tags: newTags });
   }
 
@@ -576,11 +576,11 @@ export const createAccount = async (accountData: Partial<Account>): Promise<Acco
   const database = await getDb();
 
   const account: Account = {
-    id: accountData.id || generateUUID(),
-    name: accountData.name || 'New Account',
-    serverUrl: accountData.serverUrl || '',
-    username: accountData.username || '',
-    password: accountData.password || '',
+    id: accountData.id ?? generateUUID(),
+    name: accountData.name ?? 'New Account',
+    serverUrl: accountData.serverUrl ?? '',
+    username: accountData.username ?? '',
+    password: accountData.password ?? '',
     serverType: accountData.serverType,
     calendars: [],
     isActive: true,
@@ -663,9 +663,9 @@ export const addCalendar = async (accountId: string, calendarData: Partial<Calen
 
   const calendar: Calendar = {
     ...calendarData,
-    id: calendarData.id || generateUUID(),
-    displayName: calendarData.displayName || 'Tasks',
-    url: calendarData.url || '',
+    id: calendarData.id ?? generateUUID(),
+    displayName: calendarData.displayName ?? 'Tasks',
+    url: calendarData.url ?? '',
     accountId,
   };
 

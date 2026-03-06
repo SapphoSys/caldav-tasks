@@ -194,7 +194,7 @@ App Version: ${AppVersion}
 OS: ${currentPlatform}
 Version: ${currentVersion}
 Architecture: ${currentArch}
-App Extension: ${currentExtension || 'Unknown'}
+App Extension: ${currentExtension ?? 'Unknown'}
 System Locale: ${currentLocale}
 \`\`\`
 

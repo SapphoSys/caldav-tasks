@@ -182,7 +182,7 @@ class CalDAVService {
 
     // parse response to get display name
     const results = parseMultiStatus(response.body);
-    const displayName = results[0]?.props.displayname || username;
+    const displayName = results[0]?.props.displayname ?? username;
 
     // store the connection
     connectionStore.setConnection(accountId, {
@@ -240,13 +240,13 @@ class CalDAVService {
       }
 
       // check if it's a calendar (must have 'calendar' in resourcetype)
-      const resourceType = result.props.resourcetype || '';
+      const resourceType = result.props.resourcetype ?? '';
       if (!resourceType.includes('calendar')) {
         continue;
       }
 
       // parse supported-calendar-component-set to determine if this calendar supports VTODO
-      const supportedComponentsRaw = result.props['supported-calendar-component-set'] || '';
+      const supportedComponentsRaw = result.props['supported-calendar-component-set'] ?? '';
       const supportedComponents: string[] = [];
       const componentMatches = supportedComponentsRaw.matchAll(
         /<[^:>]*:?comp[^>]+name="([^"]+)"/gi,
@@ -268,11 +268,11 @@ class CalDAVService {
 
       calendars.push({
         id: calendarUrl,
-        displayName: result.props.displayname || 'Calendar',
+        displayName: result.props.displayname ?? 'Calendar',
         url: calendarUrl,
-        ctag: result.props.getctag || undefined,
-        syncToken: result.props['sync-token'] || undefined,
-        color: normalizeHexColor(result.props['calendar-color']) || undefined,
+        ctag: result.props.getctag ?? undefined,
+        syncToken: result.props['sync-token'] ?? undefined,
+        color: normalizeHexColor(result.props['calendar-color']) ?? undefined,
         accountId,
         supportedComponents: supportedComponents.length > 0 ? supportedComponents : undefined,
       });
@@ -438,7 +438,7 @@ ${hrefs.map((href) => `  <d:href>${href}</d:href>`).join('\n')}
       const response = await put(url, conn.credentials, icalData);
 
       if (response.status === 201 || response.status === 204) {
-        const etag = response.headers.etag?.replace(/"/g, '') || '';
+        const etag = response.headers.etag?.replace(/"/g, '') ?? '';
         return { href: url, etag };
       }
 
@@ -464,7 +464,7 @@ ${hrefs.map((href) => `  <d:href>${href}</d:href>`).join('\n')}
       const response = await put(task.href, conn.credentials, icalData, task.etag);
 
       if (response.status === 200 || response.status === 201 || response.status === 204) {
-        const etag = response.headers.etag?.replace(/"/g, '') || '';
+        const etag = response.headers.etag?.replace(/"/g, '') ?? '';
         return { etag };
       }
 
@@ -766,7 +766,7 @@ ${hrefs.map((href) => `  <d:href>${href}</d:href>`).join('\n')}
       displayName
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '') || 'calendar';
+        .replace(/^-|-$/g, '') ?? 'calendar';
 
     // create the calendar URL under the calendar home
     const calendarUrl = `${conn.calendarHome}${slug}/`;

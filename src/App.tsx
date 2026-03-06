@@ -206,10 +206,10 @@ const App = () => {
         <AccountModal
           account={
             menuHandlers.editingAccountId
-              ? accounts.find((a) => a.id === menuHandlers.editingAccountId) || null
+              ? (accounts.find((a) => a.id === menuHandlers.editingAccountId) ?? null)
               : null
           }
-          preloadedConfig={preloadedConfig || undefined}
+          preloadedConfig={preloadedConfig ?? undefined}
           onClose={() => {
             menuHandlers.setShowAccountModal(false);
             menuHandlers.setEditingAccountId(null);

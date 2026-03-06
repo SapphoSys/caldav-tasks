@@ -19,7 +19,7 @@ export const getFilteredTasks = () => {
   return data.tasks.filter((task) => {
     // Filter by tag
     if (activeTagId !== null) {
-      if (!(task.tags || []).includes(activeTagId)) {
+      if (!(task.tags ?? []).includes(activeTagId)) {
         return false;
       }
     } else {
@@ -49,7 +49,7 @@ export const getFilteredTasks = () => {
 };
 
 export const getSortedTasks = (tasks: Task[], sortConfig?: SortConfig) => {
-  const config = sortConfig || loadDataStore().ui.sortConfig;
+  const config = sortConfig ?? loadDataStore().ui.sortConfig;
   const { mode, direction } = config;
   const multiplier = direction === 'asc' ? 1 : -1;
 

@@ -47,7 +47,7 @@ export const tauriRequest = async (
 
   // handle redirects manually for CalDAV
   if ([301, 302, 307, 308].includes(response.status)) {
-    const location = response.headers.get('location') || response.headers.get('Location');
+    const location = response.headers.get('location') ?? response.headers.get('Location');
     if (location) {
       log.debug(`Following redirect to: ${location}`);
       // resolve relative URLs
@@ -178,8 +178,8 @@ export const parseMultiStatus = (xml: string): MultiStatusResponse[] => {
   const responseElements = doc.querySelectorAll('response');
 
   for (const resp of responseElements) {
-    const href = resp.querySelector('href')?.textContent || '';
-    const status = resp.querySelector('status')?.textContent || '';
+    const href = resp.querySelector('href')?.textContent ?? '';
+    const status = resp.querySelector('status')?.textContent ?? '';
     const propstat = resp.querySelector('propstat');
 
     const props: Record<string, string | null> = {};
@@ -199,7 +199,7 @@ export const parseMultiStatus = (xml: string): MultiStatusResponse[] => {
           } else if (localName === 'current-user-principal' || localName === 'calendar-home-set') {
             // these properties contain an <href> child element
             const hrefElement = child.querySelector('href');
-            props[localName] = hrefElement?.textContent || null;
+            props[localName] = hrefElement?.textContent ?? null;
           } else if (child.children.length > 0) {
             // for other elements with children, get innerHTML to preserve structure
             props[localName] = child.innerHTML;

@@ -6,7 +6,7 @@
 
     if (stored) {
       const settings = JSON.parse(stored);
-      effectiveTheme = settings.state?.theme || 'system';
+      effectiveTheme = settings.state?.theme ?? 'system';
     }
 
     // Determine if we should use dark mode

@@ -16,7 +16,7 @@ export const addReminder = (taskId: string, trigger: Date) => {
     task.id === taskId
       ? {
           ...task,
-          reminders: [...(task.reminders || []), reminder],
+          reminders: [...(task.reminders ?? []), reminder],
           modifiedAt: new Date(),
           synced: false,
         }
@@ -31,7 +31,7 @@ export const removeReminder = (taskId: string, reminderId: string) => {
     task.id === taskId
       ? {
           ...task,
-          reminders: (task.reminders || []).filter((r) => r.id !== reminderId),
+          reminders: (task.reminders ?? []).filter((r) => r.id !== reminderId),
           modifiedAt: new Date(),
           synced: false,
         }
@@ -46,7 +46,7 @@ export const updateReminder = (taskId: string, reminderId: string, trigger: Date
     task.id === taskId
       ? {
           ...task,
-          reminders: (task.reminders || []).map((r) =>
+          reminders: (task.reminders ?? []).map((r) =>
             r.id === reminderId ? { ...r, trigger } : r,
           ),
           modifiedAt: new Date(),

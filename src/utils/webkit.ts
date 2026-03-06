@@ -33,7 +33,7 @@ export const initWebKitDragFix = () => {
         const hasData = event.dataTransfer.types.length > 0;
         if (!hasData) {
           const target = event.target as HTMLElement;
-          const id = target?.id || target?.dataset?.id || 'dragged-element';
+          const id = target?.id ?? target?.dataset?.id ?? 'dragged-element';
           event.dataTransfer.setData('text/plain', id);
         }
       }

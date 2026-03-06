@@ -32,5 +32,5 @@ export const formatShortcut = (shortcut: KeyboardShortcut | Partial<KeyboardShor
           : shortcut.key;
     parts.push(keyDisplay);
   }
-  return parts.join(' + ') || 'Press keys...';
+  return parts.join(' + ') ?? 'Press keys...';
 };

@@ -35,7 +35,7 @@ export const getCalendarTasks = (calendarId: string) => {
 };
 
 export const getTasksByTag = (tagId: string) => {
-  return loadDataStore().tasks.filter((t) => (t.tags || []).includes(tagId));
+  return loadDataStore().tasks.filter((t) => (t.tags ?? []).includes(tagId));
 };
 
 export const getChildTasks = (parentUid: string) => {
@@ -67,11 +67,11 @@ export const createTask = (taskData: Partial<Task>) => {
   const { defaultCalendarId, defaultPriority, defaultTags } = settingsStore.getState();
 
   // Determine calendar and account to use
-  let calendarId = taskData.calendarId || data.ui.activeCalendarId;
-  let accountId = taskData.accountId || data.ui.activeAccountId;
+  let calendarId = taskData.calendarId ?? data.ui.activeCalendarId;
+  let accountId = taskData.accountId ?? data.ui.activeAccountId;
 
   // If viewing a tag, include that tag in the new task
-  let tags = taskData.tags || [];
+  let tags = taskData.tags ?? [];
   if (data.ui.activeTagId && !tags.includes(data.ui.activeTagId)) {
     tags = [data.ui.activeTagId, ...tags];
   }
@@ -116,14 +116,14 @@ export const createTask = (taskData: Partial<Task>) => {
   const task: Task = {
     id: generateUUID(),
     uid: generateUUID(),
-    title: taskData.title || 'New Task',
-    description: taskData.description || '',
+    title: taskData.title ?? 'New Task',
+    description: taskData.description ?? '',
     completed: false,
-    priority: taskData.priority || defaultPriority,
-    subtasks: taskData.subtasks || [],
+    priority: taskData.priority ?? defaultPriority,
+    subtasks: taskData.subtasks ?? [],
     sortOrder: maxSortOrder + 1,
-    accountId: accountId || '',
-    calendarId: calendarId || taskData.calendarId || data.ui.activeCalendarId || '',
+    accountId: accountId ?? '',
+    calendarId: calendarId ?? taskData.calendarId ?? data.ui.activeCalendarId ?? '',
     synced: false,
     createdAt: now,
     modifiedAt: now,
@@ -224,7 +224,7 @@ export const deleteTask = (id: string, deleteChildren: boolean = true) => {
     pendingDeletions: newPendingDeletions,
     ui: {
       ...data.ui,
-      selectedTaskId: tasksToDelete.includes(data.ui.selectedTaskId || '')
+      selectedTaskId: tasksToDelete.includes(data.ui.selectedTaskId ?? '')
         ? null
         : data.ui.selectedTaskId,
     },

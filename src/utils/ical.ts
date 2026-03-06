@@ -631,7 +631,7 @@ export const vtodoToTask = (
     }
 
     // Calculate sort order
-    const createdDate = parsed.created || new Date();
+    const createdDate = parsed.created ?? new Date();
     let sortOrder: number;
     if (parsed.sortOrder !== undefined && !Number.isNaN(parsed.sortOrder)) {
       sortOrder = parsed.sortOrder;
@@ -641,24 +641,24 @@ export const vtodoToTask = (
 
     const task: Task = {
       id: generateUUID(),
-      uid: parsed.uid || generateUUID(),
+      uid: parsed.uid ?? generateUUID(),
       etag,
       href,
-      title: parsed.summary || 'Untitled Task',
+      title: parsed.summary ?? 'Untitled Task',
       description: filterCalDavDescription(parsed.description),
       completed: parsed.status === 'COMPLETED',
       completedAt: parsed.completed,
-      priority: icalToPriority(parsed.priority || 0),
-      categoryId: parsed.categories?.join(',') || undefined,
+      priority: icalToPriority(parsed.priority ?? 0),
+      categoryId: parsed.categories?.join(',') ?? undefined,
       startDate: parsed.dtstart,
       startDateAllDay: parsed.dtstartAllDay,
       dueDate: parsed.due,
       dueDateAllDay: parsed.dueAllDay,
       createdAt: createdDate,
-      modifiedAt: parsed.lastModified || new Date(),
+      modifiedAt: parsed.lastModified ?? new Date(),
       subtasks,
       parentUid: parsed.parentUid,
-      isCollapsed: parsed.isCollapsed || false,
+      isCollapsed: parsed.isCollapsed ?? false,
       sortOrder,
       url: parsed.url,
       accountId,
@@ -769,7 +769,7 @@ export const exportTasksAsCsv = (tasks: Task[]): string => {
     task.priority,
     task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '',
     task.startDate ? new Date(task.startDate).toLocaleDateString() : '',
-    task.categoryId || '',
+    task.categoryId ?? '',
     new Date(task.createdAt).toLocaleDateString(),
     new Date(task.modifiedAt).toLocaleDateString(),
   ]);
@@ -811,7 +811,7 @@ export const parseIcsFile = (icsContent: string): Partial<Task>[] => {
       }
 
       // Calculate sort order
-      const createdDate = parsed.created || new Date();
+      const createdDate = parsed.created ?? new Date();
       let sortOrder: number;
       if (parsed.sortOrder !== undefined && !Number.isNaN(parsed.sortOrder)) {
         sortOrder = parsed.sortOrder;
@@ -821,22 +821,22 @@ export const parseIcsFile = (icsContent: string): Partial<Task>[] => {
 
       tasks.push({
         id: generateUUID(),
-        uid: parsed.uid || generateUUID(),
-        title: parsed.summary || 'Untitled Task',
+        uid: parsed.uid ?? generateUUID(),
+        title: parsed.summary ?? 'Untitled Task',
         description: filterCalDavDescription(parsed.description),
         completed: parsed.status === 'COMPLETED',
         completedAt: parsed.completed,
-        priority: icalToPriority(parsed.priority || 0),
-        categoryId: parsed.categories?.join(',') || undefined,
+        priority: icalToPriority(parsed.priority ?? 0),
+        categoryId: parsed.categories?.join(',') ?? undefined,
         startDate: parsed.dtstart,
         startDateAllDay: parsed.dtstartAllDay,
         dueDate: parsed.due,
         dueDateAllDay: parsed.dueAllDay,
         createdAt: createdDate,
-        modifiedAt: parsed.lastModified || new Date(),
+        modifiedAt: parsed.lastModified ?? new Date(),
         subtasks,
         parentUid: parsed.parentUid,
-        isCollapsed: parsed.isCollapsed || false,
+        isCollapsed: parsed.isCollapsed ?? false,
         sortOrder,
         url: parsed.url,
         synced: false,

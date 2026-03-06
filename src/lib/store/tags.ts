@@ -74,7 +74,7 @@ export const deleteTag = (id: string) => {
     tags: data.tags.filter((tag) => tag.id !== id),
     tasks: data.tasks.map((task) => ({
       ...task,
-      tags: (task.tags || []).filter((t) => t !== id),
+      tags: (task.tags ?? []).filter((t) => t !== id),
     })),
     ui: {
       ...data.ui,

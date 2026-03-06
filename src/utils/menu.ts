@@ -74,7 +74,7 @@ const shortcutToAccelerator = (shortcut?: KeyboardShortcut) => {
       ArrowRight: 'Right',
       ' ': 'Space',
     };
-    const key = keyMap[shortcut.key] || shortcut.key.toUpperCase();
+    const key = keyMap[shortcut.key] ?? shortcut.key.toUpperCase();
     parts.push(key);
   }
 
@@ -123,7 +123,7 @@ export const createMacMenu = async (options?: {
       await MenuItem.new({
         id: 'preferences',
         text: 'Preferences...',
-        accelerator: getAcceleratorById(shortcuts, 'settings') || 'CmdOrCtrl+,',
+        accelerator: getAcceleratorById(shortcuts, 'settings') ?? 'CmdOrCtrl+,',
         action: () => {
           emit(MENU_EVENTS.PREFERENCES);
         },
@@ -158,7 +158,7 @@ export const createMacMenu = async (options?: {
     id: 'sync',
     text: 'Sync',
     icon: 'Refresh',
-    accelerator: getAcceleratorById(shortcuts, 'sync') || 'CmdOrCtrl+R',
+    accelerator: getAcceleratorById(shortcuts, 'sync') ?? 'CmdOrCtrl+R',
     enabled: hasAccounts && !isSyncing,
     action: () => {
       emit(MENU_EVENTS.SYNC);
@@ -185,7 +185,7 @@ export const createMacMenu = async (options?: {
         id: 'new-task',
         text: 'New Task',
         icon: 'Add',
-        accelerator: getAcceleratorById(shortcuts, 'new-task') || 'CmdOrCtrl+N',
+        accelerator: getAcceleratorById(shortcuts, 'new-task') ?? 'CmdOrCtrl+N',
         action: () => {
           emit(MENU_EVENTS.NEW_TASK);
         },
@@ -243,7 +243,7 @@ export const createMacMenu = async (options?: {
       await MenuItem.new({
         id: 'search',
         text: 'Search Tasks...',
-        accelerator: getAcceleratorById(shortcuts, 'search') || 'CmdOrCtrl+F',
+        accelerator: getAcceleratorById(shortcuts, 'search') ?? 'CmdOrCtrl+F',
         action: () => {
           emit(MENU_EVENTS.SEARCH);
         },
@@ -255,7 +255,7 @@ export const createMacMenu = async (options?: {
   const toggleCompletedItem = await CheckMenuItem.new({
     id: 'toggle-completed',
     text: 'Show Completed Tasks',
-    accelerator: getAcceleratorById(shortcuts, 'toggle-show-completed') || 'CmdOrCtrl+Shift+H',
+    accelerator: getAcceleratorById(shortcuts, 'toggle-show-completed') ?? 'CmdOrCtrl+Shift+H',
     checked: showCompleted,
     action: () => {
       emit(MENU_EVENTS.TOGGLE_COMPLETED);

@@ -182,7 +182,7 @@ class Logger {
 
   /** Create a child logger with a sub-category */
   child(subCategory: string, color?: string): Logger {
-    return new Logger(`${this.category}:${subCategory}`, color || this.color, this.options);
+    return new Logger(`${this.category}:${subCategory}`, color ?? this.color, this.options);
   }
 
   /** Log a group of related messages */

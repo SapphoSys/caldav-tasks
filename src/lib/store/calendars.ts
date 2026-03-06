@@ -15,9 +15,9 @@ export const addCalendar = (accountId: string, calendarData: Partial<Calendar>) 
 
   const calendar: Calendar = {
     ...calendarData,
-    id: calendarData.id || generateUUID(),
-    displayName: calendarData.displayName || 'Tasks',
-    url: calendarData.url || '',
+    id: calendarData.id ?? generateUUID(),
+    displayName: calendarData.displayName ?? 'Tasks',
+    url: calendarData.url ?? '',
     accountId,
   } satisfies Calendar;
 
