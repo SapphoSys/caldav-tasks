@@ -10,7 +10,8 @@ import { useConfirmDialog } from '$hooks/useConfirmDialog';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import { caldavService } from '$lib/caldav';
 import { loggers } from '$lib/logger';
-import * as taskData from '$lib/taskData';
+import { createTag, getAllTags } from '$lib/store/tags';
+import { createTask } from '$lib/store/tasks';
 import type { Account, Calendar, ServerType } from '$types/index';
 import { generateTagColor } from '$utils/color';
 import { generateUUID } from '$utils/misc';
@@ -58,14 +59,14 @@ export const AccountModal = ({ account, onClose, preloadedConfig }: AccountModal
    * ensure a tag exists by name, returns the tag ID
    */
   const ensureTagExists = (tagName: string): string => {
-    const currentTags = taskData.getAllTags();
+    const currentTags = getAllTags();
     const existing = currentTags.find((t) => t.name.toLowerCase() === tagName.toLowerCase());
 
     if (existing) {
       return existing.id;
     }
 
-    const newTag = taskData.createTag({
+    const newTag = createTag({
       name: tagName,
       color: generateTagColor(tagName),
     });
@@ -99,7 +100,7 @@ export const AccountModal = ({ account, onClose, preloadedConfig }: AccountModal
         }
 
         // Add the task with tags
-        taskData.createTask({
+        createTask({
           ...remoteTask,
           tags: tagIds,
         });

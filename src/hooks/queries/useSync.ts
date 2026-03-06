@@ -14,7 +14,12 @@ import { toastManager } from '$hooks/useToast.tsx';
 import { caldavService } from '$lib/caldav';
 import { loggers } from '$lib/logger';
 import { queryKeys } from '$lib/queryClient';
-import * as taskData from '$lib/taskData';
+import { getAllAccounts } from '$lib/store/accounts';
+import { addCalendar, updateCalendar } from '$lib/store/calendars';
+import { clearPendingDeletion, getPendingDeletions } from '$lib/store/sync';
+import { createTag, getAllTags } from '$lib/store/tags';
+import { createTask, deleteTask, getTasksByCalendar, updateTask } from '$lib/store/tasks';
+import { getUIState, setAllTasksView } from '$lib/store/ui';
 import type { Calendar, Task } from '$types/index';
 import { generateTagColor } from '$utils/color';
 import { MENU_EVENTS } from '$utils/menu';
@@ -55,7 +60,7 @@ export const useSyncQuery = () => {
    * Reconnect all accounts on app startup
    */
   const reconnectAccounts = useCallback(async () => {
-    const accounts = taskData.getAllAccounts();
+    const accounts = getAllAccounts();
     for (const account of accounts) {
       if (!caldavService.isConnected(account.id)) {
         try {
@@ -85,7 +90,7 @@ export const useSyncQuery = () => {
    */
   const syncCalendarsForAccount = useCallback(
     async (accountId: string) => {
-      const accounts = taskData.getAllAccounts();
+      const accounts = getAllAccounts();
       const account = accounts.find((a) => a.id === accountId);
       if (!account) return;
 
@@ -158,7 +163,7 @@ export const useSyncQuery = () => {
       }
 
       // track if we need to redirect to All Tasks
-      const currentUIState = taskData.getUIState();
+      const currentUIState = getUIState();
       let needsRedirectToAllTasks = false;
 
       // remove calendars that were deleted on server
@@ -174,29 +179,29 @@ export const useSyncQuery = () => {
           }
 
           // remove tasks for this calendar
-          const tasks = taskData.getTasksByCalendar(localCalendar.id);
+          const tasks = getTasksByCalendar(localCalendar.id);
           log.warn(`Deleting ${tasks.length} tasks from calendar "${localCalendar.displayName}"`);
 
           for (const task of tasks) {
-            taskData.deleteTask(task.id);
+            deleteTask(task.id);
           }
         }
       }
 
       // persist new calendars to database
       for (const calendar of newCalendars) {
-        taskData.addCalendar(accountId, calendar);
+        addCalendar(accountId, calendar);
       }
 
       // persist calendar property updates to database
       for (const [calendarId, updates] of calendarUpdates) {
-        taskData.updateCalendar(accountId, calendarId, updates);
+        updateCalendar(accountId, calendarId, updates);
       }
 
       // if active calendar was deleted, redirect to All Tasks
       if (needsRedirectToAllTasks) {
         log.info('Active calendar was deleted on server, redirecting to All Tasks');
-        taskData.setAllTasksView();
+        setAllTasksView();
         queryClient.invalidateQueries({ queryKey: ['uiState'] });
       }
 
@@ -209,14 +214,14 @@ export const useSyncQuery = () => {
    * Ensure a tag exists by name, returns the tag ID
    */
   const ensureTagExists = useCallback((tagName: string): string => {
-    const currentTags = taskData.getAllTags();
+    const currentTags = getAllTags();
     const existing = currentTags.find((t) => t.name.toLowerCase() === tagName.toLowerCase());
 
     if (existing) {
       return existing.id;
     }
 
-    const newTag = taskData.createTag({
+    const newTag = createTag({
       name: tagName,
       color: generateTagColor(tagName),
     });
@@ -229,7 +234,7 @@ export const useSyncQuery = () => {
    */
   const syncCalendar = useCallback(
     async (calendarId: string) => {
-      const accounts = taskData.getAllAccounts();
+      const accounts = getAllAccounts();
       const account = accounts.find((a) => a.calendars.some((c) => c.id === calendarId));
 
       if (!account) {
@@ -253,7 +258,7 @@ export const useSyncQuery = () => {
         }
 
         // STEP 0: Process pending deletions for this calendar
-        const pendingDeletions = taskData.getPendingDeletions();
+        const pendingDeletions = getPendingDeletions();
         const calendarDeletions = pendingDeletions.filter((d) => d.calendarId === calendarId);
 
         for (const deletion of calendarDeletions) {
@@ -275,19 +280,19 @@ export const useSyncQuery = () => {
               createdAt: new Date(),
               modifiedAt: new Date(),
             });
-            taskData.clearPendingDeletion(deletion.uid);
+            clearPendingDeletion(deletion.uid);
           } catch (error) {
             log.error(
               `Failed to delete task from calendar ${calendar.displayName} from server:`,
               error,
             );
             // Still clear the pending deletion to avoid infinite retries
-            taskData.clearPendingDeletion(deletion.uid);
+            clearPendingDeletion(deletion.uid);
           }
         }
 
         // Get local tasks for this calendar
-        const localCalendarTasks = taskData.getTasksByCalendar(calendarId);
+        const localCalendarTasks = getTasksByCalendar(calendarId);
 
         // STEP 1: Push unsynced local tasks to server
         const unsyncedTasks = localCalendarTasks.filter((t) => !t.synced);
@@ -298,13 +303,13 @@ export const useSyncQuery = () => {
               // Update existing task on server
               const result = await caldavService.updateTask(account.id, task);
               if (result) {
-                taskData.updateTask(task.id, { etag: result.etag, synced: true });
+                updateTask(task.id, { etag: result.etag, synced: true });
               }
             } else {
               // Create new task on server
               const result = await caldavService.createTask(account.id, calendar, task);
               if (result) {
-                taskData.updateTask(task.id, {
+                updateTask(task.id, {
                   href: result.href,
                   etag: result.etag,
                   synced: true,
@@ -340,7 +345,7 @@ export const useSyncQuery = () => {
         log.info(`Fetched ${remoteTasks.length} tasks from ${calendar.displayName}`);
 
         // Re-get local tasks (may have been updated by push)
-        const updatedLocalTasks = taskData.getTasksByCalendar(calendarId);
+        const updatedLocalTasks = getTasksByCalendar(calendarId);
         const localUids = new Set(updatedLocalTasks.map((t) => t.uid));
         const remoteUids = new Set(remoteTasks.map((t) => t.uid));
 
@@ -360,7 +365,7 @@ export const useSyncQuery = () => {
             }
 
             // Add the task with tags
-            taskData.createTask({
+            createTask({
               ...remoteTask,
               tags: tagIds,
             });
@@ -387,7 +392,7 @@ export const useSyncQuery = () => {
               if (remoteTask.etag !== localTask.etag) {
                 // Only update from server if local task is synced (no local changes)
                 if (localTask.synced) {
-                  taskData.updateTask(localTask.id, {
+                  updateTask(localTask.id, {
                     ...remoteTask,
                     id: localTask.id, // Keep local ID
                     tags: remoteTagIds,
@@ -396,7 +401,7 @@ export const useSyncQuery = () => {
                 }
               } else if (!tagsMatch && localTask.synced) {
                 // Etag matches but tags don't - sync tags without marking as unsynced
-                taskData.updateTask(localTask.id, {
+                updateTask(localTask.id, {
                   tags: remoteTagIds,
                   synced: true,
                 });
@@ -409,7 +414,7 @@ export const useSyncQuery = () => {
         for (const localTask of updatedLocalTasks) {
           if (localTask.synced && !remoteUids.has(localTask.uid)) {
             // Task was deleted on server
-            taskData.deleteTask(localTask.id);
+            deleteTask(localTask.id);
           }
         }
 
@@ -451,7 +456,7 @@ export const useSyncQuery = () => {
       await reconnectAccounts();
 
       // get fresh accounts from data layer
-      let freshAccounts = taskData.getAllAccounts();
+      let freshAccounts = getAllAccounts();
 
       // sync calendars for each account (add/remove/update calendars)
       for (const account of freshAccounts) {
@@ -475,7 +480,7 @@ export const useSyncQuery = () => {
       }
 
       // re-fetch accounts after calendar sync (calendars may have been added/removed)
-      freshAccounts = taskData.getAllAccounts();
+      freshAccounts = getAllAccounts();
 
       // sync tasks for each calendar
       for (const account of freshAccounts) {
@@ -521,7 +526,7 @@ export const useSyncQuery = () => {
    */
   const pushTask = useCallback(
     async (task: Task) => {
-      const accounts = taskData.getAllAccounts();
+      const accounts = getAllAccounts();
       const account = accounts.find((a) => a.id === task.accountId);
       if (!account) return;
 
@@ -536,13 +541,13 @@ export const useSyncQuery = () => {
         // Update existing
         const result = await caldavService.updateTask(account.id, task);
         if (result) {
-          taskData.updateTask(task.id, { etag: result.etag, synced: true });
+          updateTask(task.id, { etag: result.etag, synced: true });
         }
       } else {
         // Create new
         const result = await caldavService.createTask(account.id, calendar, task);
         if (result) {
-          taskData.updateTask(task.id, { href: result.href, etag: result.etag, synced: true });
+          updateTask(task.id, { href: result.href, etag: result.etag, synced: true });
         }
       }
 
@@ -557,7 +562,7 @@ export const useSyncQuery = () => {
   const removeTaskFromServer = useCallback(async (task: Task) => {
     if (!task.href) return true; // Not on server yet
 
-    const accounts = taskData.getAllAccounts();
+    const accounts = getAllAccounts();
     const account = accounts.find((a) => a.id === task.accountId);
     if (!account) return false;
 
@@ -576,7 +581,7 @@ export const useSyncQuery = () => {
       return;
     }
 
-    const accounts = taskData.getAllAccounts();
+    const accounts = getAllAccounts();
     const syncOnStartup = settingsStore.getState().syncOnStartup;
 
     if (accounts.length > 0 && syncOnStartup) {
@@ -621,7 +626,7 @@ export const useSyncQuery = () => {
       autoSyncIntervalRef.current = null;
     }
 
-    const accounts = taskData.getAllAccounts();
+    const accounts = getAllAccounts();
     // Set up new interval if autosync is enabled
     if (autoSync && syncInterval > 0 && accounts.length > 0) {
       autoSyncIntervalRef.current = setInterval(

@@ -10,7 +10,7 @@ import { useConfirmDialog } from '$hooks/useConfirmDialog';
 import { useSettingsStore } from '$hooks/useSettingsStore';
 import { caldavService } from '$lib/caldav';
 import { loggers } from '$lib/logger';
-import * as taskData from '$lib/taskData';
+import { deleteCalendar } from '$lib/store/calendars';
 import type { Account, Tag } from '$types/index';
 
 const log = loggers.deleteHandlers;
@@ -100,7 +100,7 @@ export const useDeleteHandlers = () => {
     try {
       await caldavService.deleteCalendar(accountId, calendarId);
       // Delete calendar and its tasks from local state
-      taskData.deleteCalendar(accountId, calendarId);
+      deleteCalendar(accountId, calendarId);
 
       // If this was the active calendar, redirect to All Tasks
       if (isActiveCalendar) {

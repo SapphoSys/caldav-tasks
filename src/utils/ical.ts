@@ -4,7 +4,7 @@
  */
 
 import { loggers } from '$lib/logger';
-import * as taskData from '$lib/taskData';
+import { getTags } from '$lib/store/tags';
 import type { Priority, Reminder, Subtask, Task } from '$types/index';
 import { generateUUID } from '$utils/misc';
 
@@ -522,7 +522,7 @@ const generateVTodo = (task: Task): string => {
 
   // Tags as CATEGORIES
   if (task.tags && task.tags.length > 0) {
-    const tags = taskData.getTags();
+    const tags = getTags();
     const tagNames = task.tags
       .map((tagId) => tags.find((t) => t.id === tagId)?.name)
       .filter((name): name is string => Boolean(name));

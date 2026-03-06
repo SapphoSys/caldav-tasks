@@ -11,6 +11,8 @@ import {
 import { useConfirmDialog } from '$hooks/useConfirmDialog';
 import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
 import { useSettingsStore } from '$hooks/useSettingsStore';
+import { getSortedTasks } from '$lib/store/filters';
+import { getChildTasks } from '$lib/store/tasks';
 import type { KeyboardShortcut } from '$types/index';
 import { DEFAULT_SORT_CONFIG } from '$utils/constants';
 import {
@@ -49,10 +51,10 @@ export const useKeyboardShortcuts = (options: UseKeyboardShortcutsOptions = {}) 
   // build the flattened task list that matches visual rendering order of tasks when using keyboard navigation
   const flattenedTasks = useMemo(() => {
     const topLevelTasks = filteredTasks.filter((task) => !task.parentUid);
-    const sortedTopLevel = taskData.getSortedTasks(topLevelTasks, sortConfig);
+    const sortedTopLevel = getSortedTasks(topLevelTasks, sortConfig);
 
     const getFilteredChildTasks = (parentUid: string) => {
-      const children = taskData.getChildTasks(parentUid);
+      const children = getChildTasks(parentUid);
       if (!showCompletedTasks) {
         return children.filter((task) => !task.completed);
       }
@@ -60,7 +62,7 @@ export const useKeyboardShortcuts = (options: UseKeyboardShortcutsOptions = {}) 
     };
 
     return flattenTasks(sortedTopLevel, getFilteredChildTasks, (tasks) =>
-      taskData.getSortedTasks(tasks, sortConfig),
+      getSortedTasks(tasks, sortConfig),
     );
   }, [filteredTasks, sortConfig, showCompletedTasks]);
 

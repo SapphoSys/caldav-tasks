@@ -5,7 +5,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { queryKeys } from '$lib/queryClient';
-import * as taskData from '$lib/taskData';
+import { subscribeToDataChanges } from '$lib/store';
+import { createTag, deleteTag, getAllTags, getTagById, updateTag } from '$lib/store/tags';
+import { getTasksByTag } from '$lib/store/tasks';
 import type { Tag } from '$types/index';
 
 /**
@@ -15,14 +17,14 @@ export const useTags = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    return taskData.subscribeToDataChanges(() => {
+    return subscribeToDataChanges(() => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tags.all });
     });
   }, [queryClient]);
 
   return useQuery({
     queryKey: queryKeys.tags.all,
-    queryFn: () => taskData.getAllTags(),
+    queryFn: () => getAllTags(),
     staleTime: Infinity,
   });
 };
@@ -34,7 +36,7 @@ export const useTag = (id: string | null) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    return taskData.subscribeToDataChanges(() => {
+    return subscribeToDataChanges(() => {
       if (id) {
         queryClient.invalidateQueries({ queryKey: queryKeys.tags.byId(id) });
       }
@@ -43,7 +45,7 @@ export const useTag = (id: string | null) => {
 
   return useQuery({
     queryKey: queryKeys.tags.byId(id || ''),
-    queryFn: () => (id ? taskData.getTagById(id) : undefined),
+    queryFn: () => (id ? getTagById(id) : undefined),
     enabled: !!id,
     staleTime: Infinity,
   });
@@ -56,7 +58,7 @@ export const useTasksByTag = (tagId: string | null) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    return taskData.subscribeToDataChanges(() => {
+    return subscribeToDataChanges(() => {
       if (tagId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byTag(tagId) });
       }
@@ -65,7 +67,7 @@ export const useTasksByTag = (tagId: string | null) => {
 
   return useQuery({
     queryKey: queryKeys.tasks.byTag(tagId || ''),
-    queryFn: () => (tagId ? taskData.getTasksByTag(tagId) : []),
+    queryFn: () => (tagId ? getTasksByTag(tagId) : []),
     enabled: !!tagId,
     staleTime: Infinity,
   });
@@ -79,7 +81,7 @@ export const useCreateTag = () => {
 
   return useMutation({
     mutationFn: (tagInput: Partial<Tag>) => {
-      return Promise.resolve(taskData.createTag(tagInput));
+      return Promise.resolve(createTag(tagInput));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tags.all });
@@ -95,7 +97,7 @@ export const useUpdateTag = () => {
 
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<Tag> }) => {
-      return Promise.resolve(taskData.updateTag(id, updates));
+      return Promise.resolve(updateTag(id, updates));
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tags.all });
@@ -112,7 +114,7 @@ export const useDeleteTag = () => {
 
   return useMutation({
     mutationFn: (id: string) => {
-      taskData.deleteTag(id);
+      deleteTag(id);
       return Promise.resolve();
     },
     onSuccess: () => {

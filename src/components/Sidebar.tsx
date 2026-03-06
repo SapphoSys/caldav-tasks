@@ -38,7 +38,7 @@ import {
 import { useDeleteHandlers } from '$hooks/useDeleteHandlers';
 import { useGlobalContextMenuClose } from '$hooks/useGlobalContextMenu';
 import { useSettingsStore } from '$hooks/useSettingsStore';
-import * as taskData from '$lib/taskData';
+import { getCalendarTasks } from '$lib/store/tasks';
 import type { Account, Calendar as CalendarType } from '$types/index';
 import { getContrastTextColor } from '$utils/color';
 import { FALLBACK_ITEM_COLOR, MAX_SIDEBAR_WIDTH, MIN_SIDEBAR_WIDTH } from '$utils/constants';
@@ -1059,7 +1059,7 @@ export const Sidebar = ({
 
       {showExportModal && exportCalendarId && (
         <ExportModal
-          tasks={taskData.getCalendarTasks(exportCalendarId)}
+          tasks={getCalendarTasks(exportCalendarId)}
           type="single-calendar"
           calendarName={
             accounts.flatMap((a) => a.calendars).find((c) => c.id === exportCalendarId)?.displayName

@@ -5,7 +5,7 @@ import { relaunch } from '@tauri-apps/plugin-process';
 import { settingsStore } from '$context/settingsContext';
 import { getUIState } from '$lib/database';
 import { initLogger, loggers } from '$lib/logger';
-import { initializeDataStore } from '$lib/taskData';
+import { initializeDataStore } from '$lib/store';
 import { initAppMenu } from '$utils/menu';
 import { isCEF } from '$utils/platform';
 import { version as AppVersion } from '../../package.json';

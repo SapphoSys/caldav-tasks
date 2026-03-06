@@ -26,7 +26,13 @@ import {
 import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
 import { useContextMenu } from '$hooks/useContextMenu';
 import { useSettingsStore } from '$hooks/useSettingsStore';
-import * as taskData from '$lib/taskData';
+import { getTags } from '$lib/store/tags';
+import {
+  countChildren,
+  exportTaskAndChildren,
+  getChildTasks,
+  toggleTaskCollapsed,
+} from '$lib/store/tasks';
 import type { Task } from '$types/index';
 import { getContrastTextColor } from '$utils/color';
 import { FALLBACK_ITEM_COLOR } from '$utils/constants';
@@ -81,8 +87,8 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
   // get contrast color for checkbox checkmark
   const checkmarkColor = getContrastTextColor(accentColor);
 
-  const childCount = taskData.countChildren(task.uid);
-  const allChildTasks = taskData.getChildTasks(task.uid);
+  const childCount = countChildren(task.uid);
+  const allChildTasks = getChildTasks(task.uid);
   const hiddenChildCount = !showCompletedTasks
     ? allChildTasks.filter((child) => child.completed).length
     : 0;
@@ -90,7 +96,7 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
   const totalSubtasks = task.subtasks.length;
 
   // helper to get tag by id
-  const getTagById = (tagId: string) => taskData.getTags().find((t) => t.id === tagId);
+  const getTagById = (tagId: string) => getTags().find((t) => t.id === tagId);
 
   // Custom animateLayoutChanges: disable animation when the drag ends (wasDragging transitions to false)
   // This prevents the "items crossing each other" animation glitch
@@ -168,7 +174,7 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
   };
 
   const handleExport = () => {
-    const result = taskData.exportTaskAndChildren(task.id);
+    const result = exportTaskAndChildren(task.id);
     if (result) {
       setShowExportModal(true);
     }
@@ -177,7 +183,7 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
 
   const handleToggleCollapsed = (e: React.MouseEvent) => {
     e.stopPropagation();
-    taskData.toggleTaskCollapsed(task.id);
+    toggleTaskCollapsed(task.id);
   };
 
   // todo: implement duplicate functionality at some point
@@ -447,7 +453,7 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
 
       {showExportModal && (
         <ExportModal
-          tasks={[task, ...(taskData.exportTaskAndChildren(task.id)?.descendants || [])]}
+          tasks={[task, ...(exportTaskAndChildren(task.id)?.descendants || [])]}
           fileName={task.title.replace(/[^a-z0-9]/gi, '-').toLowerCase() || 'task'}
           type="tasks"
           onClose={() => setShowExportModal(false)}

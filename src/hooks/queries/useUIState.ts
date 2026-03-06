@@ -4,7 +4,19 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import * as taskData from '$lib/taskData';
+import { subscribeToDataChanges } from '$lib/store';
+import {
+  getUIState,
+  setActiveAccount,
+  setActiveCalendar,
+  setActiveTag,
+  setAllTasksView,
+  setEditorOpen,
+  setSearchQuery,
+  setSelectedTask,
+  setShowCompletedTasks,
+  setSortConfig,
+} from '$lib/store/ui';
 import type { SortConfig } from '$types/index';
 import { DEFAULT_SORT_CONFIG } from '$utils/constants';
 
@@ -15,14 +27,14 @@ export const useUIState = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    return taskData.subscribeToDataChanges(() => {
+    return subscribeToDataChanges(() => {
       queryClient.invalidateQueries({ queryKey: ['uiState'] });
     });
   }, [queryClient]);
 
   return useQuery({
     queryKey: ['uiState'],
-    queryFn: () => taskData.getUIState(),
+    queryFn: () => getUIState(),
     staleTime: Infinity,
   });
 };
@@ -99,7 +111,7 @@ export const useSetActiveAccount = () => {
 
   return useMutation({
     mutationFn: (id: string | null) => {
-      taskData.setActiveAccount(id);
+      setActiveAccount(id);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -116,7 +128,7 @@ export const useSetActiveCalendar = () => {
 
   return useMutation({
     mutationFn: (id: string | null) => {
-      taskData.setActiveCalendar(id);
+      setActiveCalendar(id);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -134,7 +146,7 @@ export const useSetActiveTag = () => {
 
   return useMutation({
     mutationFn: (id: string | null) => {
-      taskData.setActiveTag(id);
+      setActiveTag(id);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -152,7 +164,7 @@ export const useSetAllTasksView = () => {
 
   return useMutation({
     mutationFn: () => {
-      taskData.setAllTasksView();
+      setAllTasksView();
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -170,7 +182,7 @@ export const useSetSelectedTask = () => {
 
   return useMutation({
     mutationFn: (id: string | null) => {
-      taskData.setSelectedTask(id);
+      setSelectedTask(id);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -187,7 +199,7 @@ export const useSetEditorOpen = () => {
 
   return useMutation({
     mutationFn: (open: boolean) => {
-      taskData.setEditorOpen(open);
+      setEditorOpen(open);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -204,7 +216,7 @@ export const useSetSearchQuery = () => {
 
   return useMutation({
     mutationFn: (query: string) => {
-      taskData.setSearchQuery(query);
+      setSearchQuery(query);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -222,7 +234,7 @@ export const useSetSortConfig = () => {
 
   return useMutation({
     mutationFn: (config: SortConfig) => {
-      taskData.setSortConfig(config);
+      setSortConfig(config);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -239,7 +251,7 @@ export const useSetShowCompletedTasks = () => {
 
   return useMutation({
     mutationFn: (show: boolean) => {
-      taskData.setShowCompletedTasks(show);
+      setShowCompletedTasks(show);
       return Promise.resolve();
     },
     onSuccess: () => {

@@ -17,7 +17,8 @@ import { TaskItem } from '$components/TaskItem';
 import { useCreateTask, useFilteredTasks, useReorderTasks } from '$hooks/queries/useTasks';
 import { useSetSelectedTask, useUIState } from '$hooks/queries/useUIState';
 import { loggers } from '$lib/logger';
-import * as taskData from '$lib/taskData';
+import { getSortedTasks } from '$lib/store/filters';
+import { getChildTasks } from '$lib/store/tasks';
 import { DEFAULT_SORT_CONFIG, TASK_LIST_INDENT_SHIFT_SIZE } from '$utils/constants';
 import { getMetaKeyLabel, getModifierJoiner } from '$utils/keyboard';
 import { type FlattenedTask, flattenTasks } from '$utils/tree';
@@ -52,13 +53,13 @@ export const TaskList = () => {
   );
 
   const sortedTasks = useMemo(
-    () => taskData.getSortedTasks(topLevelTasks, sortConfig),
+    () => getSortedTasks(topLevelTasks, sortConfig),
     [topLevelTasks, sortConfig],
   );
 
   const getFilteredChildTasks = useCallback(
     (parentUid: string) => {
-      const children = taskData.getChildTasks(parentUid);
+      const children = getChildTasks(parentUid);
       if (!showCompletedTasks) {
         return children.filter((task) => !task.completed);
       }
@@ -71,7 +72,7 @@ export const TaskList = () => {
   const flattenedTasks = useMemo(
     () =>
       flattenTasks(sortedTasks, getFilteredChildTasks, (tasks) =>
-        taskData.getSortedTasks(tasks, sortConfig),
+        getSortedTasks(tasks, sortConfig),
       ),
     [sortedTasks, getFilteredChildTasks, sortConfig],
   );

@@ -41,7 +41,8 @@ import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
 import { useDebouncedTaskUpdate } from '$hooks/useDebouncedTaskUpdate';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import { useSettingsStore } from '$hooks/useSettingsStore';
-import * as taskData from '$lib/taskData';
+import { getTags } from '$lib/store/tags';
+import { countChildren, getChildTasks } from '$lib/store/tasks';
 import type { Priority, Task } from '$types/index';
 import { getContrastTextColor } from '$utils/color';
 import { filterCalDavDescription } from '$utils/ical';
@@ -96,10 +97,10 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
   const editorContainerRef = useRef<HTMLDivElement>(null);
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const childTasks = taskData.getChildTasks(task.uid);
-  const childCount = taskData.countChildren(task.uid);
+  const childTasks = getChildTasks(task.uid);
+  const childCount = countChildren(task.uid);
   const taskTags = (task.tags || [])
-    .map((tagId) => taskData.getTags().find((t) => t.id === tagId))
+    .map((tagId) => getTags().find((t) => t.id === tagId))
     .filter(Boolean);
   const availableTags = tags.filter((t) => !(task.tags || []).includes(t.id));
 
@@ -649,8 +650,8 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
                 setExpandedSubtasks={setExpandedSubtasks}
                 updateTask={(id, updates) => updateTaskMutation.mutate({ id, updates })}
                 confirmAndDelete={confirmAndDelete}
-                getChildTasks={taskData.getChildTasks}
-                countChildren={taskData.countChildren}
+                getChildTasks={getChildTasks}
+                countChildren={countChildren}
               />
             ))}
 

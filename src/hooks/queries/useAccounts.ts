@@ -5,7 +5,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { queryKeys } from '$lib/queryClient';
-import * as taskData from '$lib/taskData';
+import { subscribeToDataChanges } from '$lib/store';
+import {
+  createAccount,
+  deleteAccount,
+  getAccountById,
+  getAllAccounts,
+  updateAccount,
+} from '$lib/store/accounts';
+import { addCalendar } from '$lib/store/calendars';
 import type { Account, Calendar } from '$types/index';
 
 /**
@@ -15,14 +23,14 @@ export const useAccounts = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    return taskData.subscribeToDataChanges(() => {
+    return subscribeToDataChanges(() => {
       queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
     });
   }, [queryClient]);
 
   return useQuery({
     queryKey: queryKeys.accounts.all,
-    queryFn: () => taskData.getAllAccounts(),
+    queryFn: () => getAllAccounts(),
     staleTime: Infinity,
   });
 };
@@ -34,7 +42,7 @@ export const useAccount = (id: string | null) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    return taskData.subscribeToDataChanges(() => {
+    return subscribeToDataChanges(() => {
       if (id) {
         queryClient.invalidateQueries({ queryKey: queryKeys.accounts.byId(id) });
       }
@@ -43,7 +51,7 @@ export const useAccount = (id: string | null) => {
 
   return useQuery({
     queryKey: queryKeys.accounts.byId(id || ''),
-    queryFn: () => (id ? taskData.getAccountById(id) : undefined),
+    queryFn: () => (id ? getAccountById(id) : undefined),
     enabled: !!id,
     staleTime: Infinity,
   });
@@ -57,7 +65,7 @@ export const useCreateAccount = () => {
 
   return useMutation({
     mutationFn: (accountInput: Partial<Account>) => {
-      return Promise.resolve(taskData.createAccount(accountInput));
+      return Promise.resolve(createAccount(accountInput));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
@@ -73,7 +81,7 @@ export const useUpdateAccount = () => {
 
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<Account> }) => {
-      return Promise.resolve(taskData.updateAccount(id, updates));
+      return Promise.resolve(updateAccount(id, updates));
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
@@ -90,7 +98,7 @@ export const useDeleteAccount = () => {
 
   return useMutation({
     mutationFn: (id: string) => {
-      taskData.deleteAccount(id);
+      deleteAccount(id);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -114,7 +122,7 @@ export const useAddCalendar = () => {
       accountId: string;
       calendarData: Partial<Calendar>;
     }) => {
-      taskData.addCalendar(accountId, calendarData);
+      addCalendar(accountId, calendarData);
       return Promise.resolve();
     },
     onSuccess: () => {

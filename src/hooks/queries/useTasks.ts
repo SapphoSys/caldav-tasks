@@ -5,7 +5,33 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { queryKeys } from '$lib/queryClient';
-import * as taskData from '$lib/taskData';
+import { subscribeToDataChanges } from '$lib/store';
+import { getFilteredTasks, getSortedTasks } from '$lib/store/filters';
+import { addReminder, removeReminder, updateReminder } from '$lib/store/reminders';
+import { reorderTasks } from '$lib/store/reorder';
+import {
+  addSubtask,
+  deleteSubtask,
+  toggleSubtaskComplete,
+  updateSubtask,
+} from '$lib/store/subtasks';
+import {
+  addTagToTask,
+  countChildren,
+  createTask,
+  deleteTask,
+  exportTaskAndChildren,
+  getAllDescendants,
+  getAllTasks,
+  getChildTasks,
+  getTaskById,
+  getTasksByCalendar,
+  removeTagFromTask,
+  setTaskParent,
+  toggleTaskCollapsed,
+  toggleTaskComplete,
+  updateTask,
+} from '$lib/store/tasks';
 import type { SortConfig, Subtask, Task } from '$types/index';
 import type { FlattenedTask } from '$utils/tree';
 
@@ -16,14 +42,14 @@ export const useTasks = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    return taskData.subscribeToDataChanges(() => {
+    return subscribeToDataChanges(() => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
     });
   }, [queryClient]);
 
   return useQuery({
     queryKey: queryKeys.tasks.all,
-    queryFn: () => taskData.getAllTasks(),
+    queryFn: () => getAllTasks(),
     staleTime: Infinity, // Data is managed by our data layer
   });
 };
@@ -35,14 +61,14 @@ export const useFilteredTasks = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    return taskData.subscribeToDataChanges(() => {
+    return subscribeToDataChanges(() => {
       queryClient.invalidateQueries({ queryKey: ['filteredTasks'] });
     });
   }, [queryClient]);
 
   return useQuery({
     queryKey: ['filteredTasks'],
-    queryFn: () => taskData.getFilteredTasks(),
+    queryFn: () => getFilteredTasks(),
     staleTime: Infinity,
   });
 };
@@ -53,7 +79,7 @@ export const useFilteredTasks = () => {
 export const useSortedTasks = (tasks: Task[], sortConfig?: SortConfig) => {
   return useQuery({
     queryKey: ['sortedTasks', tasks.map((t) => t.id), sortConfig],
-    queryFn: () => taskData.getSortedTasks(tasks, sortConfig),
+    queryFn: () => getSortedTasks(tasks, sortConfig),
     staleTime: Infinity,
   });
 };
@@ -65,7 +91,7 @@ export const useTask = (id: string | null) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    return taskData.subscribeToDataChanges(() => {
+    return subscribeToDataChanges(() => {
       if (id) {
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byId(id) });
       }
@@ -74,7 +100,7 @@ export const useTask = (id: string | null) => {
 
   return useQuery({
     queryKey: queryKeys.tasks.byId(id || ''),
-    queryFn: () => (id ? taskData.getTaskById(id) : undefined),
+    queryFn: () => (id ? getTaskById(id) : undefined),
     enabled: !!id,
     staleTime: Infinity,
   });
@@ -87,7 +113,7 @@ export const useTasksByCalendar = (calendarId: string | null) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    return taskData.subscribeToDataChanges(() => {
+    return subscribeToDataChanges(() => {
       if (calendarId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byCalendar(calendarId) });
       }
@@ -96,7 +122,7 @@ export const useTasksByCalendar = (calendarId: string | null) => {
 
   return useQuery({
     queryKey: queryKeys.tasks.byCalendar(calendarId || ''),
-    queryFn: () => (calendarId ? taskData.getTasksByCalendar(calendarId) : []),
+    queryFn: () => (calendarId ? getTasksByCalendar(calendarId) : []),
     enabled: !!calendarId,
     staleTime: Infinity,
   });
@@ -109,7 +135,7 @@ export const useChildTasks = (parentUid: string | undefined) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    return taskData.subscribeToDataChanges(() => {
+    return subscribeToDataChanges(() => {
       if (parentUid) {
         queryClient.invalidateQueries({ queryKey: ['childTasks', parentUid] });
       }
@@ -118,7 +144,7 @@ export const useChildTasks = (parentUid: string | undefined) => {
 
   return useQuery({
     queryKey: ['childTasks', parentUid || ''],
-    queryFn: () => (parentUid ? taskData.getChildTasks(parentUid) : []),
+    queryFn: () => (parentUid ? getChildTasks(parentUid) : []),
     enabled: !!parentUid,
     staleTime: Infinity,
   });
@@ -132,7 +158,7 @@ export const useCreateTask = () => {
 
   return useMutation({
     mutationFn: (taskInput: Partial<Task>) => {
-      return Promise.resolve(taskData.createTask(taskInput));
+      return Promise.resolve(createTask(taskInput));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
@@ -148,7 +174,7 @@ export const useUpdateTask = () => {
 
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<Task> }) => {
-      return Promise.resolve(taskData.updateTask(id, updates));
+      return Promise.resolve(updateTask(id, updates));
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
@@ -165,7 +191,7 @@ export const useDeleteTask = () => {
 
   return useMutation({
     mutationFn: ({ id, deleteChildren = true }: { id: string; deleteChildren?: boolean }) => {
-      taskData.deleteTask(id, deleteChildren);
+      deleteTask(id, deleteChildren);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -182,7 +208,7 @@ export const useToggleTaskComplete = () => {
 
   return useMutation({
     mutationFn: (id: string) => {
-      taskData.toggleTaskComplete(id);
+      toggleTaskComplete(id);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -199,7 +225,7 @@ export const useToggleTaskCollapsed = () => {
 
   return useMutation({
     mutationFn: (id: string) => {
-      taskData.toggleTaskCollapsed(id);
+      toggleTaskCollapsed(id);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -216,7 +242,7 @@ export const useSetTaskParent = () => {
 
   return useMutation({
     mutationFn: ({ taskId, parentUid }: { taskId: string; parentUid: string | undefined }) => {
-      taskData.setTaskParent(taskId, parentUid);
+      setTaskParent(taskId, parentUid);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -243,7 +269,7 @@ export const useReorderTasks = () => {
       flattenedItems: FlattenedTask[];
       targetIndent?: number;
     }) => {
-      taskData.reorderTasks(activeId, overId, flattenedItems, targetIndent);
+      reorderTasks(activeId, overId, flattenedItems, targetIndent);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -257,7 +283,7 @@ export const useAddSubtask = () => {
 
   return useMutation({
     mutationFn: ({ taskId, title }: { taskId: string; title: string }) => {
-      taskData.addSubtask(taskId, title);
+      addSubtask(taskId, title);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -279,7 +305,7 @@ export const useUpdateSubtask = () => {
       subtaskId: string;
       updates: Partial<Subtask>;
     }) => {
-      taskData.updateSubtask(taskId, subtaskId, updates);
+      updateSubtask(taskId, subtaskId, updates);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -293,7 +319,7 @@ export const useDeleteSubtask = () => {
 
   return useMutation({
     mutationFn: ({ taskId, subtaskId }: { taskId: string; subtaskId: string }) => {
-      taskData.deleteSubtask(taskId, subtaskId);
+      deleteSubtask(taskId, subtaskId);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -307,7 +333,7 @@ export const useToggleSubtaskComplete = () => {
 
   return useMutation({
     mutationFn: ({ taskId, subtaskId }: { taskId: string; subtaskId: string }) => {
-      taskData.toggleSubtaskComplete(taskId, subtaskId);
+      toggleSubtaskComplete(taskId, subtaskId);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -321,7 +347,7 @@ export const useAddTagToTask = () => {
 
   return useMutation({
     mutationFn: ({ taskId, tagId }: { taskId: string; tagId: string }) => {
-      taskData.addTagToTask(taskId, tagId);
+      addTagToTask(taskId, tagId);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -335,7 +361,7 @@ export const useRemoveTagFromTask = () => {
 
   return useMutation({
     mutationFn: ({ taskId, tagId }: { taskId: string; tagId: string }) => {
-      taskData.removeTagFromTask(taskId, tagId);
+      removeTagFromTask(taskId, tagId);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -349,7 +375,7 @@ export const useAddReminder = () => {
 
   return useMutation({
     mutationFn: ({ taskId, trigger }: { taskId: string; trigger: Date }) => {
-      taskData.addReminder(taskId, trigger);
+      addReminder(taskId, trigger);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -363,7 +389,7 @@ export const useRemoveReminder = () => {
 
   return useMutation({
     mutationFn: ({ taskId, reminderId }: { taskId: string; reminderId: string }) => {
-      taskData.removeReminder(taskId, reminderId);
+      removeReminder(taskId, reminderId);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -385,7 +411,7 @@ export const useUpdateReminder = () => {
       reminderId: string;
       trigger: Date;
     }) => {
-      taskData.updateReminder(taskId, reminderId, trigger);
+      updateReminder(taskId, reminderId, trigger);
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -400,7 +426,7 @@ export const useUpdateReminder = () => {
 export const useCountChildren = (parentUid: string | undefined) => {
   return useQuery({
     queryKey: ['countChildren', parentUid || ''],
-    queryFn: () => (parentUid ? taskData.countChildren(parentUid) : 0),
+    queryFn: () => (parentUid ? countChildren(parentUid) : 0),
     enabled: !!parentUid,
     staleTime: Infinity,
   });
@@ -412,7 +438,7 @@ export const useCountChildren = (parentUid: string | undefined) => {
 export const useAllDescendants = (parentUid: string | undefined) => {
   return useQuery({
     queryKey: ['allDescendants', parentUid || ''],
-    queryFn: () => (parentUid ? taskData.getAllDescendants(parentUid) : []),
+    queryFn: () => (parentUid ? getAllDescendants(parentUid) : []),
     enabled: !!parentUid,
     staleTime: Infinity,
   });
@@ -424,7 +450,7 @@ export const useAllDescendants = (parentUid: string | undefined) => {
 export const useExportTaskAndChildren = (taskId: string | null) => {
   return useQuery({
     queryKey: ['exportTask', taskId || ''],
-    queryFn: () => (taskId ? taskData.exportTaskAndChildren(taskId) : null),
+    queryFn: () => (taskId ? exportTaskAndChildren(taskId) : null),
     enabled: !!taskId,
     staleTime: Infinity,
   });
