@@ -6,6 +6,7 @@
 mod app_nap;
 mod desktop_env;
 mod migrations;
+mod plist_utils;
 mod tray;
 
 use tauri::{Manager, RunEvent, WindowEvent};
@@ -85,7 +86,8 @@ fn main() {
             tray::update_tray_sync_enabled,
             tray::set_tray_visible,
             tray::get_tray_enabled,
-            tray::initialize_tray
+            tray::initialize_tray,
+            plist_utils::convert_plist_to_xml
         ])
         .setup(|_app| {
             // Configure titlebar BEFORE window is shown (must happen before realization)

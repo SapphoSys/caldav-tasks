@@ -1,3 +1,4 @@
+import { invoke } from '@tauri-apps/api/core';
 import { useCallback, useState } from 'react';
 import { loggers } from '$lib/logger';
 import { type CalDAVConfig, parseAppleConfigProfile } from '$utils/mobileconfig';
@@ -75,8 +76,38 @@ export const useFileDrop = (options: UseFileDropOptions = {}): UseFileDropReturn
       const isMobileConfig = file.name.toLowerCase().endsWith('.mobileconfig');
       if (isMobileConfig) {
         try {
-          const content = await file.text();
-          const config = parseAppleConfigProfile(content);
+          // Read file as array buffer first
+          const arrayBuffer = await file.arrayBuffer();
+          const bytes = new Uint8Array(arrayBuffer);
+
+          // Try to detect if it's XML by checking the first few bytes
+          const textDecoder = new TextDecoder('utf-8');
+          const preview = textDecoder.decode(bytes.slice(0, 100));
+
+          let xmlContent: string;
+
+          if (preview.trimStart().startsWith('<?xml') || preview.includes('<!DOCTYPE plist')) {
+            xmlContent = textDecoder.decode(bytes);
+            log.debug('Detected XML format mobileconfig');
+          } else {
+            log.debug('Detected binary format mobileconfig, converting...');
+            try {
+              xmlContent = await invoke<string>('convert_plist_to_xml', {
+                data: Array.from(bytes),
+              });
+              log.debug('Binary plist converted successfully, XML length:', xmlContent.length);
+            } catch (err) {
+              log.error('Failed to convert binary plist:', err);
+              throw err;
+            }
+          }
+
+          if (!xmlContent || xmlContent.trim().length === 0) {
+            log.error('XML content is empty after conversion');
+            throw new Error('Empty XML content');
+          }
+
+          const config = parseAppleConfigProfile(xmlContent);
           if (config) {
             onConfigProfileDrop?.(config);
           } else {

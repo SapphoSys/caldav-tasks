@@ -27,6 +27,9 @@ log = "0.4"
 tauri-plugin-opener = "2"
 tauri-plugin-updater = "2.9.0"
 tauri-plugin-single-instance = "2"
+plist = "1.7"
+cms = "0.3.0-pre.2"
+der = { version = "0.8", features = ["ber"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.5"
