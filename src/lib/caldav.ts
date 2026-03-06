@@ -3,6 +3,7 @@ import { loggers } from '$lib/logger';
 import {
   type CalDAVCredentials,
   del,
+  type HttpResponse,
   mkcalendar,
   parseMultiStatus,
   propfind,
@@ -20,7 +21,84 @@ if (import.meta.hot) {
   import.meta.hot.accept();
 }
 
+// Server-specific URL templates for different CalDAV implementations
+interface ServerConfig {
+  principalPath: (username: string) => string;
+  calendarHomePath?: (username: string) => string; // Optional, defaults to principalPath
+}
+
+/**
+ * Common URL patterns to identify and strip known CalDAV paths from user input
+ */
+const CALDAV_PATH_PATTERNS = [
+  /(?<!:)\/remote\.php\/dav.*$/i, // Nextcloud
+  /(?<!:)\/dav\.php.*$/i, // Baikal
+  /(?<!:)\/caldav(?:\/.*)?$/i, // Various servers
+  /(?<!:)\/\.well-known\/caldav.*$/i, // Well-known
+];
+
+/**
+ * Predefined server configurations for popular CalDAV servers
+ */
+const SERVER_CONFIGS: Record<string, ServerConfig> = {
+  rustical: {
+    principalPath: (username) => `/caldav/principal/${username}/`,
+  },
+  radicale: {
+    principalPath: (username) => `/${username}/`,
+  },
+  baikal: {
+    principalPath: (username) => `/dav.php/principals/${username}/`,
+  },
+  nextcloud: {
+    principalPath: (username) => `/remote.php/dav/principals/users/${username}/`,
+    calendarHomePath: (username) => `/remote.php/dav/calendars/${username}/`,
+  },
+};
+
 class CalDAVService {
+  /**
+   * Helper: handle common HTTP error status codes
+   */
+  private handleCommonHttpErrors(response: HttpResponse, context: string = 'CalDAV'): void {
+    if (response.status === 429) {
+      throw new Error('Rate limit exceeded. Try again in a moment.');
+    }
+    if (response.status === 401) {
+      throw new Error('Authentication failed. Check your credentials.');
+    }
+    if (response.status === 403) {
+      throw new Error('Access forbidden. Check your permissions.');
+    }
+    if (response.status === 404) {
+      throw new Error(`${context} not found at this URL.`);
+    }
+    if (response.status >= 500) {
+      throw new Error(`Server error (${response.status}). Try again later.`);
+    }
+  }
+
+  /**
+   * Helper: convert relative URL to absolute URL
+   */
+  private makeAbsoluteUrl(href: string, baseUrl: string): string {
+    return href.startsWith('http') ? href : new URL(href, baseUrl).toString();
+  }
+
+  /**
+   * Helper: clean ETag by removing quotes
+   */
+  private cleanEtag(etag: string | null | undefined): string {
+    return etag?.replace(/"/g, '') ?? '';
+  }
+
+  /**
+   * Helper: normalize URL by removing trailing slash
+   */
+  private normalizeUrl(url: string): string {
+    return url.replace(/\/$/, '');
+  }
+
   /**
    * connect to a CalDAV account
    * supports multiple server types with different URL structures for the moment:
@@ -46,14 +124,7 @@ class CalDAVService {
     // For generic type, extract base URL from common CalDAV path patterns
     // This helps when users paste full DAV URLs instead of just the base URL
     if (serverType === 'generic') {
-      const caldavPathPatterns = [
-        /(?<!:)\/remote\.php\/dav.*$/i, // Nextcloud
-        /(?<!:)\/dav\.php.*$/i, // Baikal
-        /(?<!:)\/caldav(?:\/.*)?$/i, // Various servers
-        /(?<!:)\/\.well-known\/caldav.*$/i, // Well-known
-      ];
-
-      for (const pattern of caldavPathPatterns) {
+      for (const pattern of CALDAV_PATH_PATTERNS) {
         if (pattern.test(baseUrl)) {
           baseUrl = baseUrl.replace(pattern, '');
           break;
@@ -67,21 +138,16 @@ class CalDAVService {
 
     switch (serverType) {
       case 'rustical':
-        principalUrl = `${baseUrl}/caldav/principal/${username}/`;
-        calendarHome = principalUrl;
-        break;
       case 'radicale':
-        principalUrl = `${baseUrl}/${username}/`;
-        calendarHome = principalUrl;
-        break;
       case 'baikal':
-        principalUrl = `${baseUrl}/dav.php/principals/${username}/`;
-        calendarHome = principalUrl;
+      case 'nextcloud': {
+        const config = SERVER_CONFIGS[serverType];
+        principalUrl = `${baseUrl}${config.principalPath(username)}`;
+        calendarHome = config.calendarHomePath
+          ? `${baseUrl}${config.calendarHomePath(username)}`
+          : principalUrl;
         break;
-      case 'nextcloud':
-        principalUrl = `${baseUrl}/remote.php/dav/principals/users/${username}/`;
-        calendarHome = `${baseUrl}/remote.php/dav/calendars/${username}/`;
-        break;
+      }
       case 'generic': {
         // for generic servers, perform proper CalDAV discovery per RFC 4791
 
@@ -101,21 +167,7 @@ class CalDAVService {
         );
 
         // Check for specific HTTP error codes at the well-known endpoint
-        if (wellKnownResponse.status === 429) {
-          throw new Error('Rate limit exceeded. Try again in a moment.');
-        }
-        if (wellKnownResponse.status === 401) {
-          throw new Error('Authentication failed (401). Check your credentials.');
-        }
-        if (wellKnownResponse.status === 403) {
-          throw new Error('Authentication failed (403). Check your credentials.');
-        }
-        if (wellKnownResponse.status === 404) {
-          throw new Error('CalDAV service not found at this URL.');
-        }
-        if (wellKnownResponse.status >= 500) {
-          throw new Error(`Server error (${wellKnownResponse.status}). Try again later.`);
-        }
+        this.handleCommonHttpErrors(wellKnownResponse, 'CalDAV service');
 
         // step 2: discover current-user-principal
         let discoveredPrincipal = await this.discoverPrincipal(wellKnownUrl, credentials);
@@ -139,9 +191,7 @@ class CalDAVService {
         }
 
         // make principal URL absolute
-        principalUrl = discoveredPrincipal.startsWith('http')
-          ? discoveredPrincipal
-          : new URL(discoveredPrincipal, baseUrl).toString();
+        principalUrl = this.makeAbsoluteUrl(discoveredPrincipal, baseUrl);
 
         // step 3: discover calendar-home-set from principal
         const discoveredCalendarHome = await this.discoverCalendarHome(principalUrl, credentials);
@@ -151,9 +201,7 @@ class CalDAVService {
         }
 
         // make calendar home URL absolute
-        calendarHome = discoveredCalendarHome.startsWith('http')
-          ? discoveredCalendarHome
-          : new URL(discoveredCalendarHome, baseUrl).toString();
+        calendarHome = this.makeAbsoluteUrl(discoveredCalendarHome, baseUrl);
 
         break;
       }
@@ -261,10 +309,7 @@ class CalDAVService {
       }
 
       // build absolute URL
-      let calendarUrl = result.href;
-      if (!calendarUrl.startsWith('http')) {
-        calendarUrl = new URL(result.href, conn.serverUrl).toString();
-      }
+      const calendarUrl = this.makeAbsoluteUrl(result.href, conn.serverUrl);
 
       calendars.push({
         id: calendarUrl,
@@ -329,8 +374,8 @@ class CalDAVService {
       .filter((href) => {
         if (!href || href.length === 0) return false;
 
-        const normalizedHref = href.replace(/\/$/, '');
-        const normalizedCalendarUrl = calendar.url.replace(/\/$/, '');
+        const normalizedHref = this.normalizeUrl(href);
+        const normalizedCalendarUrl = this.normalizeUrl(calendar.url);
 
         // extract path from calendar URL if it's absolute
         let calendarPath = normalizedCalendarUrl;
@@ -402,16 +447,13 @@ ${hrefs.map((href) => `  <d:href>${href}</d:href>`).join('\n')}
 
     for (const result of results) {
       const calendarData = result.props['calendar-data'];
-      const etag = result.props.getetag?.replace(/"/g, '');
+      const etag = this.cleanEtag(result.props.getetag);
 
       if (calendarData) {
         // build absolute URL
-        let href = result.href;
-        if (!href.startsWith('http')) {
-          href = new URL(result.href, conn.serverUrl).toString();
-        }
+        const href = this.makeAbsoluteUrl(result.href, conn.serverUrl);
 
-        const task = vtodoToTask(calendarData, accountId, calendar.id, href, etag || undefined);
+        const task = vtodoToTask(calendarData, accountId, calendar.id, href, etag ?? undefined);
         if (task) {
           tasks.push(task);
         }
@@ -433,12 +475,12 @@ ${hrefs.map((href) => `  <d:href>${href}</d:href>`).join('\n')}
     try {
       const icalData = taskToVTodo(task);
       const filename = `${task.uid}.ics`;
-      const url = `${calendar.url.replace(/\/$/, '')}/${filename}`;
+      const url = `${this.normalizeUrl(calendar.url)}/${filename}`;
 
       const response = await put(url, conn.credentials, icalData);
 
       if (response.status === 201 || response.status === 204) {
-        const etag = response.headers.etag?.replace(/"/g, '') ?? '';
+        const etag = this.cleanEtag(response.headers.etag);
         return { href: url, etag };
       }
 
@@ -464,7 +506,7 @@ ${hrefs.map((href) => `  <d:href>${href}</d:href>`).join('\n')}
       const response = await put(task.href, conn.credentials, icalData, task.etag);
 
       if (response.status === 200 || response.status === 201 || response.status === 204) {
-        const etag = response.headers.etag?.replace(/"/g, '') ?? '';
+        const etag = this.cleanEtag(response.headers.etag);
         return { etag };
       }
 
@@ -628,21 +670,7 @@ ${hrefs.map((href) => `  <d:href>${href}</d:href>`).join('\n')}
     const response = await propfind(davRootUrl, credentials, propfindBody, '0');
 
     // Check for specific HTTP error codes and throw meaningful errors
-    if (response.status === 429) {
-      throw new Error('Rate limit exceeded. Try again in a moment.');
-    }
-    if (response.status === 401) {
-      throw new Error('Authentication failed. Check your credentials.');
-    }
-    if (response.status === 403) {
-      throw new Error('Access forbidden. Check your permissions.');
-    }
-    if (response.status === 404) {
-      throw new Error('CalDAV service not found at this URL.');
-    }
-    if (response.status >= 500) {
-      throw new Error(`Server error (${response.status}). Try again later.`);
-    }
+    this.handleCommonHttpErrors(response, 'CalDAV service');
     if (response.status !== 207) {
       return null;
     }
@@ -680,21 +708,7 @@ ${hrefs.map((href) => `  <d:href>${href}</d:href>`).join('\n')}
     const response = await propfind(principalUrl, credentials, propfindBody, '0');
 
     // Check for specific HTTP error codes and throw meaningful errors
-    if (response.status === 429) {
-      throw new Error('Rate limit exceeded. Try again in a moment.');
-    }
-    if (response.status === 401) {
-      throw new Error('Authentication failed. Check your credentials.');
-    }
-    if (response.status === 403) {
-      throw new Error('Access forbidden. Check your permissions.');
-    }
-    if (response.status === 404) {
-      throw new Error('CalDAV principal not found.');
-    }
-    if (response.status >= 500) {
-      throw new Error(`Server error (${response.status}). Try again later.`);
-    }
+    this.handleCommonHttpErrors(response, 'CalDAV principal');
     if (response.status !== 207) {
       return null;
     }
