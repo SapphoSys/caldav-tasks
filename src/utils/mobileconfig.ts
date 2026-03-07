@@ -2,13 +2,61 @@
  * Utility functions for parsing Apple Configuration Profile (.mobileconfig) files
  */
 
+import type { ServerType } from '$types/index';
+
 export interface CalDAVConfig {
   accountName?: string;
   serverUrl?: string;
   username?: string;
   password?: string;
   principalUrl?: string;
+  serverType?: ServerType;
 }
+
+/**
+ * Detect server type based on hostname and principal URL
+ *
+ * Detection is based on CalDAVPrincipalURL patterns found in .mobileconfig files.
+ * Each server type has a distinct URL structure verified from their source code:
+ * - Baikal: /dav.php/principals/{username}/
+ * - Radicale: /{username}/ (simple flat structure at root)
+ * - Nextcloud: /remote.php/dav/principals/users/{username}/
+ * - RustiCal: /caldav/principal/{username}/
+ */
+const detectServerType = (hostname: string | null, principalUrl: string | null): ServerType => {
+  // Check hostname patterns first (managed services)
+  if (hostname) {
+    const host = hostname.toLowerCase();
+    if (host.includes('fastmail.com')) return 'fastmail';
+    if (host.includes('mailbox.org')) return 'mailbox';
+  }
+
+  // Check principal URL path pattern
+  if (principalUrl) {
+    const path = principalUrl.toLowerCase();
+
+    // RustiCal: /caldav/principal/{username}/
+    if (path.includes('/caldav/principal/')) return 'rustical';
+
+    // Nextcloud: /remote.php/dav/principals/users/{username}/
+    // Also matches calendar home: /remote.php/dav/calendars/{username}/
+    if (path.includes('/remote.php/dav/')) return 'nextcloud';
+
+    // Baikal: /dav.php/principals/{username}/
+    // Also matches calendars: /dav.php/calendars/{username}/
+    if (path.includes('/dav.php/principals/')) return 'baikal';
+
+    // Radicale: /{username}/ (simple flat structure)
+    // Radicale uses a minimalist structure with users at root level
+    const pathParts = path.split('/').filter((p) => p.length > 0);
+    if (pathParts.length <= 2 && !path.includes('.php') && !path.includes('/dav/')) {
+      return 'radicale';
+    }
+  }
+
+  // Default to generic (auto-detect using .well-known/caldav)
+  return 'generic';
+};
 
 /**
  * Parse an Apple Configuration Profile XML and extract CalDAV settings
@@ -101,12 +149,15 @@ export const parseAppleConfigProfile = (xmlContent: string): CalDAVConfig | null
       }
     }
 
+    const serverType = detectServerType(hostname, principalUrl);
+
     return {
       accountName: accountDescription || username || undefined,
       serverUrl: serverUrl || undefined,
       username: username || undefined,
       password: password || undefined,
       principalUrl: principalUrl || undefined,
+      serverType,
     };
   } catch (error) {
     console.error('Failed to parse Apple Configuration Profile:', error);
