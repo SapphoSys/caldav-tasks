@@ -222,10 +222,10 @@ export const KeyboardShortcutModal = ({
             type="button"
             onClick={handleSave}
             disabled={!pendingShortcut}
-            className={`px-4 py-2 text-sm font-semibold rounded-lg text-white transition-colors ${
+            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${
               pendingShortcut
-                ? 'bg-primary-600 hover:bg-primary-700'
-                : 'bg-surface-300 dark:bg-surface-600 cursor-not-allowed'
+                ? 'bg-primary-600 hover:bg-primary-700 text-primary-contrast'
+                : 'bg-surface-300 dark:bg-surface-600 text-white cursor-not-allowed'
             }`}
           >
             Save

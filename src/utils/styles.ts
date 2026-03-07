@@ -14,7 +14,7 @@ export const getButtonClasses = (isDestructive: boolean, isPrimary: boolean) => 
   }
 
   if (isPrimary) {
-    return 'bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900/50 text-white';
+    return 'bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900/50 text-primary-contrast';
   }
 
   return 'border border-surface-200 dark:border-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700';

@@ -31,6 +31,7 @@ export default {
           800: 'rgb(var(--color-primary-800, 30 64 175) / <alpha-value>)',
           900: 'rgb(var(--color-primary-900, 30 58 138) / <alpha-value>)',
           950: 'rgb(var(--color-primary-950, 23 37 84) / <alpha-value>)',
+          contrast: 'var(--color-primary-contrast, #ffffff)',
         },
         surface: {
           50: '#fafafa',

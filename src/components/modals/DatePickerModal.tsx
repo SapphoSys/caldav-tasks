@@ -259,7 +259,7 @@ export const DatePickerModal = ({
                     w-8 h-8 rounded-full text-sm flex items-center justify-center transition-colors
                     ${
                       isLocalSelected
-                        ? 'bg-primary-600 text-white'
+                        ? 'bg-primary-600 text-primary-contrast'
                         : isTodayDate
                           ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-medium'
                           : isCurrentMonth
@@ -344,7 +344,7 @@ export const DatePickerModal = ({
             disabled={!localValue && !initialValue}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
               localValue || initialValue
-                ? 'text-white bg-primary-600 hover:bg-primary-700'
+                ? 'text-primary-contrast bg-primary-600 hover:bg-primary-700'
                 : 'text-surface-400 dark:text-surface-600 bg-surface-200 dark:bg-surface-700 cursor-not-allowed'
             }`}
           >

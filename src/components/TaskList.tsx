@@ -321,7 +321,7 @@ export const TaskList = () => {
           <button
             type="button"
             onClick={handleQuickAdd}
-            className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-primary-contrast rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Create Task
@@ -363,7 +363,7 @@ export const TaskList = () => {
           {activeTask ? (
             <div className="drag-overlay relative" style={{ marginLeft: `${targetIndent * 24}px` }}>
               {targetIndent !== originalIndentRef.current && (
-                <div className="absolute -top-6 left-2 px-2 py-0.5 bg-primary-600 text-white text-xs rounded shadow whitespace-nowrap">
+                <div className="absolute -top-6 left-2 px-2 py-0.5 bg-primary-600 text-primary-contrast text-xs rounded shadow whitespace-nowrap">
                   {targetIndent > originalIndentRef.current
                     ? `→ Nest in ${truncateName(targetParentName || 'parent')}`
                     : targetIndent === 0

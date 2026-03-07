@@ -105,7 +105,7 @@ export const SubtaskModal = ({ isOpen, onClose, onAdd }: SubtaskModalProps) => {
             <button
               type="submit"
               disabled={!title.trim()}
-              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-surface-300 dark:disabled:bg-surface-600 disabled:cursor-not-allowed rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-primary-contrast bg-primary-600 hover:bg-primary-700 disabled:bg-surface-300 dark:disabled:bg-surface-600 disabled:cursor-not-allowed rounded-lg transition-colors"
             >
               Add Subtask
             </button>

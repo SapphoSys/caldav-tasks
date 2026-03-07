@@ -231,7 +231,7 @@ export const Header = ({
                         }`}
                       >
                         {showCompletedTasks && (
-                          <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                          <Check className="w-3 h-3 text-primary-contrast" strokeWidth={3} />
                         )}
                       </div>
                     </button>
@@ -249,7 +249,7 @@ export const Header = ({
                         }`}
                       >
                         {showUnstartedTasks && (
-                          <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                          <Check className="w-3 h-3 text-primary-contrast" strokeWidth={3} />
                         )}
                       </div>
                     </button>
