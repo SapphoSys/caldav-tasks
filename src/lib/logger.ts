@@ -238,6 +238,7 @@ export const loggers = {
   caldav: createLogger('CalDAV', '#f59e0b'),
   database: createLogger('Database', '#8b5cf6'),
   deleteHandlers: createLogger('DeleteHandlers', '#ef4444'),
+  errorBoundary: createLogger('ErrorBoundary', '#dc2626'),
   export: createLogger('Export', '#f59e0b'),
   fileDrop: createLogger('FileDrop', '#eab308'),
   http: createLogger('HTTP', '#6366f1'),

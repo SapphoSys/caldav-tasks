@@ -1,6 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { ErrorBoundary } from '$components/ErrorBoundary';
 import { forceShowWindow, initializeApp, showBootstrapError, showWindow } from '$lib/bootstrap';
 import { loggers } from '$lib/logger';
 import { queryClient } from '$lib/queryClient';
@@ -19,20 +20,22 @@ const log = loggers.main;
 const renderApp = () => {
   ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <SettingsProvider>
-          <ConnectionProvider>
-            <SyncProvider>
-              <ModalStateProvider>
-                <ConfirmDialogProvider>
-                  <ToastProvider />
-                  <App />
-                </ConfirmDialogProvider>
-              </ModalStateProvider>
-            </SyncProvider>
-          </ConnectionProvider>
-        </SettingsProvider>
-      </QueryClientProvider>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <SettingsProvider>
+            <ConnectionProvider>
+              <SyncProvider>
+                <ModalStateProvider>
+                  <ConfirmDialogProvider>
+                    <ToastProvider />
+                    <App />
+                  </ConfirmDialogProvider>
+                </ModalStateProvider>
+              </SyncProvider>
+            </ConnectionProvider>
+          </SettingsProvider>
+        </QueryClientProvider>
+      </ErrorBoundary>
     </React.StrictMode>,
   );
 };
@@ -43,7 +46,7 @@ const bootstrap = async () => {
   await showWindow();
 };
 
-await bootstrap().catch((error) => {
+await bootstrap().catch(async (error) => {
   log.error('Failed to initialize app:', error);
   showBootstrapError(error);
   // still show window so user can see the error
