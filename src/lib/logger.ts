@@ -41,7 +41,7 @@ const getDefaultMinLevel = (): LogLevel => {
 };
 
 // Forward logs to Tauri's logging plugin for file persistence
-const forwardToTauri = (level: LogLevel, category: string, message: string): void => {
+const forwardToTauri = (level: LogLevel, category: string, message: string) => {
   const formattedMessage = `[${category}] ${message}`;
   switch (level) {
     case 'debug':
