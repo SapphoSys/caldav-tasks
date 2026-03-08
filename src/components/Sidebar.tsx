@@ -475,7 +475,7 @@ export const Sidebar = ({
                               </div>
                             ) : (
                               account.calendars.map((calendar) => {
-                                const CalendarIcon = getIconByName(calendar.icon || 'calendar');
+                                const CalendarIcon = getIconByName(calendar.icon ?? 'calendar');
                                 const isActive = activeCalendarId === calendar.id;
                                 const calendarColor = calendar.color ?? FALLBACK_ITEM_COLOR;
                                 const textColor = isActive
@@ -573,7 +573,7 @@ export const Sidebar = ({
                     </div>
                   ) : (
                     tags.map((tag) => {
-                      const TagIcon = getIconByName(tag.icon || 'tag');
+                      const TagIcon = getIconByName(tag.icon ?? 'tag');
                       const isActive = activeTagId === tag.id;
                       return (
                         <button
@@ -675,7 +675,7 @@ export const Sidebar = ({
             {/* Calendars */}
             {accounts.flatMap((account) =>
               account.calendars.map((calendar) => {
-                const CalendarIcon = getIconByName(calendar.icon || 'calendar');
+                const CalendarIcon = getIconByName(calendar.icon ?? 'calendar');
                 const isActive = activeCalendarId === calendar.id;
                 const calendarColor = calendar.color ?? FALLBACK_ITEM_COLOR;
                 return (
@@ -1069,7 +1069,7 @@ export const Sidebar = ({
               .flatMap((a) => a.calendars)
               .find((c) => c.id === exportCalendarId)
               ?.displayName.replace(/[^a-z0-9]/gi, '-')
-              .toLowerCase() || 'export'
+              .toLowerCase() ?? 'export'
           }
           onClose={() => {
             setShowExportModal(false);
@@ -1081,13 +1081,13 @@ export const Sidebar = ({
       {showExportModal && exportAccountId && (
         <ExportModal
           tasks={tasks.filter((t) => t.accountId === exportAccountId)}
-          calendars={accounts.find((a) => a.id === exportAccountId)?.calendars || []}
+          calendars={accounts.find((a) => a.id === exportAccountId)?.calendars ?? []}
           type="all-calendars"
           fileName={
             accounts
               .find((a) => a.id === exportAccountId)
               ?.name.replace(/[^a-z0-9]/gi, '-')
-              .toLowerCase() || 'account-export'
+              .toLowerCase() ?? 'account-export'
           }
           onClose={() => {
             setShowExportModal(false);
