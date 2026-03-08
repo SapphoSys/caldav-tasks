@@ -141,7 +141,7 @@ export const Header = ({
   };
 
   return (
-    <header className="h-[53px] bg-white dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 px-4 flex items-center">
+    <header className="h-[53px] bg-white dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700 px-4 flex items-center">
       <div className="flex-1 flex items-center justify-between gap-4">
         <div className="flex-1 relative max-w-lg">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
@@ -151,7 +151,7 @@ export const Header = ({
             placeholder={`Search tasks... (${searchShortcut})`}
             value={searchQuery}
             onChange={(value) => setSearchQueryMutation.mutate(value)}
-            className="w-full pl-9 pr-4 py-2 bg-surface-100 dark:bg-surface-700 border border-transparent rounded-lg text-sm text-surface-800 dark:text-surface-200 placeholder:text-surface-400 focus:outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors"
+            className="w-full pl-9 pr-4 py-2 bg-surface-100 dark:bg-surface-700/60 border border-transparent rounded-lg text-sm text-surface-800 dark:text-surface-200 placeholder:text-surface-400 focus:outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors"
           />
         </div>
 
@@ -177,7 +177,7 @@ export const Header = ({
                 type="button"
                 onClick={onSync}
                 disabled={isSyncing || isOffline || disableSync}
-                className={`p-2 rounded-lg border text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset flex items-center justify-center ${
+                className={`w-9 h-9 rounded-lg border text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset flex items-center justify-center ${
                   isSyncing
                     ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 border-primary-400 cursor-not-allowed'
                     : isOffline || disableSync
@@ -185,7 +185,7 @@ export const Header = ({
                       : `text-surface-500 dark:text-surface-400 border-transparent ${!isAnyModalOpen ? 'hover:bg-surface-100 dark:hover:bg-surface-700' : ''}`
                 }`}
               >
-                <RefreshCw className={`w-5 h-5 ${isSyncing ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-5 h-5 flex-shrink-0 ${isSyncing ? 'animate-spin' : ''}`} />
               </button>
             </Tooltip>
           )}
@@ -195,7 +195,7 @@ export const Header = ({
               <button
                 type="button"
                 onClick={() => setShowViewMenu(!showViewMenu)}
-                className={`flex items-center border border-transparent gap-1 px-3 py-2 rounded-lg text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset ${
+                className={`flex items-center border border-transparent gap-1.5 px-3 py-2 rounded-lg text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset ${
                   showViewMenu
                     ? 'bg-surface-200 dark:bg-surface-600 text-surface-700 dark:text-surface-200'
                     : `text-surface-600 dark:text-surface-400 ${!isAnyModalOpen ? 'hover:bg-surface-100 dark:hover:bg-surface-700' : ''}`
