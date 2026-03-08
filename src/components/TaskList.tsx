@@ -292,8 +292,8 @@ export const TaskList = () => {
   const modifierJoiner = getModifierJoiner();
   const newTaskShortcut = `${metaKey}${modifierJoiner}N`;
 
-  // only enable dragging for manual/smart sort modes
-  const isDragEnabled = sortConfig.mode === 'manual' || sortConfig.mode === 'smart';
+  // only enable dragging for manual sort mode
+  const isDragEnabled = sortConfig.mode === 'manual';
 
   if (flattenedTasks.length === 0) {
     const isSearching = searchQuery.trim().length > 0;
