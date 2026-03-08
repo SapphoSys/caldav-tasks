@@ -103,6 +103,10 @@ const App = () => {
       menuHandlers.setSettingsInitialTab({});
       menuHandlers.setShowSettings((prev: boolean) => !prev);
     },
+    onOpenKeyboardShortcuts: () => {
+      menuHandlers.setSettingsInitialTab({ category: 'general', subtab: 'shortcuts' });
+      menuHandlers.setShowSettings((prev: boolean) => !prev);
+    },
     onSync: syncAll,
   });
 

@@ -428,7 +428,7 @@ export const createMacMenu = async (options?: {
       await MenuItem.new({
         id: 'keyboard-shortcuts',
         text: 'Keyboard Shortcuts',
-        accelerator: 'CmdOrCtrl+/',
+        accelerator: getAcceleratorById(shortcuts, 'keyboard-shortcuts') ?? 'CmdOrCtrl+/',
         action: () => {
           emit(MENU_EVENTS.SHOW_KEYBOARD_SHORTCUTS);
         },

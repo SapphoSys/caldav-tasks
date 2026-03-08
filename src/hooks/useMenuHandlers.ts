@@ -106,7 +106,7 @@ export const useMenuHandlers = () => {
 
   const handleOpenKeyboardShortcuts = useCallback(() => {
     setSettingsInitialTab({ category: 'general', subtab: 'shortcuts' });
-    setShowSettings(true);
+    setShowSettings((prev) => !prev);
   }, []);
 
   const handleToggleCompleted = useCallback(

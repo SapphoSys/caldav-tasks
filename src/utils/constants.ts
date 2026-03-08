@@ -56,6 +56,7 @@ export const DEFAULT_SHORTCUTS: KeyboardShortcut[] = [
   { id: 'new-task', key: 'n', meta: true, description: 'Create new task' },
   { id: 'search', key: 'f', meta: true, description: 'Focus search' },
   { id: 'settings', key: ',', meta: true, description: 'Open settings' },
+  { id: 'keyboard-shortcuts', key: '/', meta: true, description: 'Open keyboard shortcuts' },
   { id: 'sync', key: 'r', meta: true, description: 'Sync with server' },
   { id: 'delete', key: 'Backspace', meta: true, description: 'Delete selected task' },
   { id: 'toggle-complete', key: 'z', description: 'Toggle task completion' },

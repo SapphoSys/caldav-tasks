@@ -26,11 +26,12 @@ import { flattenTasks } from '$utils/tree';
 
 interface UseKeyboardShortcutsOptions {
   onOpenSettings?: () => void;
+  onOpenKeyboardShortcuts?: () => void;
   onSync?: () => void;
 }
 
 export const useKeyboardShortcuts = (options: UseKeyboardShortcutsOptions = {}) => {
-  const { onOpenSettings, onSync } = options;
+  const { onOpenSettings, onOpenKeyboardShortcuts, onSync } = options;
   const { data: uiState } = useUIState();
   const { data: filteredTasks = [] } = useFilteredTasks();
   const createTaskMutation = useCreateTask();
@@ -144,6 +145,11 @@ export const useKeyboardShortcuts = (options: UseKeyboardShortcutsOptions = {}) 
     onOpenSettings?.();
   }, [onOpenSettings]);
 
+  const handleOpenKeyboardShortcuts = useCallback(() => {
+    // If keyboard shortcuts is already open, this will close it (toggle behavior)
+    onOpenKeyboardShortcuts?.();
+  }, [onOpenKeyboardShortcuts]);
+
   const handleSync = useCallback(() => {
     onSync?.();
   }, [onSync]);
@@ -162,6 +168,7 @@ export const useKeyboardShortcuts = (options: UseKeyboardShortcutsOptions = {}) 
       'new-task': handleNewTask,
       search: handleSearch,
       settings: handleOpenSettings,
+      'keyboard-shortcuts': handleOpenKeyboardShortcuts,
       sync: handleSync,
       delete: handleDelete,
       'toggle-complete': handleToggleComplete,
@@ -175,6 +182,7 @@ export const useKeyboardShortcuts = (options: UseKeyboardShortcutsOptions = {}) 
       handleNewTask,
       handleSearch,
       handleOpenSettings,
+      handleOpenKeyboardShortcuts,
       handleSync,
       handleDelete,
       handleToggleComplete,
