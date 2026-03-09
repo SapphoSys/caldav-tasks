@@ -38,13 +38,12 @@ export const getExportDescription = (
       return `${tasks.length} ${pluralize(tasks.length, 'task')} in ${calendarName || 'Calendar'}`;
 
     case 'tasks': {
-      // calculate subtask count based on array length (for flattened task hierarchies)
-      const descendantCount = tasks.length > 1 ? tasks.length - 1 : 0;
-      const firstTaskSubtasks = tasks[0]?.subtasks?.length || 0;
-      const totalSubtasks = descendantCount > 0 ? descendantCount : firstTaskSubtasks;
+      // Count subtasks as tasks with parentUid set
+      const subtaskCount = tasks.filter((t) => t.parentUid).length;
+      const parentTaskCount = tasks.length - subtaskCount;
 
-      if (totalSubtasks > 0) {
-        return `${tasks.length} ${pluralize(tasks.length, 'task')} + ${totalSubtasks} ${pluralize(totalSubtasks, 'subtask')}`;
+      if (subtaskCount > 0) {
+        return `${parentTaskCount} ${pluralize(parentTaskCount, 'task')} + ${subtaskCount} ${pluralize(subtaskCount, 'subtask')}`;
       }
       return `${tasks.length} ${pluralize(tasks.length, 'task')}`;
     }

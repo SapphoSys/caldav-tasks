@@ -12,12 +12,6 @@ export type SortMode =
 
 export type SortDirection = 'asc' | 'desc';
 
-export interface Subtask {
-  id: string;
-  title: string;
-  completed: boolean;
-}
-
 export interface Reminder {
   id: string;
   trigger: Date; // absolute date/time when the reminder should fire
@@ -50,9 +44,6 @@ export interface Task {
 
   // reminders
   reminders?: Reminder[];
-
-  // subtasks / checklist (deprecated - use parentUid instead)
-  subtasks: Subtask[];
 
   // parent-child relationship (RELATED-TO in CalDAV)
   parentUid?: string; // UID of parent task
@@ -163,7 +154,6 @@ export interface TaskRow {
   created_at: string;
   modified_at: string;
   reminders: string | null;
-  subtasks: string;
   parent_uid: string | null;
   is_collapsed: number | null; // Nullable in database schema (DEFAULT 0)
   sort_order: number;

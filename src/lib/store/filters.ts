@@ -45,11 +45,16 @@ export const getFilteredTasks = () => {
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      return (
+      // Check task itself
+      if (
         task.title.toLowerCase().includes(query) ||
-        task.description.toLowerCase().includes(query) ||
-        task.subtasks.some((st) => st.title.toLowerCase().includes(query))
-      );
+        task.description.toLowerCase().includes(query)
+      ) {
+        return true;
+      }
+      // Check child tasks (subtasks)
+      const childTasks = data.tasks.filter((t) => t.parentUid === task.uid);
+      return childTasks.some((child) => child.title.toLowerCase().includes(query));
     }
 
     return true;

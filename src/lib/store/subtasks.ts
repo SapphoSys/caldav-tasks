@@ -2,75 +2,103 @@
  * Subtask operations
  */
 
-import { loadDataStore, saveDataStore } from '$lib/store';
-import type { Subtask } from '$types/index';
+import {
+  createTask as dbCreateTask,
+  deleteTask as dbDeleteTask,
+  updateTask as dbUpdateTask,
+  getTaskById,
+} from '$lib/database';
+import type { Task } from '$types/index';
 import { generateUUID } from '$utils/misc';
 
-export const addSubtask = (taskId: string, title: string) => {
-  const data = loadDataStore();
+/**
+ * Add a subtask by creating a new child Task
+ */
+export const addSubtask = async (parentTaskId: string, title: string) => {
+  const parentTask = await getTaskById(parentTaskId);
+  if (!parentTask) {
+    throw new Error('Parent task not found');
+  }
 
-  const subtask: Subtask = {
-    id: generateUUID(),
+  const now = new Date();
+  const childTask: Partial<Task> = {
+    uid: generateUUID(),
+    parentUid: parentTask.uid,
     title,
+    description: '',
     completed: false,
-  } satisfies Subtask;
+    priority: 'none',
+    sortOrder: 0,
+    createdAt: now,
+    modifiedAt: now,
+    accountId: parentTask.accountId,
+    calendarId: parentTask.calendarId,
+    synced: false,
+  };
 
-  const tasks = data.tasks.map((task) =>
-    task.id === taskId
-      ? {
-          ...task,
-          subtasks: [...task.subtasks, subtask],
-          modifiedAt: new Date(),
-          synced: false,
-        }
-      : task,
-  );
-  saveDataStore({ ...data, tasks });
+  await dbCreateTask(childTask);
+
+  // Mark parent as modified
+  await dbUpdateTask(parentTaskId, {
+    modifiedAt: now,
+    synced: false,
+  });
 };
 
-export const updateSubtask = (taskId: string, subtaskId: string, updates: Partial<Subtask>) => {
-  const data = loadDataStore();
-  const tasks = data.tasks.map((task) =>
-    task.id === taskId
-      ? {
-          ...task,
-          subtasks: task.subtasks.map((st) => (st.id === subtaskId ? { ...st, ...updates } : st)),
-          modifiedAt: new Date(),
-          synced: false,
-        }
-      : task,
-  );
-  saveDataStore({ ...data, tasks });
+/**
+ * Update a subtask (child task)
+ */
+export const updateSubtask = async (
+  taskId: string,
+  subtaskId: string,
+  updates: { title?: string; completed?: boolean },
+) => {
+  const now = new Date();
+  await dbUpdateTask(subtaskId, {
+    ...updates,
+    modifiedAt: now,
+    synced: false,
+  });
+
+  // Mark parent as modified
+  await dbUpdateTask(taskId, {
+    modifiedAt: now,
+    synced: false,
+  });
 };
 
-export const deleteSubtask = (taskId: string, subtaskId: string) => {
-  const data = loadDataStore();
-  const tasks = data.tasks.map((task) =>
-    task.id === taskId
-      ? {
-          ...task,
-          subtasks: task.subtasks.filter((st) => st.id !== subtaskId),
-          modifiedAt: new Date(),
-          synced: false,
-        }
-      : task,
-  );
-  saveDataStore({ ...data, tasks });
+/**
+ * Delete a subtask (child task)
+ */
+export const deleteSubtask = async (taskId: string, subtaskId: string) => {
+  await dbDeleteTask(subtaskId, true); // Delete the child task and its children
+
+  // Mark parent as modified
+  const now = new Date();
+  await dbUpdateTask(taskId, {
+    modifiedAt: now,
+    synced: false,
+  });
 };
 
-export const toggleSubtaskComplete = (taskId: string, subtaskId: string) => {
-  const data = loadDataStore();
-  const tasks = data.tasks.map((task) =>
-    task.id === taskId
-      ? {
-          ...task,
-          subtasks: task.subtasks.map((st) =>
-            st.id === subtaskId ? { ...st, completed: !st.completed } : st,
-          ),
-          modifiedAt: new Date(),
-          synced: false,
-        }
-      : task,
-  );
-  saveDataStore({ ...data, tasks });
+/**
+ * Toggle subtask completion status
+ */
+export const toggleSubtaskComplete = async (taskId: string, subtaskId: string) => {
+  const subtask = await getTaskById(subtaskId);
+  if (!subtask) return;
+
+  const now = new Date();
+  await dbUpdateTask(subtaskId, {
+    completed: !subtask.completed,
+    completedAt: !subtask.completed ? now : undefined,
+    modifiedAt: now,
+    synced: false,
+  });
+
+  // Mark parent as modified
+  await dbUpdateTask(taskId, {
+    modifiedAt: now,
+    synced: false,
+  });
 };

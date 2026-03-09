@@ -278,7 +278,6 @@ export const useSyncQuery = () => {
               description: '',
               completed: false,
               priority: 'none',
-              subtasks: [],
               sortOrder: 0,
               accountId: deletion.accountId,
               calendarId: deletion.calendarId,

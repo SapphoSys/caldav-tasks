@@ -120,7 +120,6 @@ export const createTask = (taskData: Partial<Task>) => {
     description: taskData.description ?? '',
     completed: false,
     priority: taskData.priority ?? defaultPriority,
-    subtasks: taskData.subtasks ?? [],
     sortOrder: maxSortOrder + 1,
     accountId: accountId ?? '',
     calendarId: calendarId ?? taskData.calendarId ?? data.ui.activeCalendarId ?? '',

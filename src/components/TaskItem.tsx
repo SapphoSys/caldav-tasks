@@ -93,8 +93,8 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
   const hiddenChildCount = !showCompletedTasks
     ? allChildTasks.filter((child) => child.completed).length
     : 0;
-  const completedSubtasks = task.subtasks.filter((s) => s.completed).length;
-  const totalSubtasks = task.subtasks.length;
+  const completedSubtasks = allChildTasks.filter((s) => s.completed).length;
+  const totalSubtasks = allChildTasks.length;
 
   // helper to get tag by id
   const getTagById = (tagId: string) => getTags().find((t) => t.id === tagId);
@@ -368,7 +368,7 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
               )}
 
               {totalSubtasks > 0 && (
-                <span className="inline-flex items-center gap-1 text-xs text-surface-500 dark:text-surface-400">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-surface-300 dark:border-surface-600 bg-surface-50 dark:bg-surface-800 text-surface-600 dark:text-surface-400">
                   <CheckCircle2 className="w-3 h-3" />
                   {completedSubtasks}/{totalSubtasks}
                 </span>

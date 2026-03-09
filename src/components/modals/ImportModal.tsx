@@ -169,7 +169,6 @@ export const ImportModal = ({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
           dueDate: partialTask.dueDate,
           createdAt: partialTask.createdAt || new Date(),
           modifiedAt: new Date(),
-          subtasks: partialTask.subtasks || [],
           parentUid: newParentUid,
           isCollapsed: partialTask.isCollapsed || false,
           sortOrder: partialTask.sortOrder || Date.now(),

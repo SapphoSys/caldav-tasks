@@ -32,7 +32,7 @@ import {
   toggleTaskComplete,
   updateTask,
 } from '$lib/store/tasks';
-import type { SortConfig, Subtask, Task } from '$types/index';
+import type { SortConfig, Task } from '$types/index';
 import type { FlattenedTask } from '$utils/tree';
 
 /**
@@ -303,7 +303,7 @@ export const useUpdateSubtask = () => {
     }: {
       taskId: string;
       subtaskId: string;
-      updates: Partial<Subtask>;
+      updates: { title?: string; completed?: boolean };
     }) => {
       updateSubtask(taskId, subtaskId, updates);
       return Promise.resolve();

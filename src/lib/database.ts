@@ -143,7 +143,6 @@ const rowToTask = (row: TaskRow): Task => {
           trigger: new Date(r.trigger),
         }))
       : undefined,
-    subtasks: row.subtasks ? JSON.parse(row.subtasks) : [],
     parentUid: row.parent_uid || undefined,
     isCollapsed: row.is_collapsed === null ? undefined : row.is_collapsed === 1,
     sortOrder: row.sort_order,
@@ -313,7 +312,6 @@ export const createTask = async (taskData: Partial<Task>): Promise<Task> => {
     description: taskData.description ?? '',
     completed: false,
     priority: taskData.priority ?? defaultPriority,
-    subtasks: taskData.subtasks ?? [],
     sortOrder: maxSortOrder + 1,
     accountId: accountId ?? '',
     calendarId: calendarId ?? '',
@@ -330,9 +328,9 @@ export const createTask = async (taskData: Partial<Task>): Promise<Task> => {
       id, uid, etag, href, title, description, completed, completed_at,
       tags, category_id, priority, start_date, start_date_all_day,
       due_date, due_date_all_day, created_at, modified_at, reminders,
-      subtasks, parent_uid, is_collapsed, sort_order, account_id,
+      parent_uid, is_collapsed, sort_order, account_id,
       calendar_id, synced, local_only, url
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)`,
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)`,
     [
       task.id,
       task.uid,
@@ -352,7 +350,6 @@ export const createTask = async (taskData: Partial<Task>): Promise<Task> => {
       task.createdAt.toISOString(),
       task.modifiedAt.toISOString(),
       task.reminders && task.reminders.length > 0 ? JSON.stringify(task.reminders) : null,
-      JSON.stringify(task.subtasks),
       task.parentUid || null,
       task.isCollapsed ? 1 : 0,
       task.sortOrder,
@@ -386,10 +383,10 @@ export const updateTask = async (id: string, updates: Partial<Task>): Promise<Ta
       completed = $6, completed_at = $7, tags = $8, category_id = $9,
       priority = $10, start_date = $11, start_date_all_day = $12,
       due_date = $13, due_date_all_day = $14, modified_at = $15,
-      reminders = $16, subtasks = $17, parent_uid = $18, is_collapsed = $19,
-      sort_order = $20, account_id = $21, calendar_id = $22, synced = $23,
-      local_only = $24, url = $25
-     WHERE id = $26`,
+      reminders = $16, parent_uid = $17, is_collapsed = $18,
+      sort_order = $19, account_id = $20, calendar_id = $21, synced = $22,
+      local_only = $23, url = $24
+     WHERE id = $25`,
     [
       updatedTask.uid,
       updatedTask.etag || null,
@@ -409,7 +406,6 @@ export const updateTask = async (id: string, updates: Partial<Task>): Promise<Ta
       updatedTask.reminders && updatedTask.reminders.length > 0
         ? JSON.stringify(updatedTask.reminders)
         : null,
-      JSON.stringify(updatedTask.subtasks),
       updatedTask.parentUid || null,
       updatedTask.isCollapsed ? 1 : 0,
       updatedTask.sortOrder,

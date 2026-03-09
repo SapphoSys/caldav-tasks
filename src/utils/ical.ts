@@ -5,7 +5,7 @@
 
 import { loggers } from '$lib/logger';
 import { getTags } from '$lib/store/tags';
-import type { Priority, Reminder, Subtask, Task } from '$types/index';
+import type { Priority, Reminder, Task } from '$types/index';
 import { generateUUID } from '$utils/misc';
 
 const log = loggers.iCal;
@@ -268,7 +268,6 @@ interface ParsedVTodo {
   created?: Date;
   lastModified?: Date;
   sortOrder?: number;
-  subtasksJson?: string;
   isCollapsed?: boolean;
   parentUid?: string;
   alarms?: ParsedVAlarm[];
@@ -409,9 +408,6 @@ const parseVTodo = (vtodoContent: string): ParsedVTodo => {
       case 'X-APPLE-SORT-ORDER':
         result.sortOrder = parseInt(prop.value, 10);
         break;
-      case 'X-CALDAV-TASKS-SUBTASKS':
-        result.subtasksJson = prop.value;
-        break;
       case 'X-APPLE-COLLAPSED':
         result.isCollapsed = prop.value === '1';
         break;
@@ -543,12 +539,6 @@ const generateVTodo = (task: Task): string => {
     lines.push('X-APPLE-COLLAPSED:1');
   }
 
-  // Legacy subtasks (app-specific)
-  if (task.subtasks.length > 0) {
-    const subtasksJson = JSON.stringify(task.subtasks);
-    lines.push(`X-CALDAV-TASKS-SUBTASKS:${subtasksJson}`);
-  }
-
   // URL (RFC 7986)
   if (task.url) {
     lines.push(`URL:${escapeICalText(task.url)}`);
@@ -609,16 +599,6 @@ export const vtodoToTask = (
 
     const parsed = parseVTodo(vtodos[0]);
 
-    // Parse subtasks
-    let subtasks: Subtask[] = [];
-    if (parsed.subtasksJson) {
-      try {
-        subtasks = JSON.parse(parsed.subtasksJson);
-      } catch {
-        subtasks = [];
-      }
-    }
-
     // Parse reminders from alarms
     let reminders: Reminder[] | undefined;
     if (parsed.alarms && parsed.alarms.length > 0) {
@@ -656,7 +636,6 @@ export const vtodoToTask = (
       dueDateAllDay: parsed.dueAllDay,
       createdAt: createdDate,
       modifiedAt: parsed.lastModified ?? new Date(),
-      subtasks,
       parentUid: parsed.parentUid,
       isCollapsed: parsed.isCollapsed ?? false,
       sortOrder,
@@ -789,16 +768,6 @@ export const parseIcsFile = (icsContent: string): Partial<Task>[] => {
     for (const vtodoContent of vtodos) {
       const parsed = parseVTodo(vtodoContent);
 
-      // Parse subtasks
-      let subtasks: Subtask[] = [];
-      if (parsed.subtasksJson) {
-        try {
-          subtasks = JSON.parse(parsed.subtasksJson);
-        } catch {
-          subtasks = [];
-        }
-      }
-
       // Parse reminders from alarms
       let reminders: Reminder[] | undefined;
       if (parsed.alarms && parsed.alarms.length > 0) {
@@ -834,7 +803,6 @@ export const parseIcsFile = (icsContent: string): Partial<Task>[] => {
         dueDateAllDay: parsed.dueAllDay,
         createdAt: createdDate,
         modifiedAt: parsed.lastModified ?? new Date(),
-        subtasks,
         parentUid: parsed.parentUid,
         isCollapsed: parsed.isCollapsed ?? false,
         sortOrder,
