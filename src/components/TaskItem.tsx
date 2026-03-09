@@ -346,7 +346,11 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
                         color: calendarColor,
                       }}
                     >
-                      <CalendarIcon className="w-3 h-3" />
+                      {calendar.emoji ? (
+                        <span className="text-xs leading-none">{calendar.emoji}</span>
+                      ) : (
+                        <CalendarIcon className="w-3 h-3" />
+                      )}
                       {calendar.displayName || 'Calendar'}
                     </button>
                   );
