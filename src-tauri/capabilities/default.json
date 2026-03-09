@@ -30,7 +30,6 @@
         }
       ]
     },
-    "shell:allow-open",
     "notification:default",
     "sql:default",
     "sql:allow-execute",
