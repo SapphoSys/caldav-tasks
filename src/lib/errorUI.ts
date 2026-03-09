@@ -1,8 +1,8 @@
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { arch, exeExtension, locale, platform, version } from '@tauri-apps/plugin-os';
-import { version as AppVersion } from '../../package.json';
-import { deleteDatabase } from './bootstrap';
-import { loggers } from './logger';
+import { deleteDatabase } from '$lib/bootstrap';
+import { loggers } from '$lib/logger';
+import { getAppInfo } from '$utils/version';
 
 const log = loggers.bootstrap;
 
@@ -69,7 +69,7 @@ export const createBootstrapErrorUI = async (error: unknown): Promise<void> => {
       const errorTitle = `Critical startup error on ${currentPlatform} ${currentVersion}`;
       const errorBody = `**System Information:**
 \`\`\`
-App Version: ${AppVersion}
+App Version: ${getAppInfo().version}
 OS: ${currentPlatform}
 Version: ${currentVersion}
 Architecture: ${currentArch}
