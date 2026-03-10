@@ -1,3 +1,4 @@
+import { emit } from '@tauri-apps/api/event';
 import ChevronDown from 'lucide-react/icons/chevron-down';
 import ChevronRight from 'lucide-react/icons/chevron-right';
 import Download from 'lucide-react/icons/download';
@@ -38,11 +39,13 @@ import {
 import { useDeleteHandlers } from '$hooks/useDeleteHandlers';
 import { useGlobalContextMenuClose } from '$hooks/useGlobalContextMenu';
 import { useSettingsStore } from '$hooks/useSettingsStore';
+import { toastManager } from '$hooks/useToast';
 import { getCalendarTasks } from '$lib/store/tasks';
 import type { Account, Calendar as CalendarType } from '$types/index';
 import { getContrastTextColor } from '$utils/color';
 import { FALLBACK_ITEM_COLOR, MAX_SIDEBAR_WIDTH, MIN_SIDEBAR_WIDTH } from '$utils/constants';
 import { getMetaKeyLabel, getModifierJoiner } from '$utils/keyboard';
+import { MENU_EVENTS } from '$utils/menu';
 import { clampToViewport } from '$utils/position';
 
 interface SidebarProps {
@@ -880,9 +883,24 @@ export const Sidebar = ({
             <>
               <button
                 type="button"
-                onClick={async () => {
+                onClick={() => {
                   handleCloseContextMenu();
-                  syncCalendar(contextMenu.id);
+                  const account = accounts.find((a) => a.id === contextMenu.accountId);
+                  const calendar = account?.calendars.find((c) => c.id === contextMenu.id);
+                  syncCalendar(contextMenu.id).catch((error) => {
+                    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                    toastManager.error(
+                      `Calendar sync failed: ${calendar?.displayName || 'Unknown'}`,
+                      errorMessage,
+                      `sync-error-calendar-${contextMenu.id}`,
+                      {
+                        label: 'Edit Account',
+                        onClick: () => {
+                          emit(MENU_EVENTS.EDIT_ACCOUNT, { accountId: account?.id });
+                        },
+                      },
+                    );
+                  });
                 }}
                 disabled={syncingCalendarId === contextMenu.id}
                 className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
