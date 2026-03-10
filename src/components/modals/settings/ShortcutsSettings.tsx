@@ -5,6 +5,7 @@ import { KeyboardShortcutModal } from '$components/modals/KeyboardShortcutModal'
 import { useSettingsStore } from '$hooks/useSettingsStore';
 import type { KeyboardShortcut } from '$types/index';
 import { formatShortcut } from '$utils/keyboard';
+import { isMacPlatform } from '$utils/platform';
 
 export const ShortcutsSettings = ({
   onEditingShortcutChange,
@@ -39,14 +40,14 @@ export const ShortcutsSettings = ({
   return (
     <>
       <div className="space-y-4">
-        <div className="flex flex-row justify-between">
+        <div className="flex flex-row items-center justify-between">
           <h3 className="text-base font-semibold text-surface-800 dark:text-surface-200">
             Keyboard Shortcuts
           </h3>
           <button
             type="button"
             onClick={resetShortcuts}
-            className="flex items-center gap-1 px-2 py-1 text-xs bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-300 rounded transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+            className="flex items-center gap-1.5 px-2 py-1 text-xs bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-300 rounded transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
             title="Reset to defaults"
           >
             <RotateCcw className="w-3 h-3" />
