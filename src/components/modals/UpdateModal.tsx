@@ -2,8 +2,8 @@ import { openUrl } from '@tauri-apps/plugin-opener';
 import Download from 'lucide-react/icons/download';
 import ExternalLink from 'lucide-react/icons/external-link';
 import X from 'lucide-react/icons/x';
-import { useEffect } from 'react';
 import { useFocusTrap } from '$hooks/useFocusTrap';
+import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import type { UpdateInfo } from '$hooks/useUpdateChecker';
 
 interface UpdateModalProps {
@@ -23,20 +23,7 @@ export const UpdateModal = ({
   downloadProgress,
 }: UpdateModalProps) => {
   const focusTrapRef = useFocusTrap();
-
-  // handle ESC key to close
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        e.stopPropagation();
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown, true);
-    return () => document.removeEventListener('keydown', handleKeyDown, true);
-  }, [onClose]);
+  useModalEscapeKey(onClose);
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: Modal backdrop does not require keyboard handler; ESC key closes modal via custom handler
