@@ -110,13 +110,12 @@ export const useSyncQuery = () => {
         remoteCalendars = await caldavService.fetchCalendars(accountId);
       } catch (error) {
         log.error(`Failed to fetch calendars for ${account.name}:`, error);
-        log.debug('About to show calendar sync error toast...');
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         toastManager.error(
           'Calendar Sync Error',
-          `Could not fetch calendars from "${account.name}". Server returned ${error instanceof Error ? error.message : 'an error'}.`,
+          `${account.name}: ${errorMessage}`,
           'calendar-fetch-error',
         );
-        log.debug('Calendar sync error toast call completed');
         return; // skip calendar sync to avoid deleting calendars based on failed fetch
       }
 
@@ -338,11 +337,6 @@ export const useSyncQuery = () => {
         if (remoteTasks === null) {
           log.warn(
             `Failed to fetch tasks from ${calendar.displayName}. Local changes were pushed successfully, but skipping server comparison to prevent data loss.`,
-          );
-          toastManager.error(
-            'Partial Sync',
-            `Pushed changes to "${calendar.displayName}", but could not verify server state. Your local tasks are safe.`,
-            'sync-fetch-error',
           );
           return; // Exit early, preserve local tasks (but pushes already happened)
         }
