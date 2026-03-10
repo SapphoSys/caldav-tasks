@@ -66,7 +66,7 @@ export const ShortcutsSettings = ({
               </span>
 
               <div className="flex items-center gap-2">
-                <div className="flex items-center">
+                <div className="flex items-center gap-1.5">
                   {formatShortcut(shortcut)
                     .split(' + ')
                     .map((key, keyIndex, arr) => (
@@ -74,8 +74,8 @@ export const ShortcutsSettings = ({
                         <kbd className="px-2 py-1 bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded text-xs font-mono text-surface-700 dark:text-surface-300">
                           {key}
                         </kbd>
-                        {keyIndex < arr.length - 1 && (
-                          <span className="text-surface-400 mx-0.5">+</span>
+                        {keyIndex < arr.length - 1 && !isMacPlatform() && (
+                          <span className="text-surface-400 mx-1.5">+</span>
                         )}
                       </span>
                     ))}
