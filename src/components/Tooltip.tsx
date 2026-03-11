@@ -15,6 +15,7 @@ interface TooltipProps {
   delay?: number;
   position?: 'top' | 'bottom' | 'left' | 'right';
   className?: string;
+  allowInModal?: boolean;
 }
 
 export const Tooltip = ({
@@ -23,6 +24,7 @@ export const Tooltip = ({
   delay = 0,
   position = 'top',
   className = '',
+  allowInModal = false,
 }: TooltipProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [coords, setCoords] = useState({ x: 0, y: 0 });
@@ -33,14 +35,14 @@ export const Tooltip = ({
 
   // hide tooltip when a modal or context menu opens
   useEffect(() => {
-    if ((isAnyModalOpen || isContextMenuOpen) && isVisible) {
+    if (!allowInModal && (isAnyModalOpen || isContextMenuOpen) && isVisible) {
       setIsVisible(false);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
     }
-  }, [isAnyModalOpen, isContextMenuOpen, isVisible]);
+  }, [isAnyModalOpen, isContextMenuOpen, isVisible, allowInModal]);
 
   const updatePosition = useCallback(() => {
     if (!triggerRef.current || !tooltipRef.current) return;
@@ -105,8 +107,8 @@ export const Tooltip = ({
   }, [position]);
 
   const showTooltip = () => {
-    // Don't show tooltip when a modal or context menu is open
-    if (isAnyModalOpen || isContextMenuOpen) return;
+    // Don't show tooltip when a modal or context menu is open (unless allowInModal is true)
+    if (!allowInModal && (isAnyModalOpen || isContextMenuOpen)) return;
 
     const show = () => {
       updatePosition();

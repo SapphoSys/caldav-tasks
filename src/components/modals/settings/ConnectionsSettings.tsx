@@ -1,10 +1,21 @@
-import ChevronDown from 'lucide-react/icons/chevron-down';
+import { emit } from '@tauri-apps/api/event';
+import Activity from 'lucide-react/icons/activity';
+import Edit2 from 'lucide-react/icons/edit-2';
+import Loader2 from 'lucide-react/icons/loader-2';
+import Plus from 'lucide-react/icons/plus';
 import Trash2 from 'lucide-react/icons/trash-2';
-import { useState } from 'react';
+import User from 'lucide-react/icons/user';
+import { useMemo, useState } from 'react';
+import { Tooltip } from '$components/Tooltip';
 import { useDeleteAccount } from '$hooks/queries/useAccounts';
+import { useTasks } from '$hooks/queries/useTasks';
 import { useConfirmDialog } from '$hooks/useConfirmDialog';
+import { useConnectionStore } from '$hooks/useConnectionStore';
 import { useSettingsStore } from '$hooks/useSettingsStore';
+import { caldavService } from '$lib/caldav';
 import type { Account } from '$types/index';
+import { pluralize } from '$utils/format';
+import { MENU_EVENTS } from '$utils/menu';
 
 interface ConnectionsSettingsProps {
   accounts: Account[];
@@ -14,19 +25,22 @@ export const ConnectionsSettings = ({ accounts }: ConnectionsSettingsProps) => {
   const deleteAccountMutation = useDeleteAccount();
   const { confirm } = useConfirmDialog();
   const { confirmBeforeDeleteAccount } = useSettingsStore();
-  const [expandedAccounts, setExpandedAccounts] = useState<Set<string>>(new Set());
+  const { hasConnection } = useConnectionStore();
+  const { data: tasks = [] } = useTasks();
 
-  const toggleExpanded = (accountId: string) => {
-    setExpandedAccounts((prev) => {
-      const next = new Set(prev);
-      if (next.has(accountId)) {
-        next.delete(accountId);
-      } else {
-        next.add(accountId);
-      }
-      return next;
-    });
-  };
+  const [testingAccounts, setTestingAccounts] = useState<Set<string>>(new Set());
+  const [testResults, setTestResults] = useState<
+    Record<string, { success: boolean; message: string }>
+  >({});
+
+  // Calculate task counts per account
+  const accountStats = useMemo(() => {
+    const stats: Record<string, number> = {};
+    for (const account of accounts) {
+      stats[account.id] = tasks.filter((t) => t.accountId === account.id).length;
+    }
+    return stats;
+  }, [accounts, tasks]);
 
   const handleDeleteAccount = async (account: { id: string; name: string }) => {
     if (confirmBeforeDeleteAccount) {
@@ -45,94 +59,169 @@ export const ConnectionsSettings = ({ accounts }: ConnectionsSettingsProps) => {
     deleteAccountMutation.mutate(account.id);
   };
 
+  const handleEditAccount = (accountId: string) => {
+    emit(MENU_EVENTS.EDIT_ACCOUNT, { accountId });
+  };
+
+  const handleTestConnection = async (account: Account) => {
+    setTestingAccounts((prev) => new Set(prev).add(account.id));
+    setTestResults((prev) => {
+      const next = { ...prev };
+      delete next[account.id];
+      return next;
+    });
+
+    try {
+      await caldavService.reconnect(account);
+      const calendars = await caldavService.fetchCalendars(account.id);
+
+      setTestResults((prev) => ({
+        ...prev,
+        [account.id]: {
+          success: true,
+          message: `Connected successfully. Found ${calendars.length} ${pluralize(calendars.length, 'calendar', 'calendars')}.`,
+        },
+      }));
+    } catch (error) {
+      setTestResults((prev) => ({
+        ...prev,
+        [account.id]: {
+          success: false,
+          message: error instanceof Error ? error.message : 'Connection test failed',
+        },
+      }));
+    } finally {
+      setTestingAccounts((prev) => {
+        const next = new Set(prev);
+        next.delete(account.id);
+        return next;
+      });
+    }
+  };
+
+  const handleAddAccount = () => {
+    emit(MENU_EVENTS.ADD_ACCOUNT);
+  };
+
   return (
     <div className="space-y-4">
-      <h3 className="text-base font-semibold text-surface-800 dark:text-surface-200">
-        Connections
-      </h3>
-      <div className="space-y-3 rounded-lg border border-surface-200 dark:border-surface-700 p-4 bg-white dark:bg-surface-800">
+      <div className="flex items-center justify-between">
+        <h3 className="text-base font-semibold text-surface-800 dark:text-surface-200">
+          Connections
+        </h3>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleAddAccount}
+            className="flex items-center gap-1.5 px-2 py-1 text-xs bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-300 rounded transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Add Account
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-4 rounded-lg">
         {accounts.length === 0 ? (
-          <div className="text-center">
-            <p className="text-sm text-surface-500 dark:text-surface-400 mb-2">
+          <div className="rounded-lg border border-surface-200 dark:border-surface-700 p-4">
+            <p className="text-sm text-surface-500 dark:text-surface-400">
               No accounts connected yet.
-            </p>
-            <p className="text-xs text-surface-400 dark:text-surface-500">
-              Add an account from the sidebar to get started.
             </p>
           </div>
         ) : (
-          accounts.map((account) => {
-            const isExpanded = expandedAccounts.has(account.id);
-            return (
-              <div
-                key={account.id}
-                className="rounded-lg border border-surface-200 dark:border-surface-600 overflow-hidden"
-              >
-                <button
-                  type="button"
-                  className="flex items-center justify-between p-3 cursor-pointer hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors w-full text-left"
-                  onClick={() => toggleExpanded(account.id)}
+          <div className="space-y-3">
+            {accounts.map((account) => {
+              const isConnected = hasConnection(account.id);
+              const isTesting = testingAccounts.has(account.id);
+              const testResult = testResults[account.id];
+              const taskCount = accountStats[account.id] || 0;
+
+              return (
+                <div
+                  key={account.id}
+                  className="rounded-lg border border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900/50 p-4"
                 >
-                  <div className="flex items-center gap-3">
-                    <ChevronDown
-                      className={`w-4 h-4 text-surface-400 transition-transform ${isExpanded ? '' : '-rotate-90'}`}
-                    />
-                    <div>
-                      <p className="text-sm font-medium text-surface-700 dark:text-surface-300">
-                        {account.name}
-                      </p>
-                      <p className="text-xs text-surface-500 dark:text-surface-400">
-                        {account.username} ({account.serverType})
-                      </p>
-                    </div>
-                  </div>
-                </button>
-
-                {isExpanded && (
-                  <div className="border-t border-surface-200 dark:border-surface-600 p-3 bg-surface-50 dark:bg-surface-900/50 space-y-3">
-                    <div>
-                      <p className="text-xs text-surface-500 dark:text-surface-400 mb-1">Server</p>
-                      <p className="text-sm text-surface-700 dark:text-surface-300 font-mono break-all">
-                        {account.serverUrl}
-                      </p>
-                    </div>
-
-                    {account.calendars.length > 0 && (
-                      <div>
-                        <p className="text-xs text-surface-500 dark:text-surface-400 mb-1">
-                          Calendars ({account.calendars.length})
+                  <div className="flex justify-between gap-3">
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="flex flex-row gap-1.5 items-center text-sm font-medium text-surface-700 dark:text-surface-300">
+                          <User className="w-4 h-4 text-surface-500 dark:text-surface-400 flex-shrink-0" />
+                          {account.name}
                         </p>
-                        <div className="flex flex-wrap gap-1">
-                          {account.calendars.map((cal) => (
-                            <span
-                              key={cal.id}
-                              className="text-xs bg-surface-200 dark:bg-surface-700 text-surface-600 dark:text-surface-400 px-2 py-0.5 rounded"
-                            >
-                              {cal.displayName}
-                            </span>
-                          ))}
-                        </div>
+                        {!isConnected && (
+                          <span className="text-xs text-amber-600 dark:text-amber-400">
+                            Disconnected
+                          </span>
+                        )}
                       </div>
-                    )}
 
-                    <div className="pt-2 border-t border-surface-200 dark:border-surface-600">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteAccount(account);
-                        }}
-                        className="flex items-center gap-2 px-3 py-1.5 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                        Remove account
-                      </button>
+                      <div className="flex items-center gap-1 text-xs text-surface-500 dark:text-surface-400">
+                        <span>
+                          {account.calendars.length}{' '}
+                          {pluralize(account.calendars.length, 'calendar', 'calendars')}
+                        </span>
+                        {taskCount > 0 && (
+                          <>
+                            <span>•</span>
+                            <span>
+                              {taskCount} {pluralize(taskCount, 'task', 'tasks')}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-center items-center gap-1">
+                      <Tooltip content="Edit account" position="bottom" allowInModal>
+                        <button
+                          type="button"
+                          onClick={() => handleEditAccount(account.id)}
+                          className="p-1.5 text-surface-600 dark:text-surface-400 hover:bg-surface-200 dark:hover:bg-surface-600 rounded transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+                        >
+                          <Edit2 className="w-5 h-5" />
+                        </button>
+                      </Tooltip>
+                      <Tooltip content="Test connection" position="bottom" allowInModal>
+                        <button
+                          type="button"
+                          onClick={() => handleTestConnection(account)}
+                          disabled={isTesting}
+                          className="p-1.5 text-surface-600 dark:text-surface-400 hover:bg-surface-200 dark:hover:bg-surface-600 rounded transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset disabled:opacity-50"
+                        >
+                          {isTesting ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                          ) : (
+                            <Activity className="w-5 h-5" />
+                          )}
+                        </button>
+                      </Tooltip>
+                      <Tooltip content="Remove account" position="bottom" allowInModal>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteAccount(account)}
+                          className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </Tooltip>
                     </div>
                   </div>
-                )}
-              </div>
-            );
-          })
+
+                  {testResult && (
+                    <div
+                      className={`p-2 rounded-md text-xs mt-3 ${
+                        testResult.success
+                          ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                          : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                      }`}
+                    >
+                      {testResult.message}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>
