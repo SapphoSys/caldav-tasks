@@ -1,4 +1,6 @@
 import { emit } from '@tauri-apps/api/event';
+import { openUrl } from '@tauri-apps/plugin-opener';
+import Bug from 'lucide-react/icons/bug';
 import ChevronDown from 'lucide-react/icons/chevron-down';
 import ChevronRight from 'lucide-react/icons/chevron-right';
 import Download from 'lucide-react/icons/download';
@@ -47,6 +49,7 @@ import { FALLBACK_ITEM_COLOR, MAX_SIDEBAR_WIDTH, MIN_SIDEBAR_WIDTH } from '$util
 import { getMetaKeyLabel, getModifierJoiner } from '$utils/keyboard';
 import { MENU_EVENTS } from '$utils/menu';
 import { clampToViewport } from '$utils/position';
+import { getAppInfo } from '$utils/version';
 
 interface SidebarProps {
   onOpenSettings?: () => void;
@@ -79,12 +82,13 @@ export const Sidebar = ({
   const setActiveTagMutation = useSetActiveTag();
   const setAllTasksViewMutation = useSetAllTasksView();
 
+  const { version } = getAppInfo();
+
   const { handleDeleteAccount, handleDeleteTag, handleDeleteCalendar } = useDeleteHandlers();
   const { syncCalendar, syncingCalendarId } = useSyncQuery();
 
   const activeCalendarId = uiState?.activeCalendarId ?? null;
   const activeTagId = uiState?.activeTagId ?? null;
-
   const { isAnyModalOpen } = useModalState();
   const {
     expandedAccountIds,
@@ -639,12 +643,25 @@ export const Sidebar = ({
               <button
                 type="button"
                 onClick={() => onOpenSettings?.()}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-surface-600 dark:text-surface-400 ${!isAnyModalOpen ? 'hover:bg-surface-200 dark:hover:bg-surface-700' : ''} transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset`}
+                className={`w-full flex items-center gap-2 px-4 py-2 text-sm text-surface-600 dark:text-surface-400 ${!isAnyModalOpen ? 'hover:bg-surface-200 dark:hover:bg-surface-700' : ''} transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset`}
               >
                 <Settings className="w-4 h-4" />
                 Settings
                 <span className="ml-auto text-xs text-surface-400">{settingsShortcut}</span>
               </button>
+              <div className="flex items-center justify-between px-4 py-2 text-xs text-surface-400 dark:text-surface-500">
+                <span>v{version}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    openUrl('https://github.com/SapphoSys/caldav-tasks/issues/new');
+                  }}
+                  className="flex items-center gap-1 text-surface-500 dark:text-surface-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset rounded"
+                >
+                  <Bug className="w-3 h-3" />
+                  Report Bug
+                </button>
+              </div>
             </div>
           </div>
         )}
