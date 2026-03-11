@@ -4,6 +4,7 @@
 
 import * as db from '$lib/database';
 import { loggers } from '$lib/logger';
+import { deleteAppPassword as deleteNextcloudAppPassword } from '$lib/nextcloud-auth';
 import { loadDataStore, saveDataStore } from '$lib/store';
 import type { Account } from '$types/index';
 import { generateUUID } from '$utils/misc';
@@ -70,6 +71,17 @@ export const deleteAccount = (id: string) => {
   const newAccounts = data.accounts.filter((acc) => acc.id !== id);
   const deletedAccount = data.accounts.find((acc) => acc.id === id);
   const deletedCalendarIds = deletedAccount?.calendars.map((c) => c.id) ?? [];
+
+  // Delete the app password on the server (for supported server types)
+  if (deletedAccount?.serverType === 'nextcloud') {
+    deleteNextcloudAppPassword(
+      deletedAccount.serverUrl,
+      deletedAccount.username,
+      deletedAccount.password,
+    )
+      .then(() => log.info('Nextcloud app password deleted for account', { accountId: id }))
+      .catch((e) => log.warn('Failed to delete Nextcloud app password:', e));
+  }
 
   db.deleteAccount(id).catch((e) => log.error('Failed to persist account deletion:', e));
 
