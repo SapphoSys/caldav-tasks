@@ -1,5 +1,6 @@
 import Bell from 'lucide-react/icons/bell';
 import Database from 'lucide-react/icons/database';
+import Download from 'lucide-react/icons/download';
 import Info from 'lucide-react/icons/info';
 import Keyboard from 'lucide-react/icons/keyboard';
 import ListTodo from 'lucide-react/icons/list-todo';
@@ -18,6 +19,7 @@ import { NotificationSettings } from '$components/modals/settings/NotificationSe
 import { ShortcutsSettings } from '$components/modals/settings/ShortcutsSettings';
 import { SyncSettings } from '$components/modals/settings/SyncSettings';
 import { TaskDefaultsSettings } from '$components/modals/settings/TaskDefaultsSettings';
+import { UpdateSettings } from '$components/modals/settings/UpdateSettings';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
@@ -86,8 +88,11 @@ export const SettingsModal = ({ onClose, initialCategory, initialSubtab }: Setti
       id: 'about',
       label: 'About',
       icon: <Info className="w-4 h-4" />,
-      description: 'Version',
-      subtabs: [{ id: 'version', label: 'Version', icon: <Info className="w-4 h-4" /> }],
+      description: 'Version, updates',
+      subtabs: [
+        { id: 'updates', label: 'Updates', icon: <Download className="w-4 h-4" /> },
+        { id: 'version', label: 'Version', icon: <Info className="w-4 h-4" /> },
+      ],
     },
   ];
 
@@ -183,7 +188,12 @@ export const SettingsModal = ({ onClose, initialCategory, initialSubtab }: Setti
               </div>
             )}
 
-            {activeCategory === 'about' && currentSubtab === 'version' && <AboutSettings />}
+            {activeCategory === 'about' && (
+              <div className="space-y-6">
+                {currentSubtab === 'version' && <AboutSettings />}
+                {currentSubtab === 'updates' && <UpdateSettings />}
+              </div>
+            )}
           </div>
         </div>
       </div>

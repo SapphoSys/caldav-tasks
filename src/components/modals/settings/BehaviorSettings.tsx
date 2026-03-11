@@ -23,8 +23,6 @@ export const BehaviorSettings = () => {
     setEnableSystemTray,
     systemTrayAppliedValue,
     setSystemTrayAppliedValue,
-    checkForUpdatesAutomatically,
-    setCheckForUpdatesAutomatically,
   } = useSettingsStore();
 
   const systemTrayChanged = enableSystemTray !== systemTrayAppliedValue;
@@ -162,22 +160,6 @@ export const BehaviorSettings = () => {
             type="checkbox"
             checked={enableSystemTray}
             onChange={(e) => handleSystemTrayChange(e.target.checked)}
-            className="rounded border-surface-300 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 outline-none"
-          />
-        </label>
-        <label className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-surface-700 dark:text-surface-300">
-              Check for updates automatically
-            </p>
-            <p className="text-xs text-surface-500 dark:text-surface-400">
-              Automatically check for updates on startup
-            </p>
-          </div>
-          <input
-            type="checkbox"
-            checked={checkForUpdatesAutomatically}
-            onChange={(e) => setCheckForUpdatesAutomatically(e.target.checked)}
             className="rounded border-surface-300 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 outline-none"
           />
         </label>

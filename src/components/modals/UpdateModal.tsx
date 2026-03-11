@@ -1,7 +1,8 @@
-import { openUrl } from '@tauri-apps/plugin-opener';
 import Download from 'lucide-react/icons/download';
-import ExternalLink from 'lucide-react/icons/external-link';
+import FileText from 'lucide-react/icons/file-text';
 import X from 'lucide-react/icons/x';
+import { useState } from 'react';
+import { ChangelogModal } from '$components/modals/ChangelogModal';
 import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import type { UpdateInfo } from '$hooks/useUpdateChecker';
@@ -23,6 +24,7 @@ export const UpdateModal = ({
   downloadProgress,
 }: UpdateModalProps) => {
   const focusTrapRef = useFocusTrap();
+  const [showChangelogModal, setShowChangelogModal] = useState(false);
   useModalEscapeKey(onClose);
 
   return (
@@ -82,15 +84,11 @@ export const UpdateModal = ({
         <div className="flex justify-end gap-2 p-4 border-t border-surface-200 dark:border-surface-700">
           <button
             type="button"
-            className="px-4 py-2 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors flex items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
-            onClick={() => {
-              openUrl(
-                `https://github.com/SapphoSys/caldav-tasks/releases/tag/app-v${updateInfo.version}`,
-              );
-            }}
+            className="px-4 py-2 text-sm text-surface-700 dark:text-surface-300 bg-surface-50 dark:bg-surface-800 hover:bg-surface-100 dark:hover:bg-surface-700 border border-surface-200 dark:border-surface-700 rounded-lg transition-colors flex items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+            onClick={() => setShowChangelogModal(true)}
           >
-            <ExternalLink className="w-4 h-4" />
-            View changelog
+            <FileText className="w-4 h-4" />
+            View Changelog
           </button>
           <button
             type="button"
@@ -103,6 +101,15 @@ export const UpdateModal = ({
           </button>
         </div>
       </div>
+
+      {/* Changelog Modal */}
+      {showChangelogModal && (
+        <ChangelogModal
+          version={updateInfo.version}
+          changelog={updateInfo.body || ''}
+          onClose={() => setShowChangelogModal(false)}
+        />
+      )}
     </div>
   );
 };

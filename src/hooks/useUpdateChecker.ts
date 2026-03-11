@@ -1,5 +1,6 @@
-import { isTauri } from '@tauri-apps/api/core';
+import { getVersion } from '@tauri-apps/api/app';
 import { relaunch } from '@tauri-apps/plugin-process';
+import { check } from '@tauri-apps/plugin-updater';
 import { useCallback, useEffect, useState } from 'react';
 import { settingsStore } from '$context/settingsContext';
 import { loggers } from '$lib/logger';
@@ -24,28 +25,43 @@ export interface UseUpdateCheckerResult {
   downloadProgress: number;
 }
 
+// Module-level state that persists across component mounts
+let sharedUpdateState: UpdateInfo | null = null;
+let sharedDismissed = false;
+const stateChangeListeners = new Set<() => void>();
+
+const notifyListeners = () => {
+  for (const listener of stateChangeListeners) {
+    listener();
+  }
+};
+
 export const useUpdateChecker = (): UseUpdateCheckerResult => {
-  const [updateAvailable, setUpdateAvailable] = useState<UpdateInfo | null>(null);
+  const [updateAvailable, setUpdateAvailable] = useState<UpdateInfo | null>(sharedUpdateState);
   const [isChecking, setIsChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(sharedDismissed);
+
+  // Sync with shared state
+  useEffect(() => {
+    const listener = () => {
+      setUpdateAvailable(sharedUpdateState);
+      setDismissed(sharedDismissed);
+    };
+    stateChangeListeners.add(listener);
+    return () => {
+      stateChangeListeners.delete(listener);
+    };
+  }, []);
 
   const checkForUpdates = useCallback(async () => {
-    if (!isTauri()) {
-      log.info('Not in Tauri environment, skipping update check');
-      return;
-    }
-
     setIsChecking(true);
     setError(null);
 
     try {
       log.info('Starting update check...');
-      const { check } = await import('@tauri-apps/plugin-updater');
-      const { getVersion } = await import('@tauri-apps/api/app');
-
       const currentVersion = await getVersion();
       log.info(`Current version: ${currentVersion}`);
 
@@ -53,15 +69,40 @@ export const useUpdateChecker = (): UseUpdateCheckerResult => {
       const update = await check();
       if (update) {
         log.info(`Update available: ${update.version}`);
-        setUpdateAvailable({
+
+        // Fetch release notes from GitHub API if not provided by updater
+        let body = update.body || '';
+        if (!body) {
+          try {
+            log.info('Fetching release notes from GitHub API...');
+            const response = await fetch(
+              `https://api.github.com/repos/SapphoSys/caldav-tasks/releases/tags/app-v${update.version}`,
+              { headers: { Accept: 'application/vnd.github.v3+json' } },
+            );
+            if (response.ok) {
+              const release = await response.json();
+              body = release.body || '';
+              log.info('Release notes fetched successfully');
+            }
+          } catch (e) {
+            log.warn('Failed to fetch release notes from GitHub:', e);
+          }
+        }
+
+        const updateInfo = {
           version: update.version,
-          body: update.body,
+          body,
           date: update.date,
           currentVersion,
-        });
+        };
+        sharedUpdateState = updateInfo;
+        setUpdateAvailable(updateInfo);
+        notifyListeners();
       } else {
         log.info('No updates available');
+        sharedUpdateState = null;
         setUpdateAvailable(null);
+        notifyListeners();
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to check for updates';
@@ -73,7 +114,7 @@ export const useUpdateChecker = (): UseUpdateCheckerResult => {
   }, []);
 
   const downloadAndInstall = useCallback(async () => {
-    if (!isTauri() || !updateAvailable) {
+    if (!updateAvailable) {
       return;
     }
 
@@ -81,8 +122,6 @@ export const useUpdateChecker = (): UseUpdateCheckerResult => {
     setDownloadProgress(0);
 
     try {
-      const { check } = await import('@tauri-apps/plugin-updater');
-
       const update = await check();
       if (!update) {
         throw new Error('Update no longer available');
@@ -122,15 +161,14 @@ export const useUpdateChecker = (): UseUpdateCheckerResult => {
   }, [updateAvailable]);
 
   const dismissUpdate = useCallback(() => {
+    sharedDismissed = true;
+    sharedUpdateState = null;
     setDismissed(true);
     setUpdateAvailable(null);
+    notifyListeners();
   }, []);
 
   useEffect(() => {
-    if (!isTauri()) {
-      return;
-    }
-
     // Check if automatic updates are enabled
     const { checkForUpdatesAutomatically } = settingsStore.getState();
     if (!checkForUpdatesAutomatically) {
