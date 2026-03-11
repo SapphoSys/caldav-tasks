@@ -3,12 +3,21 @@ import X from 'lucide-react/icons/x';
 import { useState } from 'react';
 import { TagPickerModal } from '$components/modals/TagPickerModal';
 import { getIconByName } from '$data/icons';
+import { useAccounts } from '$hooks/queries/useAccounts';
 import { useTags } from '$hooks/queries/useTags';
 import { useSettingsStore } from '$hooks/useSettingsStore';
 import { PRIORITIES } from '$utils/priority';
 
 export const TaskDefaultsSettings = () => {
-  const { defaultPriority, setDefaultPriority, defaultTags, setDefaultTags } = useSettingsStore();
+  const {
+    defaultPriority,
+    setDefaultPriority,
+    defaultTags,
+    setDefaultTags,
+    defaultCalendarId,
+    setDefaultCalendarId,
+  } = useSettingsStore();
+  const { data: accounts = [] } = useAccounts();
   const { data: tags = [] } = useTags();
   const [showTagPicker, setShowTagPicker] = useState(false);
 
@@ -31,6 +40,45 @@ export const TaskDefaultsSettings = () => {
       <h3 className="text-base font-semibold text-surface-800 dark:text-surface-200">
         Task Defaults
       </h3>
+
+      <div className="rounded-lg border border-surface-200 dark:border-surface-700 p-4 bg-white dark:bg-surface-800">
+        <div className="flex flex-row items-center justify-between">
+          <div>
+            <h4 className="text-sm font-medium text-surface-800 dark:text-surface-200">
+              Default Calendar
+            </h4>
+            <p className="text-xs text-surface-500 dark:text-surface-400">
+              Used for new tasks in "All Tasks"
+            </p>
+          </div>
+          <select
+            value={defaultCalendarId || ''}
+            onChange={(e) => setDefaultCalendarId(e.target.value || null)}
+            disabled={
+              accounts.length === 0 || !accounts.some((account) => account.calendars.length > 0)
+            }
+            className="px-3 py-2 text-sm border border-transparent bg-surface-100 dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {accounts.length === 0 || !accounts.some((account) => account.calendars.length > 0) ? (
+              <option value="">No accounts available</option>
+            ) : (
+              <>
+                <option value="">Use active calendar</option>
+                {accounts.map((account) => (
+                  <optgroup key={account.id} label={account.name}>
+                    {account.calendars.map((cal) => (
+                      <option key={cal.id} value={cal.id}>
+                        {cal.displayName}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </>
+            )}
+          </select>
+        </div>
+      </div>
+
       <div className="rounded-lg border border-surface-200 dark:border-surface-700 p-4 bg-white dark:bg-surface-800">
         <h4 className="text-sm font-medium text-surface-800 dark:text-surface-200 mb-3">
           Default Priority

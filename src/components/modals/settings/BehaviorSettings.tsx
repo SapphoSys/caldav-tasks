@@ -1,6 +1,5 @@
 import { relaunch } from '@tauri-apps/plugin-process';
 import { WEEK_START_OPTIONS } from '$data/settings';
-import { useAccounts } from '$hooks/queries/useAccounts';
 import { useSettingsStore } from '$hooks/useSettingsStore';
 import type { StartOfWeek, SubtaskDeletionBehavior } from '$types/index';
 
@@ -18,8 +17,6 @@ export const BehaviorSettings = () => {
     setDeleteSubtasksWithParent,
     startOfWeek,
     setStartOfWeek,
-    defaultCalendarId,
-    setDefaultCalendarId,
     defaultAccountsExpanded,
     setDefaultAccountsExpanded,
     enableSystemTray,
@@ -29,7 +26,6 @@ export const BehaviorSettings = () => {
     checkForUpdatesAutomatically,
     setCheckForUpdatesAutomatically,
   } = useSettingsStore();
-  const { data: accounts = [] } = useAccounts();
 
   const systemTrayChanged = enableSystemTray !== systemTrayAppliedValue;
 
@@ -45,13 +41,6 @@ export const BehaviorSettings = () => {
       console.error('Failed to relaunch app:', error);
     }
   };
-
-  const allCalendars = accounts.flatMap((account) =>
-    account.calendars.map((cal) => ({
-      ...cal,
-      accountName: account.name,
-    })),
-  );
 
   return (
     <div className="space-y-4">
@@ -105,8 +94,8 @@ export const BehaviorSettings = () => {
           />
         </label>
 
-        <div>
-          <div className="mb-2">
+        <div className="flex flex-row items-center justify-between">
+          <div>
             <p className="text-sm text-surface-700 dark:text-surface-300">
               When deleting a task with subtasks
             </p>
@@ -114,10 +103,11 @@ export const BehaviorSettings = () => {
               Choose what happens to subtasks
             </p>
           </div>
+
           <select
             value={deleteSubtasksWithParent}
             onChange={(e) => setDeleteSubtasksWithParent(e.target.value as SubtaskDeletionBehavior)}
-            className="w-full px-3 py-1.5 text-sm border border-transparent bg-surface-100 dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors"
+            className="px-3 text-sm border border-transparent bg-surface-100 dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors"
           >
             <option value="delete">Delete all subtasks</option>
             <option value="keep">Keep subtasks</option>
@@ -161,35 +151,6 @@ export const BehaviorSettings = () => {
           />
         </label>
 
-        {allCalendars.length > 0 && (
-          <div>
-            <div className="mb-2">
-              <p className="text-sm text-surface-700 dark:text-surface-300">
-                Default calendar for new tasks
-              </p>
-              <p className="text-xs text-surface-500 dark:text-surface-400">
-                Used when creating tasks from "All Tasks" view
-              </p>
-            </div>
-            <select
-              value={defaultCalendarId || ''}
-              onChange={(e) => setDefaultCalendarId(e.target.value || null)}
-              className="w-full px-3 py-2 text-sm border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg focus:outline-none focus:border-primary-300"
-            >
-              <option value="">Use active calendar</option>
-              {accounts.map((account) => (
-                <optgroup key={account.id} label={account.name}>
-                  {account.calendars.map((cal) => (
-                    <option key={cal.id} value={cal.id}>
-                      {cal.displayName}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          </div>
-        )}
-
         <label className="flex items-center justify-between">
           <div>
             <p className="text-sm text-surface-700 dark:text-surface-300">Enable system tray</p>
@@ -204,7 +165,6 @@ export const BehaviorSettings = () => {
             className="rounded border-surface-300 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 outline-none"
           />
         </label>
-
         <label className="flex items-center justify-between">
           <div>
             <p className="text-sm text-surface-700 dark:text-surface-300">
