@@ -44,7 +44,7 @@ cef = ["tauri/cef", "dep:rustls"]
 
 [dependencies.rustls]
 version = "0.23"
-features = ["ring"]
+features = ["aws_lc_rs"]
 optional = true
 
 [patch.crates-io]
@@ -65,6 +65,7 @@ tauri-plugin-process = { git = "https://github.com/tauri-apps/plugins-workspace"
 tauri-plugin-os = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }
 tauri-plugin-opener = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }
 tauri-plugin-updater = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }
+tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.

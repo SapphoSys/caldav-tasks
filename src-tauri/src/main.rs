@@ -19,7 +19,7 @@ fn main() {
     // Initialize default crypto provider for rustls (required for reqwest in CEF)
     #[cfg(feature = "cef")]
     {
-        let _ = rustls::crypto::ring::default_provider().install_default();
+        let _ = rustls::crypto::aws_lc_rs::default_provider().install_default();
     }
 
     // Disable App Nap on macOS to ensure periodic sync and notifications work
