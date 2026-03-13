@@ -39,9 +39,10 @@ You can download pre-built binaries of the application for each platform by clic
 <details>
 <summary>Instructions for Arch Linux</summary>
 
+## Arch Linux
 caldav-tasks is available on the AUR (Arch User Repository) in two variants:
 
-### Build from source
+### Building from source
 ```bash
 yay -S caldav-tasks # or `paru -S caldav-tasks`
 
@@ -65,7 +66,10 @@ makepkg -si
 <details>
 <summary>Instructions for Nix / NixOS</summary>
 
-### Flakes
+## Nix / NixOS
+caldav-tasks is available for Nix, NixOS, and nix-darwin as a flake. A pre-built binary is also available.
+
+### Flake
 > Until the app is officially published to `nixpkgs`, you'll have to use a flake input for the time being.
 
 Add `caldav-tasks` as an input to your `flake.nix` file.
@@ -98,11 +102,12 @@ Add `caldav-tasks` as an input to your `flake.nix` file.
     };
     outputs = { nixpkgs, caldav-tasks, ... }: {
       nixosConfigurations.your-hostname = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
+        system = "x86_64-linux"; # Or "aarch64-linux"
         modules = [
           {
             environment.systemPackages = [
               caldav-tasks.packages.x86_64-linux.default
+              # Or "caldav-tasks.packages.x86_64-linux.bin" for a pre-built binary
             ];
           }
           # ... etc
@@ -121,6 +126,7 @@ Add `caldav-tasks` as an input to your `flake.nix` file.
   {
     home.packages = [
       inputs.caldav-tasks.packages.${pkgs.system}.default
+      # Or "inputs.caldav-tasks.packages.${pkgs.system}.bin" for a pre-built binary
     ];
   }
   ```
@@ -145,11 +151,12 @@ Add `caldav-tasks` as an input to your `flake.nix` file.
     };
     outputs = { nixpkgs, darwin, caldav-tasks, ... }: {
       darwinConfigurations.your-macbook = darwin.lib.darwinSystem {
-        system = "aarch64-darwin";  # or "x86_64-darwin"
+        system = "aarch64-darwin"; # Or "x86_64-darwin"
         modules = [
           {
             environment.systemPackages = [
               caldav-tasks.packages.aarch64-darwin.default
+              # Or "caldav-tasks.packages.aarch64-darwin.bin" for a pre-built binary
             ];
           }
         ];
