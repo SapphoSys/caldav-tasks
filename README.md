@@ -34,7 +34,33 @@ You can download pre-built binaries of the application for each platform by clic
 <!-- download badges end -->
 
 > [!NOTE]  
-> Flatpak, AppImage and AUR (Arch Linux) support is planned in a future release.
+> Flatpak and AppImage support is planned in a future release.
+
+<details>
+<summary>Instructions for Arch Linux</summary>
+
+caldav-tasks is available on the AUR (Arch User Repository) in two variants:
+
+### Build from source
+```bash
+yay -S caldav-tasks # or `paru -S caldav-tasks`
+
+# Or manually
+git clone https://aur.archlinux.org/caldav-tasks.git
+cd caldav-tasks
+makepkg -si
+```
+
+### Pre-built binary (faster installation)
+```bash
+yay -S caldav-tasks-bin # or `paru -S caldav-tasks-bin`
+
+# Or manually
+git clone https://aur.archlinux.org/caldav-tasks-bin.git
+cd caldav-tasks-bin
+makepkg -si
+```
+</details>
 
 <details>
 <summary>Instructions for Nix / NixOS</summary>
