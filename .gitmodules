@@ -1,0 +1,6 @@
+[submodule "aur/src"]
+	path = aur/src
+	url = ssh://aur@aur.archlinux.org/caldav-tasks.git
+[submodule "aur/bin"]
+	path = aur/bin
+	url = ssh://aur@aur.archlinux.org/caldav-tasks-bin.git
