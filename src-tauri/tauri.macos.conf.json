@@ -17,5 +17,15 @@
     "security": {
       "csp": null
     }
+  },
+  "bundle": {
+    "resources": {
+      "gen/Assets.car": "Assets.car",
+      "gen/Chiri.icns": "Chiri.icns",
+      "gen/partial.plist": "partial.plist"
+    },
+    "macOS": {
+      "infoPlist": "Info.plist"
+    }
   }
 }
