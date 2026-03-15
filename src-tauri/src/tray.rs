@@ -1,8 +1,9 @@
 use std::sync::{LazyLock, Mutex};
 use tauri::{
+    image::Image,
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{TrayIconBuilder, TrayIconEvent, TrayIconId},
-    Emitter, Manager,
+    Emitter, Manager, Theme,
 };
 
 // Runtime type alias - switches between Wry and Cef based on feature flag
@@ -19,6 +20,38 @@ static SYNC_ITEM: LazyLock<Mutex<Option<MenuItem<AppRuntime>>>> =
     LazyLock::new(|| Mutex::new(None));
 static TRAY_VISIBLE: LazyLock<Mutex<bool>> = LazyLock::new(|| Mutex::new(true));
 static TRAY_ENABLED: LazyLock<Mutex<bool>> = LazyLock::new(|| Mutex::new(true));
+
+/// Get the current system theme
+fn get_current_theme(app_handle: &tauri::AppHandle<AppRuntime>) -> Theme {
+    if let Some(main_window) = app_handle.get_webview_window("main") {
+        main_window.theme().unwrap_or(Theme::Dark)
+    } else {
+        Theme::Dark
+    }
+}
+
+/// Load the appropriate tray icon based on system theme
+fn load_tray_icon(app_handle: &tauri::AppHandle<AppRuntime>) -> Result<Image<'static>, String> {
+    let theme = get_current_theme(app_handle);
+
+    match theme {
+        Theme::Light => {
+            // Light menu bar needs dark icon to be visible
+            let icon_bytes = include_bytes!("../icons/monochrome_dark.png");
+            Image::from_bytes(icon_bytes).map_err(|e| format!("Failed to load tray icon: {}", e))
+        }
+        Theme::Dark => {
+            // Dark menu bar needs light icon to be visible
+            let icon_bytes = include_bytes!("../icons/monochrome_light.png");
+            Image::from_bytes(icon_bytes).map_err(|e| format!("Failed to load tray icon: {}", e))
+        }
+        _ => {
+            // Default to light icon for dark theme
+            let icon_bytes = include_bytes!("../icons/monochrome_light.png");
+            Image::from_bytes(icon_bytes).map_err(|e| format!("Failed to load tray icon: {}", e))
+        }
+    }
+}
 
 /// check if the system tray is currently enabled
 pub fn is_tray_enabled() -> bool {
@@ -83,16 +116,21 @@ pub async fn initialize_tray(
     )
     .map_err(|e| e.to_string())?;
 
-    // get the default window icon
-    let icon = app_handle
-        .default_window_icon()
-        .ok_or_else(|| "No default window icon found".to_string())?
-        .clone();
+    // Load tray icon
+    let tray_icon = load_tray_icon(&app_handle)?;
 
-    let _tray = TrayIconBuilder::with_id("main")
-        .icon(icon)
+    let mut tray_builder = TrayIconBuilder::with_id("main")
+        .icon(tray_icon)
         .menu(&menu)
-        .tooltip("caldav-tasks")
+        .tooltip("Chiri");
+
+    // On macOS, use template icon for automatic light/dark mode adaptation
+    #[cfg(target_os = "macos")]
+    {
+        tray_builder = tray_builder.icon_as_template(true);
+    }
+
+    let _tray = tray_builder
         .on_menu_event(|app, event| match event.id.as_ref() {
             "show" => {
                 if let Some(window) = app.get_webview_window("main") {
