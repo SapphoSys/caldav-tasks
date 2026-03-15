@@ -24,8 +24,8 @@ export const ACCENT_COLORS = [
   { name: 'Pink', value: '#ec4899' },
 ] as const;
 
-export const DEFAULT_COLOR = '#3b82f6';
-export const FALLBACK_ITEM_COLOR = '#3b82f6';
+export const DEFAULT_COLOR = '#ec4899';
+export const FALLBACK_ITEM_COLOR = '#ec4899';
 export const DEFAULT_DAY_OF_WEEK = 'monday';
 
 export const MODAL_SIZE_CLASSES = {
