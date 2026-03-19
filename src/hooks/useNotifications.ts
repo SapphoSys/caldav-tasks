@@ -1,50 +1,100 @@
-import {
-  isPermissionGranted,
-  requestPermission,
-  sendNotification,
-} from '@tauri-apps/plugin-notification';
+import { listen } from '@tauri-apps/api/event';
 import { differenceInSeconds, isPast } from 'date-fns';
-import { useEffect, useRef } from 'react';
-import { useTasks } from '$hooks/queries/useTasks';
+import { useCallback, useEffect, useRef } from 'react';
+import { useTasks, useUpdateTask } from '$hooks/queries/useTasks';
 import { useSettingsStore } from '$hooks/useSettingsStore';
 import { loggers } from '$lib/logger';
+import {
+  checkNotificationPermission,
+  type NotificationActionEvent,
+  type NotificationType,
+  requestNotificationPermission,
+  sendNotification,
+} from '$lib/notifications';
 
 const log = loggers.notifications;
 
 interface NotificationOptions {
   title: string;
   body: string;
+  taskId: string;
+  notificationType: NotificationType;
 }
 
 const showNotification = async (options: NotificationOptions): Promise<void> => {
   try {
-    let permissionGranted = await isPermissionGranted();
+    // Use our native permission check
+    const permissionStatus = await checkNotificationPermission();
+    let permissionGranted = permissionStatus.status === 'granted';
 
     if (!permissionGranted) {
-      const permission = await requestPermission();
-      permissionGranted = permission === 'granted';
+      // Request permission using native API
+      const result = await requestNotificationPermission();
+      permissionGranted = result.granted;
+
+      log.info('Notification permission requested:', result);
     }
 
     if (permissionGranted) {
-      sendNotification({
+      await sendNotification({
+        title: options.title,
+        body: options.body,
+        taskId: options.taskId,
+        notificationType: options.notificationType,
+      });
+      log.info('Notification sent:', {
         title: options.title,
         body: options.body,
       });
+    } else {
+      log.warn('Notification permission not granted:', permissionStatus.status);
     }
   } catch (error) {
     log.error('Failed to show notification:', error);
   }
 };
 
+interface UseNotificationsOptions {
+  onOpenTaskActions?: (taskId: string) => void;
+}
+
 /**
  * hook that monitors tasks and shows notifications for due tasks and reminders
  */
-export const useNotifications = () => {
+export const useNotifications = (options: UseNotificationsOptions = {}) => {
+  const { onOpenTaskActions } = options;
   const { data: tasks = [] } = useTasks();
   const { notifications } = useSettingsStore();
+  const updateTaskMutation = useUpdateTask();
   const notifiedTasksRef = useRef<Set<string>>(new Set());
   const notifiedRemindersRef = useRef<Set<string>>(new Set());
+  const snoozedTasksRef = useRef<Map<string, number>>(new Map());
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Helper function to handle snoozing a task
+  const handleSnoozeTask = useCallback((taskId: string, durationMinutes: number) => {
+    // Calculate when the snooze expires
+    const snoozeUntil = new Date();
+    snoozeUntil.setMinutes(snoozeUntil.getMinutes() + durationMinutes);
+    snoozedTasksRef.current.set(taskId, snoozeUntil.getTime());
+
+    // Remove from notified sets so notifications can fire again once the snooze expires
+    const reminderKeys = Array.from(notifiedRemindersRef.current).filter((key) =>
+      key.startsWith(`reminder-${taskId}`),
+    );
+    reminderKeys.forEach((key) => {
+      notifiedRemindersRef.current.delete(key);
+    });
+
+    const dueKeys = Array.from(notifiedTasksRef.current).filter((key) =>
+      key.startsWith(`due-${taskId}`),
+    );
+    dueKeys.forEach((key) => {
+      notifiedTasksRef.current.delete(key);
+    });
+
+    log.info(`Snoozed notification for task: ${taskId} for ${durationMinutes} minutes`);
+  }, []);
 
   useEffect(() => {
     if (!notifications) {
@@ -56,12 +106,24 @@ export const useNotifications = () => {
       return;
     }
 
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Notification polling has multiple conditions
     const checkDueTasks = () => {
       const now = new Date();
 
       for (const task of tasks) {
         // skip completed tasks
         if (task.completed) continue;
+
+        // Check if task is currently snoozed
+        let justUnsnoozed = false;
+        const snoozeUntil = snoozedTasksRef.current.get(task.id);
+        if (snoozeUntil && now.getTime() < snoozeUntil) {
+          continue; // still snoozed, skip all notifications for this task
+        } else if (snoozeUntil) {
+          // Snooze expired, remove it so we don't keep checking
+          snoozedTasksRef.current.delete(task.id);
+          justUnsnoozed = true;
+        }
 
         // Check reminders (VALARM)
         if (task.reminders && task.reminders.length > 0) {
@@ -75,13 +137,16 @@ export const useNotifications = () => {
             const secondsUntilReminder = differenceInSeconds(reminderDate, now);
 
             // Fire reminder when the time has arrived (0 or past, within 60 second window to avoid missing)
-            // Using seconds for precision - fire when secondsUntilReminder is between 0 and -60
-            if (secondsUntilReminder <= 0 && secondsUntilReminder >= -60) {
+            // OR if the task was just unsnoozed
+            if ((secondsUntilReminder <= 0 && secondsUntilReminder >= -60) || justUnsnoozed) {
               showNotification({
-                title: 'Task Reminder',
+                title: justUnsnoozed ? 'Snoozed Task Reminder' : 'Task Reminder',
                 body: task.title,
+                taskId: task.id,
+                notificationType: 'reminder',
               });
               notifiedRemindersRef.current.add(reminderKey);
+              justUnsnoozed = false; // mark as handled so we don't re-trigger other notifications
             }
           }
         }
@@ -95,14 +160,17 @@ export const useNotifications = () => {
         // skip if we already notified about this task
         if (notifiedTasksRef.current.has(taskKey)) continue;
 
-        // Notify when task is overdue
-        if (isPast(dueDate) && !notifiedTasksRef.current.has(taskKey)) {
+        // Notify when task is overdue or just unsnoozed
+        if ((isPast(dueDate) || justUnsnoozed) && !notifiedTasksRef.current.has(taskKey)) {
           showNotification({
-            title: 'Task Overdue',
+            title: justUnsnoozed ? 'Snoozed Task Overdue' : 'Task Overdue',
             body: task.title,
+            taskId: task.id,
+            notificationType: 'overdue',
           });
 
           notifiedTasksRef.current.add(taskKey);
+          justUnsnoozed = false;
         }
       }
 
@@ -121,11 +189,35 @@ export const useNotifications = () => {
     // check every minute
     checkIntervalRef.current = setInterval(checkDueTasks, 60 * 1000);
 
+    // Listen for notification actions
+    const unlistenPromise = listen<NotificationActionEvent>('notification-action', (event) => {
+      const { action, taskId, notificationType } = event.payload;
+      log.info('Notification action received:', { action, taskId, notificationType });
+
+      if (action === 'complete') {
+        // Complete the task
+        updateTaskMutation.mutate({
+          id: taskId,
+          updates: { completed: true },
+        });
+        log.info('Completing task:', taskId);
+      } else if (action === 'snooze-15min' || action === 'snooze-1hr') {
+        // Snooze the notification
+        const durationMinutes = action === 'snooze-1hr' ? 60 : 15;
+        handleSnoozeTask(taskId, durationMinutes);
+      } else if (action === 'view') {
+        // View action - open the task actions modal
+        log.info('Viewing task:', taskId);
+        onOpenTaskActions?.(taskId);
+      }
+    });
+
     return () => {
       if (checkIntervalRef.current) {
         clearInterval(checkIntervalRef.current);
         checkIntervalRef.current = null;
       }
+      unlistenPromise.then((unlisten) => unlisten());
     };
-  }, [tasks, notifications]);
+  }, [tasks, notifications, updateTaskMutation, handleSnoozeTask, onOpenTaskActions]);
 };
