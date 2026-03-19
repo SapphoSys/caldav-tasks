@@ -14,11 +14,17 @@ export interface UpdateInfo {
   currentVersion: string;
 }
 
+export interface UpdateError {
+  kind: 'check' | 'download';
+  title: string;
+  description: string;
+}
+
 export interface UseUpdateCheckerResult {
   updateAvailable: UpdateInfo | null;
   isChecking: boolean;
-  error: string | null;
-  checkForUpdates: () => Promise<void>;
+  error: UpdateError | null;
+  checkForUpdates: (trigger?: string) => Promise<void>;
   downloadAndInstall: () => Promise<void>;
   dismissUpdate: () => void;
   isDownloading: boolean;
@@ -28,6 +34,9 @@ export interface UseUpdateCheckerResult {
 // Module-level state that persists across component mounts
 let sharedUpdateState: UpdateInfo | null = null;
 let sharedDismissed = false;
+let sharedIsChecking = false;
+let activeUpdateCheckTrigger: string | null = null;
+let startupUpdateCheckScheduled = false;
 const stateChangeListeners = new Set<() => void>();
 
 const notifyListeners = () => {
@@ -36,10 +45,88 @@ const notifyListeners = () => {
   }
 };
 
+const extractErrorMessage = (err: unknown): string => {
+  if (err instanceof Error) {
+    return err.message;
+  }
+
+  if (typeof err === 'string') {
+    return err;
+  }
+
+  if (err && typeof err === 'object' && 'message' in err) {
+    const message = (err as { message?: unknown }).message;
+    if (typeof message === 'string') {
+      return message;
+    }
+  }
+
+  return 'Unknown error';
+};
+
+const toUserFriendlyUpdateCheckError = (rawMessage: string): string => {
+  const normalized = rawMessage.toLowerCase();
+
+  if (
+    normalized.includes('valid release json') ||
+    normalized.includes('release json') ||
+    normalized.includes('manifest')
+  ) {
+    return 'Unable to read update metadata from the update server. Please try again later.';
+  }
+
+  if (
+    normalized.includes('failed to fetch') ||
+    normalized.includes('network') ||
+    normalized.includes('connection') ||
+    normalized.includes('dns') ||
+    normalized.includes('offline')
+  ) {
+    return 'Network error while checking for updates. Please check your internet connection and try again.';
+  }
+
+  if (normalized.includes('timeout') || normalized.includes('timed out')) {
+    return 'Update check timed out. Please try again in a moment.';
+  }
+
+  if (
+    normalized.includes('401') ||
+    normalized.includes('403') ||
+    normalized.includes('unauthorized') ||
+    normalized.includes('forbidden')
+  ) {
+    return 'Update server rejected the request (permission/auth issue). Please verify updater credentials or endpoint access.';
+  }
+
+  if (normalized.includes('404') || normalized.includes('not found')) {
+    return 'Update endpoint was not found. Please verify the configured update URL.';
+  }
+
+  return `Update check failed: ${rawMessage}`;
+};
+
+const toUserFriendlyUpdateDownloadError = (rawMessage: string): string => {
+  const normalized = rawMessage.toLowerCase();
+
+  if (normalized.includes('not enough space') || normalized.includes('no space')) {
+    return 'Not enough disk space to download the update.';
+  }
+
+  if (normalized.includes('signature') || normalized.includes('integrity')) {
+    return 'Downloaded update failed verification. Please try again later.';
+  }
+
+  if (normalized.includes('network') || normalized.includes('failed to fetch')) {
+    return 'Network error while downloading the update. Please check your connection and retry.';
+  }
+
+  return `Update download failed: ${rawMessage}`;
+};
+
 export const useUpdateChecker = (): UseUpdateCheckerResult => {
   const [updateAvailable, setUpdateAvailable] = useState<UpdateInfo | null>(sharedUpdateState);
-  const [isChecking, setIsChecking] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isChecking, setIsChecking] = useState(sharedIsChecking);
+  const [error, setError] = useState<UpdateError | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [dismissed, setDismissed] = useState(sharedDismissed);
@@ -49,6 +136,7 @@ export const useUpdateChecker = (): UseUpdateCheckerResult => {
     const listener = () => {
       setUpdateAvailable(sharedUpdateState);
       setDismissed(sharedDismissed);
+      setIsChecking(sharedIsChecking);
     };
     stateChangeListeners.add(listener);
     return () => {
@@ -56,16 +144,27 @@ export const useUpdateChecker = (): UseUpdateCheckerResult => {
     };
   }, []);
 
-  const checkForUpdates = useCallback(async () => {
+  const checkForUpdates = useCallback(async (trigger = 'unknown') => {
+    if (sharedIsChecking) {
+      log.info('Update check skipped - already in progress', {
+        requestedBy: trigger,
+        activeBy: activeUpdateCheckTrigger,
+      });
+      return;
+    }
+
+    sharedIsChecking = true;
+    activeUpdateCheckTrigger = trigger;
+    notifyListeners();
     setIsChecking(true);
     setError(null);
 
     try {
-      log.info('Starting update check...');
       const currentVersion = await getVersion();
-      log.info(`Current version: ${currentVersion}`);
+      log.info(`Starting update check... (Current version: ${currentVersion})`, {
+        trigger,
+      });
 
-      log.info('Checking for updates from endpoint...');
       const update = await check();
       if (update) {
         log.info(`Update available: ${update.version}`);
@@ -74,7 +173,6 @@ export const useUpdateChecker = (): UseUpdateCheckerResult => {
         let body = update.body || '';
         if (!body) {
           try {
-            log.info('Fetching release notes from GitHub API...');
             const response = await fetch(
               `https://api.github.com/repos/SapphoSys/chiri/releases/tags/app-v${update.version}`,
               { headers: { Accept: 'application/vnd.github.v3+json' } },
@@ -82,7 +180,6 @@ export const useUpdateChecker = (): UseUpdateCheckerResult => {
             if (response.ok) {
               const release = await response.json();
               body = release.body || '';
-              log.info('Release notes fetched successfully');
             }
           } catch (e) {
             log.warn('Failed to fetch release notes from GitHub:', e);
@@ -105,10 +202,23 @@ export const useUpdateChecker = (): UseUpdateCheckerResult => {
         notifyListeners();
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to check for updates';
-      log.error('Update check failed:', err);
-      setError(message);
+      const rawMessage = extractErrorMessage(err);
+      const userMessage = toUserFriendlyUpdateCheckError(rawMessage);
+      log.error('Update check failed:', {
+        error: err,
+        trigger,
+        rawMessage,
+        userMessage,
+      });
+      setError({
+        kind: 'check',
+        title: 'Update check failed',
+        description: userMessage,
+      });
     } finally {
+      sharedIsChecking = false;
+      activeUpdateCheckTrigger = null;
+      notifyListeners();
       setIsChecking(false);
     }
   }, []);
@@ -120,6 +230,7 @@ export const useUpdateChecker = (): UseUpdateCheckerResult => {
 
     setIsDownloading(true);
     setDownloadProgress(0);
+    setError(null);
 
     try {
       const update = await check();
@@ -152,9 +263,18 @@ export const useUpdateChecker = (): UseUpdateCheckerResult => {
       log.info('Update installed, relaunching...');
       await relaunch();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to download update';
-      log.error('Update download failed:', err);
-      setError(message);
+      const rawMessage = extractErrorMessage(err);
+      const userMessage = toUserFriendlyUpdateDownloadError(rawMessage);
+      log.error('Update download failed:', {
+        error: err,
+        rawMessage,
+        userMessage,
+      });
+      setError({
+        kind: 'download',
+        title: 'Update download failed',
+        description: userMessage,
+      });
     } finally {
       setIsDownloading(false);
     }
@@ -176,13 +296,13 @@ export const useUpdateChecker = (): UseUpdateCheckerResult => {
       return;
     }
 
-    const timer = setTimeout(() => {
-      checkForUpdates();
-    }, 5000); // Check 5 seconds after app starts
+    if (startupUpdateCheckScheduled) {
+      return;
+    }
 
-    return () => {
-      clearTimeout(timer);
-    };
+    startupUpdateCheckScheduled = true;
+
+    void checkForUpdates('startup-auto');
   }, [checkForUpdates]);
 
   return {

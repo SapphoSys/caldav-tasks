@@ -26,7 +26,7 @@ export const UpdateSettings = () => {
 
   const handleManualCheck = async () => {
     setHasManuallyChecked(true);
-    await checkForUpdates();
+    await checkForUpdates('settings-manual');
   };
 
   return (
@@ -82,9 +82,12 @@ export const UpdateSettings = () => {
         </div>
 
         {/* Update status */}
-        {hasManuallyChecked && !isChecking && error && (
+        {!isChecking && error && (hasManuallyChecked || error.kind === 'download') && (
           <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 rounded-lg border border-red-200 dark:border-red-800">
-            <p className="text-sm">{error}</p>
+            <div>
+              <p className="text-sm font-semibold">{error.title}</p>
+              <p className="text-xs mt-1">{error.description}</p>
+            </div>
           </div>
         )}
 
