@@ -10,7 +10,7 @@ import {
 import { useMenuEvents } from '$hooks/useMenuEvents';
 import type { SettingsCategory, SettingsSubtab, SortDirection, SortMode } from '$types/index';
 
-export const useMenuHandlers = () => {
+export const useMenuHandlers = (onSync?: () => void) => {
   const [showSettings, setShowSettings] = useState(false);
   const [settingsInitialTab, setSettingsInitialTab] = useState<{
     category?: SettingsCategory;
@@ -21,6 +21,8 @@ export const useMenuHandlers = () => {
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
   const [showCreateCalendar, setShowCreateCalendar] = useState(false);
+  const [showTaskActions, setShowTaskActions] = useState(false);
+  const [taskActionsId, setTaskActionsId] = useState<string | null>(null);
 
   const createTaskMutation = useCreateTask();
   const setSelectedTaskMutation = useSetSelectedTask();
@@ -42,6 +44,7 @@ export const useMenuHandlers = () => {
   const onOpenKeyboardShortcutsRef = useRef<(() => void) | null>(null);
   const onToggleCompletedRef = useRef<((currentValue: boolean) => void) | null>(null);
   const onToggleUnstartedRef = useRef<((currentValue: boolean) => void) | null>(null);
+  const onSyncRef = useRef<(() => void) | null>(null);
   const onSetSortModeRef = useRef<
     ((mode: SortMode, currentMode: SortMode, currentDirection: SortDirection) => void) | null
   >(null);
@@ -86,6 +89,11 @@ export const useMenuHandlers = () => {
     }
   }, [accounts.length]);
 
+  const handleOpenTaskActions = useCallback((taskId: string) => {
+    setTaskActionsId(taskId);
+    setShowTaskActions(true);
+  }, []);
+
   const handleSearch = useCallback(() => {
     const searchInput = document.querySelector('[data-search-input]') as HTMLInputElement;
     if (searchInput) {
@@ -100,12 +108,12 @@ export const useMenuHandlers = () => {
   }, []);
 
   const handleOpenAbout = useCallback(() => {
-    setSettingsInitialTab({ category: 'about', subtab: 'version' });
+    setSettingsInitialTab({ category: 'misc', subtab: 'about' });
     setShowSettings(true);
   }, []);
 
   const handleOpenKeyboardShortcuts = useCallback(() => {
-    setSettingsInitialTab({ category: 'general', subtab: 'shortcuts' });
+    setSettingsInitialTab({ category: 'app', subtab: 'shortcuts' });
     setShowSettings((prev) => !prev);
   }, []);
 
@@ -143,6 +151,7 @@ export const useMenuHandlers = () => {
   onOpenKeyboardShortcutsRef.current = handleOpenKeyboardShortcuts;
   onToggleCompletedRef.current = handleToggleCompleted;
   onToggleUnstartedRef.current = handleToggleUnstarted;
+  onSyncRef.current = onSync ?? null;
   onSetSortModeRef.current = handleSetSortMode;
 
   // Wire up menu events using refs
@@ -159,6 +168,7 @@ export const useMenuHandlers = () => {
     onOpenKeyboardShortcuts: onOpenKeyboardShortcutsRef,
     onToggleCompleted: onToggleCompletedRef,
     onToggleUnstarted: onToggleUnstartedRef,
+    onSync: onSyncRef,
     onSetSortMode: onSetSortModeRef,
   });
 
@@ -171,6 +181,8 @@ export const useMenuHandlers = () => {
     editingAccountId,
     showCreateCalendar,
     settingsInitialTab,
+    showTaskActions,
+    taskActionsId,
 
     // Modal controls
     setShowSettings,
@@ -180,8 +192,11 @@ export const useMenuHandlers = () => {
     setEditingAccountId,
     setShowCreateCalendar,
     setSettingsInitialTab,
+    setShowTaskActions,
+    setTaskActionsId,
 
     // Handlers
     handleOpenSettings,
+    handleOpenTaskActions,
   };
 };

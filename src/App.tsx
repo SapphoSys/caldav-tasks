@@ -7,6 +7,7 @@ import { ExportModal } from '$components/modals/ExportModal';
 import { ImportModal } from '$components/modals/ImportModal';
 import { OnboardingModal } from '$components/modals/OnboardingModal';
 import { SettingsModal } from '$components/modals/SettingsModal';
+import { TaskActionsModal } from '$components/modals/TaskActionsModal';
 import { UpdateModal } from '$components/modals/UpdateModal';
 import { OfflineBanner } from '$components/OfflineBanner';
 import { Sidebar } from '$components/Sidebar';
@@ -34,13 +35,46 @@ const App = () => {
     initWebKitDragFix();
   }, []);
 
-  const [preloadedFile, setPreloadedFile] = useState<{ name: string; content: string } | null>(
-    null,
-  );
+  const [preloadedFile, setPreloadedFile] = useState<{
+    name: string;
+    content: string;
+  } | null>(null);
   const [preloadedConfig, setPreloadedConfig] = useState<CalDAVConfig | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const { isSyncing, syncingCalendarId, isOffline, lastSyncTime, syncAll } = useSyncQuery();
+  const handleHeaderSync = useCallback(() => {
+    void syncAll({
+      source: 'header-sync-button',
+      reason: 'user clicked sync in header',
+      where: 'App Header.onSync',
+    });
+  }, [syncAll]);
+
+  const handleTraySync = useCallback(() => {
+    void syncAll({
+      source: 'tray-sync',
+      reason: 'user clicked sync from system tray',
+      where: 'useTray tray-sync event',
+    });
+  }, [syncAll]);
+
+  const handleKeyboardSync = useCallback(() => {
+    void syncAll({
+      source: 'keyboard-shortcut',
+      reason: 'user pressed keyboard shortcut for sync',
+      where: 'useKeyboardShortcuts',
+    });
+  }, [syncAll]);
+
+  const handleMenuSync = useCallback(() => {
+    void syncAll({
+      source: 'app-menu',
+      reason: 'user selected Sync from app menu',
+      where: 'useMenuEvents MENU_EVENTS.SYNC',
+    });
+  }, [syncAll]);
+
   const { data: accounts = [] } = useAccounts();
   const {
     sidebarCollapsed,
@@ -62,7 +96,7 @@ const App = () => {
   useTray({
     isSyncing: isSyncing || syncingCalendarId !== null,
     lastSyncTime,
-    onSyncRequest: syncAll,
+    onSyncRequest: handleTraySync,
   });
 
   // app update checker
@@ -73,7 +107,7 @@ const App = () => {
   useAppMenu(isSyncing || syncingCalendarId !== null);
 
   // menu handlers and modal state
-  const menuHandlers = useMenuHandlers();
+  const menuHandlers = useMenuHandlers(handleMenuSync);
 
   // file drop handling via hook
   const {
@@ -96,7 +130,9 @@ const App = () => {
   });
 
   useTheme();
-  useNotifications();
+  useNotifications({
+    onOpenTaskActions: menuHandlers.handleOpenTaskActions,
+  });
 
   useKeyboardShortcuts({
     onOpenSettings: () => {
@@ -104,10 +140,13 @@ const App = () => {
       menuHandlers.setShowSettings((prev: boolean) => !prev);
     },
     onOpenKeyboardShortcuts: () => {
-      menuHandlers.setSettingsInitialTab({ category: 'general', subtab: 'shortcuts' });
+      menuHandlers.setSettingsInitialTab({
+        category: 'app',
+        subtab: 'shortcuts',
+      });
       menuHandlers.setShowSettings((prev: boolean) => !prev);
     },
-    onSync: syncAll,
+    onSync: handleKeyboardSync,
   });
 
   const { data: uiState } = useUIState();
@@ -161,7 +200,7 @@ const App = () => {
       <main className="flex-1 flex flex-col min-w-0">
         <Header
           isSyncing={isSyncing || syncingCalendarId !== null}
-          onSync={syncAll}
+          onSync={handleHeaderSync}
           disableSync={accounts.length === 0}
           isOffline={isOffline}
           lastSyncTime={lastSyncTime}
@@ -235,6 +274,17 @@ const App = () => {
           menuHandlers.setShowCreateCalendar(false);
           return null;
         })()}
+
+      {menuHandlers.showTaskActions && menuHandlers.taskActionsId && (
+        <TaskActionsModal
+          isOpen={menuHandlers.showTaskActions}
+          taskId={menuHandlers.taskActionsId}
+          onClose={() => {
+            menuHandlers.setShowTaskActions(false);
+            menuHandlers.setTaskActionsId(null);
+          }}
+        />
+      )}
 
       {showOnboarding && (
         <OnboardingModal

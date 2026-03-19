@@ -1,9 +1,11 @@
 import Bell from 'lucide-react/icons/bell';
 import Database from 'lucide-react/icons/database';
 import Download from 'lucide-react/icons/download';
+import Globe from 'lucide-react/icons/globe';
 import Info from 'lucide-react/icons/info';
 import Keyboard from 'lucide-react/icons/keyboard';
 import ListTodo from 'lucide-react/icons/list-todo';
+import Monitor from 'lucide-react/icons/monitor';
 import Palette from 'lucide-react/icons/palette';
 import RefreshCw from 'lucide-react/icons/refresh-cw';
 import Settings from 'lucide-react/icons/settings';
@@ -16,8 +18,10 @@ import { BehaviorSettings } from '$components/modals/settings/BehaviorSettings';
 import { ConnectionsSettings } from '$components/modals/settings/ConnectionsSettings';
 import { DataSettings } from '$components/modals/settings/DataSettings';
 import { NotificationSettings } from '$components/modals/settings/NotificationSettings';
+import { RegionSettings } from '$components/modals/settings/RegionSettings';
 import { ShortcutsSettings } from '$components/modals/settings/ShortcutsSettings';
 import { SyncSettings } from '$components/modals/settings/SyncSettings';
+import { SystemSettings } from '$components/modals/settings/SystemSettings';
 import { TaskDefaultsSettings } from '$components/modals/settings/TaskDefaultsSettings';
 import { UpdateSettings } from '$components/modals/settings/UpdateSettings';
 import { useAccounts } from '$hooks/queries/useAccounts';
@@ -31,16 +35,19 @@ interface SettingsModalProps {
   initialSubtab?: SettingsSubtab;
 }
 
-type SettingsSubtabInfo = { id: SettingsSubtab; label: string; icon: React.ReactNode };
+type SettingsSubtabInfo = {
+  id: SettingsSubtab;
+  label: string;
+  icon: React.ReactNode;
+};
 
 export const SettingsModal = ({ onClose, initialCategory, initialSubtab }: SettingsModalProps) => {
-  const [activeCategory, setActiveCategory] = useState<SettingsCategory>(
-    initialCategory || 'general',
-  );
+  const [activeCategory, setActiveCategory] = useState<SettingsCategory>(initialCategory || 'app');
   const [activeSubtabs, setActiveSubtabs] = useState<Record<SettingsCategory, SettingsSubtab>>({
-    general: initialCategory === 'general' && initialSubtab ? initialSubtab : 'behavior',
-    account: initialCategory === 'account' && initialSubtab ? initialSubtab : 'connections',
-    about: initialCategory === 'about' && initialSubtab ? initialSubtab : 'version',
+    tasks: initialCategory === 'tasks' && initialSubtab ? initialSubtab : 'defaults',
+    app: initialCategory === 'app' && initialSubtab ? initialSubtab : 'behavior',
+    accounts: initialCategory === 'accounts' && initialSubtab ? initialSubtab : 'connections',
+    misc: initialCategory === 'misc' && initialSubtab ? initialSubtab : 'updates',
   });
   const [isChildModalOpen, setIsChildModalOpen] = useState(false);
   const { data: accounts = [] } = useAccounts();
@@ -61,37 +68,79 @@ export const SettingsModal = ({ onClose, initialCategory, initialSubtab }: Setti
     subtabs: SettingsSubtabInfo[];
   }[] = [
     {
-      id: 'general',
-      label: 'General',
-      icon: <Settings className="w-4 h-4" />,
-      description: 'Behavior, appearance, notifications, shortcuts',
+      id: 'app',
+      label: 'App',
+      icon: <Monitor className="w-4 h-4" />,
+      description: 'Behavior, appearance, notifications, region, shortcuts, system',
       subtabs: [
-        { id: 'behavior', label: 'Behavior', icon: <Settings className="w-4 h-4" /> },
-        { id: 'defaults', label: 'Task Defaults', icon: <ListTodo className="w-4 h-4" /> },
-        { id: 'appearance', label: 'Appearance', icon: <Palette className="w-4 h-4" /> },
-        { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
-        { id: 'shortcuts', label: 'Shortcuts', icon: <Keyboard className="w-4 h-4" /> },
+        {
+          id: 'behavior',
+          label: 'Behavior',
+          icon: <Settings className="w-4 h-4" />,
+        },
+        {
+          id: 'appearance',
+          label: 'Appearance',
+          icon: <Palette className="w-4 h-4" />,
+        },
+        {
+          id: 'notifications',
+          label: 'Notifications',
+          icon: <Bell className="w-4 h-4" />,
+        },
+        { id: 'region', label: 'Region', icon: <Globe className="w-4 h-4" /> },
+        {
+          id: 'shortcuts',
+          label: 'Shortcuts',
+          icon: <Keyboard className="w-4 h-4" />,
+        },
+        {
+          id: 'system',
+          label: 'System',
+          icon: <Monitor className="w-4 h-4" />,
+        },
       ],
     },
     {
-      id: 'account',
-      label: 'Account',
+      id: 'tasks',
+      label: 'Tasks',
+      icon: <ListTodo className="w-4 h-4" />,
+      description: 'Defaults',
+      subtabs: [
+        {
+          id: 'defaults',
+          label: 'Defaults',
+          icon: <ListTodo className="w-4 h-4" />,
+        },
+      ],
+    },
+    {
+      id: 'accounts',
+      label: 'Accounts',
       icon: <User className="w-4 h-4" />,
-      description: 'Connections, sync, data',
+      description: 'Connections, data, sync',
       subtabs: [
-        { id: 'connections', label: 'Connections', icon: <User className="w-4 h-4" /> },
-        { id: 'sync', label: 'Sync', icon: <RefreshCw className="w-4 h-4" /> },
+        {
+          id: 'connections',
+          label: 'Connections',
+          icon: <User className="w-4 h-4" />,
+        },
         { id: 'data', label: 'Data', icon: <Database className="w-4 h-4" /> },
+        { id: 'sync', label: 'Sync', icon: <RefreshCw className="w-4 h-4" /> },
       ],
     },
     {
-      id: 'about',
-      label: 'About',
+      id: 'misc',
+      label: 'Misc',
       icon: <Info className="w-4 h-4" />,
-      description: 'Version, updates',
+      description: 'Updates, about',
       subtabs: [
-        { id: 'updates', label: 'Updates', icon: <Download className="w-4 h-4" /> },
-        { id: 'version', label: 'Version', icon: <Info className="w-4 h-4" /> },
+        {
+          id: 'updates',
+          label: 'Updates',
+          icon: <Download className="w-4 h-4" />,
+        },
+        { id: 'about', label: 'About', icon: <Info className="w-4 h-4" /> },
       ],
     },
   ];
@@ -168,30 +217,37 @@ export const SettingsModal = ({ onClose, initialCategory, initialSubtab }: Setti
           </div>
 
           <div className="flex-1 p-6 overflow-y-auto overscroll-contain">
-            {activeCategory === 'general' && (
+            {activeCategory === 'tasks' && (
+              <div className="space-y-6">
+                {currentSubtab === 'defaults' && <TaskDefaultsSettings />}
+              </div>
+            )}
+
+            {activeCategory === 'app' && (
               <div className="space-y-6">
                 {currentSubtab === 'behavior' && <BehaviorSettings />}
-                {currentSubtab === 'defaults' && <TaskDefaultsSettings />}
                 {currentSubtab === 'appearance' && <AppearanceSettings />}
                 {currentSubtab === 'notifications' && <NotificationSettings />}
+                {currentSubtab === 'region' && <RegionSettings />}
                 {currentSubtab === 'shortcuts' && (
                   <ShortcutsSettings onEditingShortcutChange={setIsChildModalOpen} />
                 )}
+                {currentSubtab === 'system' && <SystemSettings />}
               </div>
             )}
 
-            {activeCategory === 'account' && (
+            {activeCategory === 'accounts' && (
               <div className="space-y-6">
                 {currentSubtab === 'connections' && <ConnectionsSettings accounts={accounts} />}
-                {currentSubtab === 'sync' && <SyncSettings />}
                 {currentSubtab === 'data' && <DataSettings />}
+                {currentSubtab === 'sync' && <SyncSettings />}
               </div>
             )}
 
-            {activeCategory === 'about' && (
+            {activeCategory === 'misc' && (
               <div className="space-y-6">
-                {currentSubtab === 'version' && <AboutSettings />}
                 {currentSubtab === 'updates' && <UpdateSettings />}
+                {currentSubtab === 'about' && <AboutSettings />}
               </div>
             )}
           </div>
