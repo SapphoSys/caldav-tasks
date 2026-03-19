@@ -29,6 +29,9 @@ tauri-plugin-single-instance = "2"
 plist = "1.7"
 cms = "0.3.0-pre.2"
 der = { version = "0.8", features = ["ber"] }
+dirs = "5.0"
+user-notify = "0.4.1"
+tokio = { version = "1", features = ["sync"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.5"
