@@ -1,31 +1,37 @@
 {
-  "app": {
-    "windows": [
-      {
-        "fullscreen": false,
-        "resizable": true,
-        "title": "Chiri",
-        "width": 1200,
-        "height": 800,
-        "minWidth": 800,
-        "minHeight": 600,
-        "dragDropEnabled": false,
-        "visible": false,
-        "backgroundColor": "#18181B"
-      }
-    ],
-    "security": {
-      "csp": null
-    }
+  "build": {
+    "beforeBundleCommand": "cd src-tauri && ./fix-libs.sh"
   },
   "bundle": {
+    "targets": ["dmg", "app"],
+    "icon": ["gen/Chiri.icns"],
     "resources": {
       "gen/Assets.car": "Assets.car",
       "gen/Chiri.icns": "Chiri.icns",
       "gen/partial.plist": "partial.plist"
     },
     "macOS": {
-      "infoPlist": "Info.plist"
+      "infoPlist": "Info.plist",
+      "signingIdentity": "-",
+      "dmg": {
+        "appPosition": {
+          "x": 100,
+          "y": 103
+        },
+        "applicationFolderPosition": {
+          "x": 373,
+          "y": 103
+        },
+        "background": "./Chiri.dmg.png",
+        "windowPosition": {
+          "x": 600,
+          "y": 400
+        },
+        "windowSize": {
+          "width": 512,
+          "height": 340
+        }
+      }
     }
   }
 }

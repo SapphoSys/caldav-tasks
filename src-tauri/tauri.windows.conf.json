@@ -1,0 +1,14 @@
+{
+  "bundle": {
+    "targets": ["nsis", "msi"],
+    "icon": ["icons/icon.ico"],
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": "",
+      "nsis": {
+        "displayLanguageSelector": false
+      }
+    }
+  }
+}
