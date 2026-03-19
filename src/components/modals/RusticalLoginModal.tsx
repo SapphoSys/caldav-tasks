@@ -145,7 +145,11 @@ export const RusticalLoginModal = ({ onClose, onSuccess }: RusticalLoginModalPro
 
       // Trigger initial sync
       log.info('Starting sync for new account');
-      await syncAll();
+      await syncAll({
+        source: 'account-setup-rustical',
+        reason: 'completed RustiCal account creation flow',
+        where: 'RusticalLoginModal.handleValidateAndLogin',
+      });
 
       log.info('RustiCal account setup complete');
       onSuccess();

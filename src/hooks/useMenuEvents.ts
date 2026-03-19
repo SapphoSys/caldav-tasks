@@ -1,6 +1,5 @@
 import { listen } from '@tauri-apps/api/event';
 import { useEffect } from 'react';
-import { useSyncQuery } from '$hooks/queries/useSync';
 import { useUIState } from '$hooks/queries/useUIState';
 import { loggers } from '$lib/logger';
 import type { SortDirection, SortMode } from '$types/index';
@@ -27,11 +26,11 @@ export const useMenuEvents = (callbacks: {
   onOpenKeyboardShortcuts?: React.RefObject<(() => void) | null>;
   onToggleCompleted?: React.RefObject<((currentValue: boolean) => void) | null>;
   onToggleUnstarted?: React.RefObject<((currentValue: boolean) => void) | null>;
+  onSync?: React.RefObject<(() => void) | null>;
   onSetSortMode?: React.RefObject<
     ((mode: SortMode, currentMode: SortMode, currentDirection: SortDirection) => void) | null
   >;
 }) => {
-  const { syncAll } = useSyncQuery();
   const { data: uiState } = useUIState();
 
   useEffect(() => {
@@ -60,7 +59,7 @@ export const useMenuEvents = (callbacks: {
       // Sync
       const unlistenSync = await listen(MENU_EVENTS.SYNC, () => {
         log.debug('Sync triggered');
-        syncAll();
+        callbacks.onSync?.current?.();
       });
       if (!isActive) {
         unlistenSync();
@@ -232,5 +231,5 @@ export const useMenuEvents = (callbacks: {
         unlisten();
       });
     };
-  }, [syncAll, callbacks, uiState]);
+  }, [callbacks, uiState]);
 };

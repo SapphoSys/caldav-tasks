@@ -142,7 +142,11 @@ export const NextcloudLoginModal = ({ onClose, onSuccess }: NextcloudLoginModalP
 
       // Trigger sync to fetch tasks from the new account
       log.info('Starting sync for new account');
-      await syncAll();
+      await syncAll({
+        source: 'account-setup-nextcloud',
+        reason: 'completed Nextcloud account creation flow',
+        where: 'NextcloudLoginModal.handleValidateAndLogin',
+      });
 
       onSuccess?.();
       onClose();

@@ -151,9 +151,7 @@ export const ImportModal = ({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
 
       // import tasks with new UIDs
       for (const partialTask of parsedTasks) {
-        const newUid = partialTask.uid
-          ? uidMap.get(partialTask.uid)
-          : `${generateUUID()}@chiri`;
+        const newUid = partialTask.uid ? uidMap.get(partialTask.uid) : `${generateUUID()}@chiri`;
         const newParentUid = partialTask.parentUid ? uidMap.get(partialTask.parentUid) : undefined;
 
         const task: Task = {
