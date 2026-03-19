@@ -118,18 +118,20 @@ export interface AppSettings {
   confirmBeforeDelete: boolean;
 }
 
-export type SettingsCategory = 'general' | 'account' | 'about';
+export type SettingsCategory = 'tasks' | 'app' | 'accounts' | 'misc';
 export type SettingsSubtab =
   | 'behavior'
+  | 'defaults'
   | 'appearance'
   | 'notifications'
+  | 'region'
   | 'shortcuts'
-  | 'defaults'
+  | 'system'
   | 'connections'
-  | 'sync'
   | 'data'
-  | 'version'
-  | 'updates';
+  | 'sync'
+  | 'updates'
+  | 'about';
 
 export type ExportFormat = 'ics' | 'json' | 'markdown' | 'csv';
 export type ExportType = 'tasks' | 'all-calendars' | 'single-calendar';
@@ -226,6 +228,7 @@ export type SubtaskDeletionBehavior = 'delete' | 'keep';
 export type Theme = 'light' | 'dark' | 'system';
 export type AccentColor = string;
 export type StartOfWeek = 'sunday' | 'monday';
+export type TimeFormat = '12' | '24';
 
 export interface KeyboardShortcut {
   id: string;

@@ -1,7 +1,5 @@
-import { relaunch } from '@tauri-apps/plugin-process';
-import { WEEK_START_OPTIONS } from '$data/settings';
 import { useSettingsStore } from '$hooks/useSettingsStore';
-import type { StartOfWeek, SubtaskDeletionBehavior } from '$types/index';
+import type { SubtaskDeletionBehavior } from '$types/index';
 
 export const BehaviorSettings = () => {
   const {
@@ -15,30 +13,9 @@ export const BehaviorSettings = () => {
     setConfirmBeforeDeleteTag,
     deleteSubtasksWithParent,
     setDeleteSubtasksWithParent,
-    startOfWeek,
-    setStartOfWeek,
     defaultAccountsExpanded,
     setDefaultAccountsExpanded,
-    enableSystemTray,
-    setEnableSystemTray,
-    systemTrayAppliedValue,
-    setSystemTrayAppliedValue,
   } = useSettingsStore();
-
-  const systemTrayChanged = enableSystemTray !== systemTrayAppliedValue;
-
-  const handleSystemTrayChange = (checked: boolean) => {
-    setEnableSystemTray(checked);
-  };
-
-  const handleRestart = async () => {
-    try {
-      setSystemTrayAppliedValue(enableSystemTray);
-      await relaunch();
-    } catch (error) {
-      console.error('Failed to relaunch app:', error);
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -112,30 +89,10 @@ export const BehaviorSettings = () => {
           </select>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-surface-700 dark:text-surface-300">Week starts on</p>
-            <p className="text-xs text-surface-500 dark:text-surface-400">
-              Choose how dates are shown in calendars
-            </p>
-          </div>
-          <select
-            value={startOfWeek}
-            onChange={(e) => setStartOfWeek(e.target.value as StartOfWeek)}
-            className="px-3 py-1.5 text-sm border border-transparent bg-surface-100 dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors"
-          >
-            {WEEK_START_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
         <label className="flex items-center justify-between">
           <div>
             <p className="text-sm text-surface-700 dark:text-surface-300">
-              Expand new accounts by default
+              Expand new accounts in the sidebar by default
             </p>
             <p className="text-xs text-surface-500 dark:text-surface-400">
               Show calendars when adding a new account
@@ -148,36 +105,6 @@ export const BehaviorSettings = () => {
             className="rounded border-surface-300 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 outline-none"
           />
         </label>
-
-        <label className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-surface-700 dark:text-surface-300">Enable system tray</p>
-            <p className="text-xs text-surface-500 dark:text-surface-400">
-              Show app in system tray. Requires restart.
-            </p>
-          </div>
-          <input
-            type="checkbox"
-            checked={enableSystemTray}
-            onChange={(e) => handleSystemTrayChange(e.target.checked)}
-            className="rounded border-surface-300 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 outline-none"
-          />
-        </label>
-
-        {systemTrayChanged && (
-          <div className="flex items-center justify-between rounded-lg bg-blue-50 dark:bg-blue-950 p-3 border border-blue-200 dark:border-blue-800">
-            <p className="text-sm text-blue-700 dark:text-blue-300">
-              Restart required to apply changes
-            </p>
-            <button
-              type="button"
-              onClick={handleRestart}
-              className="px-3 py-1.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
-            >
-              Restart Now
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

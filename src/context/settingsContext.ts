@@ -7,6 +7,7 @@ import type {
   StartOfWeek,
   SubtaskDeletionBehavior,
   Theme,
+  TimeFormat,
 } from '$types/index';
 import { applyAccentColor, applyTheme } from '$utils/color';
 import { DEFAULT_COLOR, DEFAULT_DAY_OF_WEEK, DEFAULT_SHORTCUTS } from '$utils/constants';
@@ -27,6 +28,7 @@ interface SettingsState {
   confirmBeforeDeleteTag: boolean;
   deleteSubtasksWithParent: SubtaskDeletionBehavior;
   startOfWeek: StartOfWeek;
+  timeFormat: TimeFormat;
   notifications: boolean;
   defaultCalendarId: string | null;
   keyboardShortcuts: KeyboardShortcut[];
@@ -61,6 +63,7 @@ interface SettingsActions {
   setConfirmBeforeDeleteTag: (confirm: boolean) => void;
   setDeleteSubtasksWithParent: (behavior: SubtaskDeletionBehavior) => void;
   setStartOfWeek: (day: StartOfWeek) => void;
+  setTimeFormat: (format: TimeFormat) => void;
   setNotifications: (enabled: boolean) => void;
   setDefaultCalendarId: (calendarId: string | null) => void;
   setKeyboardShortcuts: (shortcuts: KeyboardShortcut[]) => void;
@@ -88,6 +91,7 @@ export type SettingsStore = SettingsState & SettingsActions;
 
 const STORAGE_KEY = 'chiri-settings';
 
+// Detect locale preferences for intelligent defaults
 const defaultState: SettingsState = {
   theme: 'system',
   accentColor: DEFAULT_COLOR,
@@ -102,6 +106,7 @@ const defaultState: SettingsState = {
   confirmBeforeDeleteTag: true,
   deleteSubtasksWithParent: 'delete',
   startOfWeek: DEFAULT_DAY_OF_WEEK,
+  timeFormat: '12',
   notifications: true,
   defaultCalendarId: null,
   keyboardShortcuts: DEFAULT_SHORTCUTS,
@@ -255,6 +260,7 @@ export const settingsStore = {
   setDeleteSubtasksWithParent: (deleteSubtasksWithParent: SubtaskDeletionBehavior) =>
     setState({ deleteSubtasksWithParent }),
   setStartOfWeek: (startOfWeek: StartOfWeek) => setState({ startOfWeek }),
+  setTimeFormat: (timeFormat: TimeFormat) => setState({ timeFormat }),
   setNotifications: (notifications: boolean) => setState({ notifications }),
   setDefaultCalendarId: (defaultCalendarId: string | null) => setState({ defaultCalendarId }),
   setKeyboardShortcuts: (keyboardShortcuts: KeyboardShortcut[]) => setState({ keyboardShortcuts }),
@@ -290,7 +296,9 @@ export const settingsStore = {
   toggleAccountExpanded: (accountId: string) => {
     const current = state.expandedAccountIds;
     if (current.includes(accountId)) {
-      setState({ expandedAccountIds: current.filter((id) => id !== accountId) });
+      setState({
+        expandedAccountIds: current.filter((id) => id !== accountId),
+      });
     } else {
       setState({ expandedAccountIds: [...current, accountId] });
     }
@@ -340,6 +348,7 @@ export const settingsStore = {
         deleteSubtasksWithParent:
           data.deleteSubtasksWithParent ?? defaultState.deleteSubtasksWithParent,
         startOfWeek: data.startOfWeek ?? defaultState.startOfWeek,
+        timeFormat: data.timeFormat ?? defaultState.timeFormat,
         notifications: data.notifications ?? defaultState.notifications,
         defaultCalendarId: data.defaultCalendarId ?? defaultState.defaultCalendarId,
         keyboardShortcuts: data.keyboardShortcuts

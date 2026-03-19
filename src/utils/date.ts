@@ -6,20 +6,34 @@ import {
   isToday,
   isTomorrow,
 } from 'date-fns';
+import { settingsStore } from '$context/settingsContext';
+import type { TimeFormat } from '$types/index';
 
 /**
  * Standard date format strings for consistent formatting across the app
  */
 export const DATE_FORMATS = {
   shortDate: 'MMM d',
-  fullDateTime: 'MMM d, yyyy h:mm a',
+  fullDateTime12: 'MMM d, yyyy h:mm a',
+  fullDateTime24: 'MMM d, yyyy HH:mm',
   fullDate: 'MMM d, yyyy',
   monthYear: 'MMMM yyyy',
   dayName: 'EEEE',
+  time12: 'h:mm a',
+  time24: 'HH:mm',
 } as const;
+
+/**
+ * Format time according to user's time format preference
+ */
+export const formatTime = (date: Date, timeFormat?: TimeFormat): string => {
+  const format12or24 = timeFormat ?? settingsStore.getState().timeFormat;
+  return format(date, format12or24 === '12' ? DATE_FORMATS.time12 : DATE_FORMATS.time24);
+};
 
 export const formatDueDate = (
   date: Date,
+  timeFormat?: TimeFormat,
 ): {
   text: string;
   className: string;
@@ -29,7 +43,7 @@ export const formatDueDate = (
 } => {
   const d = new Date(date);
   const now = new Date();
-  const time = format(d, 'HH:mm');
+  const time = formatTime(d, timeFormat);
   const isOverdue = d.getTime() < now.getTime();
   const dayDiff = differenceInCalendarDays(d, now);
 
@@ -92,7 +106,7 @@ export const formatDueDate = (
       : getColors('#64748b'); // slate for future
 
     return {
-      text: `${format(d, 'MMM d')}, ${time}`,
+      text: `${format(d, DATE_FORMATS.shortDate)}, ${time}`,
       className: isOverdue
         ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30'
         : 'text-surface-600 dark:text-surface-400 bg-surface-100 dark:bg-surface-700',
@@ -105,7 +119,7 @@ export const formatDueDate = (
     : getColors('#64748b'); // slate for future
 
   return {
-    text: `${format(d, 'MMM d, yyyy')} ${time}`,
+    text: `${format(d, DATE_FORMATS.fullDate)} ${time}`,
     className: isOverdue
       ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30'
       : 'text-surface-600 dark:text-surface-400 bg-surface-100 dark:bg-surface-700',
@@ -118,6 +132,7 @@ export const formatDueDate = (
  */
 export const formatStartDate = (
   date: Date,
+  timeFormat?: TimeFormat,
 ): {
   text: string;
   className: string;
@@ -135,7 +150,7 @@ export const formatStartDate = (
 
   // Check if date has a meaningful time component (not midnight)
   const hasTime = d.getHours() !== 0 || d.getMinutes() !== 0 || d.getSeconds() !== 0;
-  const timeStr = hasTime ? ` ${format(d, 'h:mm a')}` : '';
+  const timeStr = hasTime ? ` ${formatTime(d, timeFormat)}` : '';
 
   if (isToday(d)) {
     return {
@@ -155,7 +170,7 @@ export const formatStartDate = (
 
   if (isThisWeek(d)) {
     return {
-      text: `${format(d, 'EEEE')}${timeStr}`, // Full day name
+      text: `${format(d, DATE_FORMATS.dayName)}${timeStr}`, // Full day name
       className: 'text-surface-600 dark:text-surface-400 bg-surface-100 dark:bg-surface-700',
       ...colors,
     };
@@ -163,14 +178,14 @@ export const formatStartDate = (
 
   if (isSameYear(d, now)) {
     return {
-      text: `${format(d, 'MMM d')}${timeStr}`,
+      text: `${format(d, DATE_FORMATS.shortDate)}${timeStr}`,
       className: 'text-surface-600 dark:text-surface-400 bg-surface-100 dark:bg-surface-700',
       ...colors,
     };
   }
 
   return {
-    text: `${format(d, 'MMM d, yyyy')}${timeStr}`,
+    text: `${format(d, DATE_FORMATS.fullDate)}${timeStr}`,
     className: 'text-surface-600 dark:text-surface-400 bg-surface-100 dark:bg-surface-700',
     ...colors,
   };

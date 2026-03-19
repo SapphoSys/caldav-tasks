@@ -7,6 +7,7 @@ import type {
   StartOfWeek,
   SubtaskDeletionBehavior,
   Theme,
+  TimeFormat,
 } from '$types/index';
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
@@ -65,6 +66,10 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     [],
   );
   const setStartOfWeek = useCallback((day: StartOfWeek) => settingsStore.setStartOfWeek(day), []);
+  const setTimeFormat = useCallback(
+    (format: TimeFormat) => settingsStore.setTimeFormat(format),
+    [],
+  );
   const setNotifications = useCallback(
     (enabled: boolean) => settingsStore.setNotifications(enabled),
     [],
@@ -152,6 +157,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     setConfirmBeforeDeleteTag,
     setDeleteSubtasksWithParent,
     setStartOfWeek,
+    setTimeFormat,
     setNotifications,
     setDefaultCalendarId,
     setKeyboardShortcuts,
