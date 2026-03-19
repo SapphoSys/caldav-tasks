@@ -472,7 +472,6 @@ export const initAppMenu = async (options?: {
   try {
     const menu = await createMacMenu(options);
     await menu.setAsAppMenu();
-    log.info('macOS menu initialized successfully');
   } catch (error) {
     log.error('Failed to initialize menu:', error);
   }
@@ -548,10 +547,7 @@ export const updateMenuItem = async (
         break;
     }
 
-    if (!item) {
-      log.warn(`Item with id "${menuId}" not found in refs`);
-      return;
-    }
+    if (!item) return;
 
     if (updates.text !== undefined && 'setText' in item) {
       await item.setText(updates.text);
