@@ -29,7 +29,6 @@ import {
   getTasksByCalendar,
   removeTagFromTask,
   setTaskParent,
-  toggleTaskCollapsed,
   toggleTaskComplete,
   updateTask,
 } from '$lib/store/tasks';
@@ -231,23 +230,6 @@ export const useToggleTaskComplete = () => {
       if (task?.uid) {
         queryClient.invalidateQueries({ queryKey: ['taskHistory', task.uid] });
       }
-    },
-  });
-};
-
-/**
- * Hook to toggle task collapsed state
- */
-export const useToggleTaskCollapsed = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => {
-      toggleTaskCollapsed(id);
-      return Promise.resolve();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
     },
   });
 };
