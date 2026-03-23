@@ -4,7 +4,7 @@
  */
 
 import { loggers } from '$lib/logger';
-import { getTags } from '$lib/store/tags';
+import { getAllTags } from '$lib/store/tags';
 import type { Priority, Reminder, Task, TaskStatus } from '$types/index';
 import { formatDate } from '$utils/date';
 import { generateUUID } from '$utils/misc';
@@ -59,19 +59,27 @@ export const fromAppleEpoch = (appleSeconds: number): number => {
 // Status mapping: iCalendar VTODO STATUS ↔ TaskStatus
 const icalStatusToTaskStatus = (icalStatus: string | undefined): TaskStatus => {
   switch (icalStatus?.toUpperCase()) {
-    case 'COMPLETED': return 'completed';
-    case 'IN-PROCESS': return 'in-process';
-    case 'CANCELLED': return 'cancelled';
-    default: return 'needs-action';
+    case 'COMPLETED':
+      return 'completed';
+    case 'IN-PROCESS':
+      return 'in-process';
+    case 'CANCELLED':
+      return 'cancelled';
+    default:
+      return 'needs-action';
   }
 };
 
 const taskStatusToIcal = (status: TaskStatus): string => {
   switch (status) {
-    case 'completed': return 'COMPLETED';
-    case 'in-process': return 'IN-PROCESS';
-    case 'cancelled': return 'CANCELLED';
-    default: return 'NEEDS-ACTION';
+    case 'completed':
+      return 'COMPLETED';
+    case 'in-process':
+      return 'IN-PROCESS';
+    case 'cancelled':
+      return 'CANCELLED';
+    default:
+      return 'NEEDS-ACTION';
   }
 };
 
@@ -515,7 +523,9 @@ const generateVTodo = (task: Task): string => {
     lines.push(`DESCRIPTION:${escapeICalText(task.description)}`);
   }
 
-  lines.push(`STATUS:${taskStatusToIcal(task.status ?? (task.completed ? 'completed' : 'needs-action'))}`);
+  lines.push(
+    `STATUS:${taskStatusToIcal(task.status ?? (task.completed ? 'completed' : 'needs-action'))}`,
+  );
 
   if (task.status === 'completed' && task.completedAt) {
     lines.push(`COMPLETED:${formatICalDate(new Date(task.completedAt))}`);
@@ -547,7 +557,7 @@ const generateVTodo = (task: Task): string => {
 
   // Tags as CATEGORIES
   if (task.tags && task.tags.length > 0) {
-    const tags = getTags();
+    const tags = getAllTags();
     const tagNames = task.tags
       .map((tagId) => tags.find((t) => t.id === tagId)?.name)
       .filter((name): name is string => Boolean(name));
@@ -724,7 +734,8 @@ export const exportTasksAsMarkdown = (tasks: Task[], level: number = 0): string 
 
   for (const task of tasks) {
     const indent = '  '.repeat(level);
-    const checkbox = task.status === 'completed' ? '[x]' : task.status === 'cancelled' ? '[-]' : '[ ]';
+    const checkbox =
+      task.status === 'completed' ? '[x]' : task.status === 'cancelled' ? '[-]' : '[ ]';
     let line = `${indent}${checkbox} ${task.title}`;
 
     // Add metadata if present
@@ -771,7 +782,13 @@ export const exportTasksAsCsv = (tasks: Task[]): string => {
   const rows = tasks.map((task) => [
     `"${task.title.replace(/"/g, '""')}"`,
     `"${task.description.replace(/"/g, '""')}"`,
-    task.status === 'completed' ? 'Completed' : task.status === 'cancelled' ? 'Cancelled' : task.status === 'in-process' ? 'In Process' : 'Needs Action',
+    task.status === 'completed'
+      ? 'Completed'
+      : task.status === 'cancelled'
+        ? 'Cancelled'
+        : task.status === 'in-process'
+          ? 'In Process'
+          : 'Needs Action',
     task.priority,
     task.dueDate ? formatDate(new Date(task.dueDate), true) : '',
     task.startDate ? formatDate(new Date(task.startDate), true) : '',

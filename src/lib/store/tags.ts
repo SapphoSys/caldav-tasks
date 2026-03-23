@@ -15,11 +15,6 @@ export const getAllTags = () => {
   return loadDataStore().tags;
 };
 
-// Alias for getAllTags (for compatibility)
-export const getTags = () => {
-  return getAllTags();
-};
-
 export const getTagById = (id: string) => {
   return loadDataStore().tags.find((t) => t.id === id);
 };

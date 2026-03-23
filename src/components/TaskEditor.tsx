@@ -58,7 +58,7 @@ import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import { useSettingsStore } from '$hooks/useSettingsStore';
 import { truncateName, useSortableDrag } from '$hooks/useSortableDrag';
 import { getSortedTasks } from '$lib/store/filters';
-import { getTags } from '$lib/store/tags';
+import { getAllTags } from '$lib/store/tags';
 import { countChildren } from '$lib/store/tasks';
 import type { Priority, Task, TaskStatus } from '$types/index';
 import { getContrastTextColor } from '$utils/color';
@@ -165,7 +165,7 @@ export const TaskEditor = ({ task, onOpenNotificationSettings }: TaskEditorProps
   } = useSortableDrag({ flattenedItems: flattenedSubtasks, minIndent: 1 });
 
   const taskTags = (task.tags || [])
-    .map((tagId) => getTags().find((t) => t.id === tagId))
+    .map((tagId) => getAllTags().find((t) => t.id === tagId))
     .filter(Boolean);
   const availableTags = tags.filter((t) => !(task.tags || []).includes(t.id));
 
@@ -601,11 +601,10 @@ export const TaskEditor = ({ task, onOpenNotificationSettings }: TaskEditorProps
             onChange={(e) => setDraftPercent(Number(e.target.value))}
             onPointerUp={(e) => commitPercentComplete(Number((e.target as HTMLInputElement).value))}
             onKeyUp={(e) => commitPercentComplete(Number((e.target as HTMLInputElement).value))}
-            className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-blue-500"
+            className="w-full accent-primary-500 cursor-pointer"
           />
           <div className="flex justify-between text-xs text-surface-400 mt-1">
             <span>0%</span>
-            <span>50%</span>
             <span>100%</span>
           </div>
         </div>

@@ -71,11 +71,6 @@ export const getTasksByCalendar = (calendarId: string) => {
   return loadDataStore().tasks.filter((t) => t.calendarId === calendarId);
 };
 
-// Alias for getTasksByCalendar (for compatibility)
-export const getCalendarTasks = (calendarId: string) => {
-  return getTasksByCalendar(calendarId);
-};
-
 export const getTasksByTag = (tagId: string) => {
   return loadDataStore().tasks.filter((t) => (t.tags ?? []).includes(tagId));
 };

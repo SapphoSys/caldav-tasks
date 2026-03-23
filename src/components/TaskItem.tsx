@@ -25,7 +25,7 @@ import {
 } from '$hooks/queries/useUIState';
 import { useContextMenu } from '$hooks/useContextMenu';
 import { useSettingsStore } from '$hooks/useSettingsStore';
-import { getTags } from '$lib/store/tags';
+import { getAllTags } from '$lib/store/tags';
 import { countChildren, getChildTasks, toggleTaskCollapsed } from '$lib/store/tasks';
 import type { Account, Task } from '$types/index';
 import { getContrastTextColor } from '$utils/color';
@@ -77,7 +77,7 @@ const TaskBadgesRow = ({
   const isUnstarted = task.startDate && new Date(task.startDate) > new Date();
   const startDateDisplay = isUnstarted && task.startDate ? formatStartDate(task.startDate) : null;
   const taskTags = (task.tags || [])
-    .map((tagId) => getTags().find((t) => t.id === tagId))
+    .map((tagId) => getAllTags().find((t) => t.id === tagId))
     .filter(Boolean);
 
   if (

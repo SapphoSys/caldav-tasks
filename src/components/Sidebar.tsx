@@ -42,7 +42,7 @@ import { useDeleteHandlers } from '$hooks/useDeleteHandlers';
 import { useGlobalContextMenuClose } from '$hooks/useGlobalContextMenu';
 import { useSettingsStore } from '$hooks/useSettingsStore';
 import { toastManager } from '$hooks/useToast';
-import { getCalendarTasks } from '$lib/store/tasks';
+import { getTasksByCalendar } from '$lib/store/tasks';
 import type { Account, Calendar as CalendarType } from '$types/index';
 import { getContrastTextColor } from '$utils/color';
 import { FALLBACK_ITEM_COLOR, MAX_SIDEBAR_WIDTH, MIN_SIDEBAR_WIDTH } from '$utils/constants';
@@ -266,7 +266,8 @@ export const Sidebar = ({
   // register for global context menu close
   useGlobalContextMenuClose(handleCloseContextMenu, contextMenu !== null);
 
-  const isActiveTask = (t: { status: string }) => t.status !== 'completed' && t.status !== 'cancelled';
+  const isActiveTask = (t: { status: string }) =>
+    t.status !== 'completed' && t.status !== 'cancelled';
 
   const getTaskCount = (calendarId: string) => {
     return tasks.filter((t) => t.calendarId === calendarId && isActiveTask(t)).length;
@@ -422,7 +423,9 @@ export const Sidebar = ({
                           className={`relative w-full flex items-center gap-2 px-4 py-1.5 text-sm transition-colors group cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset ${
                             contextMenu?.type === 'account' && contextMenu.id === account.id
                               ? 'bg-surface-200 dark:bg-surface-700'
-                              : !isAnyModalOpen ? 'hover:bg-surface-200 dark:hover:bg-surface-700' : ''
+                              : !isAnyModalOpen
+                                ? 'hover:bg-surface-200 dark:hover:bg-surface-700'
+                                : ''
                           }`}
                         >
                           {expandedAccounts.has(account.id) ? (
@@ -504,9 +507,12 @@ export const Sidebar = ({
                                       isActive
                                         ? ''
                                         : `text-surface-600 dark:text-surface-400 ${
-                                            contextMenu?.type === 'calendar' && contextMenu.id === calendar.id
+                                            contextMenu?.type === 'calendar' &&
+                                            contextMenu.id === calendar.id
                                               ? 'bg-surface-200 dark:bg-surface-700'
-                                              : !isAnyModalOpen ? 'hover:bg-surface-200 dark:hover:bg-surface-700' : ''
+                                              : !isAnyModalOpen
+                                                ? 'hover:bg-surface-200 dark:hover:bg-surface-700'
+                                                : ''
                                           }`
                                     }`}
                                     style={
@@ -599,7 +605,9 @@ export const Sidebar = ({
                               : `text-surface-600 dark:text-surface-400 ${
                                   contextMenu?.type === 'tag' && contextMenu.id === tag.id
                                     ? 'bg-surface-200 dark:bg-surface-700'
-                                    : !isAnyModalOpen ? 'hover:bg-surface-200 dark:hover:bg-surface-700' : ''
+                                    : !isAnyModalOpen
+                                      ? 'hover:bg-surface-200 dark:hover:bg-surface-700'
+                                      : ''
                                 }`
                           }`}
                           style={
@@ -1149,7 +1157,7 @@ export const Sidebar = ({
 
       {showExportModal && exportCalendarId && (
         <ExportModal
-          tasks={getCalendarTasks(exportCalendarId)}
+          tasks={getTasksByCalendar(exportCalendarId)}
           type="single-calendar"
           calendarName={
             accounts.flatMap((a) => a.calendars).find((c) => c.id === exportCalendarId)?.displayName
