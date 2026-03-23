@@ -436,9 +436,6 @@ const parseVTodo = (vtodoContent: string): ParsedVTodo => {
       case 'X-APPLE-SORT-ORDER':
         result.sortOrder = parseInt(prop.value, 10);
         break;
-      case 'X-APPLE-COLLAPSED':
-        result.isCollapsed = prop.value === '1';
-        break;
       case 'RELATED-TO': {
         // Only use PARENT relationship
         const relType = prop.params.RELTYPE;
@@ -564,11 +561,6 @@ const generateVTodo = (task: Task): string => {
   // Parent relationship
   if (task.parentUid) {
     lines.push(`RELATED-TO;RELTYPE=PARENT:${task.parentUid}`);
-  }
-
-  // Collapsed state
-  if (task.isCollapsed) {
-    lines.push('X-APPLE-COLLAPSED:1');
   }
 
   // URL (RFC 7986)
