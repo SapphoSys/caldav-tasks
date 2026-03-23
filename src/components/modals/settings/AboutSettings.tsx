@@ -1,7 +1,7 @@
 import { openUrl } from '@tauri-apps/plugin-opener';
 import Bug from 'lucide-react/icons/bug';
-import Code from 'lucide-react/icons/Code';
 import ChevronRight from 'lucide-react/icons/chevron-right';
+import Code from 'lucide-react/icons/code';
 import Coffee from 'lucide-react/icons/coffee';
 import ExternalLink from 'lucide-react/icons/external-link';
 import Heart from 'lucide-react/icons/heart';
