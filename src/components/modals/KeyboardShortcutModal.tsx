@@ -2,6 +2,7 @@ import RotateCcw from 'lucide-react/icons/rotate-ccw';
 import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
 import { useFocusTrap } from '$hooks/useFocusTrap';
+import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import type { KeyboardShortcut } from '$types/index';
 import { formatShortcut } from '$utils/keyboard';
 
@@ -31,39 +32,22 @@ export const KeyboardShortcutModal = ({
     }
   }, [isOpen, shortcut]);
 
-  // Handle ESC key - need to use capture phase to intercept before useModalEscapeKey
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        // Use stopImmediatePropagation to prevent SettingsModal's useModalEscapeKey from also running
-        e.stopImmediatePropagation();
-
-        if (pendingShortcut) {
-          // If recording, just cancel the recording (don't close anything)
-          setPendingShortcut(null);
-        } else {
-          // If not recording, close this modal (but not the parent Settings modal)
-          onClose();
-        }
+  useModalEscapeKey(
+    () => {
+      if (pendingShortcut) {
+        setPendingShortcut(null);
+      } else {
+        onClose();
       }
-    };
-
-    // Use capture phase to intercept before SettingsModal's useModalEscapeKey
-    window.addEventListener('keydown', handleKeyDown, { capture: true });
-    return () =>
-      window.removeEventListener('keydown', handleKeyDown, {
-        capture: true,
-      } as EventListenerOptions);
-  }, [isOpen, pendingShortcut, onClose]);
+    },
+    { enabled: isOpen },
+  );
 
   const handleKeyCapture = (e: React.KeyboardEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Escape is handled by the global handler in useEffect
+    // Escape is handled by useModalEscapeKey
     if (e.key === 'Escape') {
       return;
     }
@@ -131,7 +115,7 @@ export const KeyboardShortcutModal = ({
           <button
             type="button"
             onClick={onClose}
-            className="flex-shrink-0 text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-200 transition-colors"
+            className="flex-shrink-0 p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
           >
             <X className="w-5 h-5" />
           </button>

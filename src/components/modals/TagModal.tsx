@@ -1,43 +1,36 @@
 import X from 'lucide-react/icons/x';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { ComposedInput } from '$components/ComposedInput';
 import { IconEmojiPicker } from '$components/IconEmojiPicker';
 import { getIconByName } from '$data/icons';
 import { useCreateTag, useTags, useUpdateTag } from '$hooks/queries/useTags';
 import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
+import { useSettingsStore } from '$hooks/useSettingsStore';
 import { COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '$utils/constants';
 
 interface TagModalProps {
   tagId: string | null;
+  initialName?: string;
   onClose: () => void;
 }
 
-export const TagModal = ({ tagId, onClose }: TagModalProps) => {
+export const TagModal = ({ tagId, initialName, onClose }: TagModalProps) => {
   const { data: tags = [] } = useTags();
   const createTagMutation = useCreateTag();
   const updateTagMutation = useUpdateTag();
+  const { accentColor } = useSettingsStore();
 
   const existingTag = tagId ? tags.find((t) => t.id === tagId) : null;
 
-  const [name, setName] = useState(existingTag?.name || '');
-  const [color, setColor] = useState(existingTag?.color ?? FALLBACK_ITEM_COLOR);
+  const [name, setName] = useState(existingTag?.name || initialName || '');
+  const [color, setColor] = useState(existingTag?.color ?? accentColor);
   const [icon, setIcon] = useState(existingTag?.icon || 'tag');
   const [emoji, setEmoji] = useState(existingTag?.emoji || '');
-  const nameInputRef = useRef<HTMLInputElement>(null);
   const focusTrapRef = useFocusTrap();
 
   // handle ESC key to close modal
   useModalEscapeKey(onClose);
-
-  // Autofocus name input after modal is mounted and visible
-  useEffect(() => {
-    // Delay to ensure modal animation (150ms) has completed
-    const timer = setTimeout(() => {
-      nameInputRef.current?.focus();
-    }, 200);
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +87,9 @@ export const TagModal = ({ tagId, onClose }: TagModalProps) => {
                 color={color}
               />
               <ComposedInput
-                ref={nameInputRef}
+                ref={(el) => {
+                  if (el) setTimeout(() => el.focus(), 100);
+                }}
                 id="tag-name"
                 type="text"
                 value={name}

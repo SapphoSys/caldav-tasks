@@ -4,7 +4,8 @@ import Cloud from 'lucide-react/icons/cloud';
 import Info from 'lucide-react/icons/info';
 import Loader2 from 'lucide-react/icons/loader-2';
 import X from 'lucide-react/icons/x';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { AppSelect } from '$components/AppSelect';
 import { ComposedInput } from '$components/ComposedInput';
 import { NextcloudLoginModal } from '$components/modals/NextcloudLoginModal';
 import { RusticalLoginModal } from '$components/modals/RusticalLoginModal';
@@ -19,6 +20,7 @@ import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import { caldavService } from '$lib/caldav';
 import { loggers } from '$lib/logger';
+import { getAllAccounts } from '$lib/store/accounts';
 import { createTag, getAllTags } from '$lib/store/tags';
 import { createTask } from '$lib/store/tasks';
 import type { Account, Calendar, ServerType } from '$types/index';
@@ -61,39 +63,26 @@ export const AccountModal = ({ account, onClose, preloadedConfig }: AccountModal
   const [error, setError] = useState('');
   const [showNextcloudLogin, setShowNextcloudLogin] = useState(false);
   const [showRusticalLogin, setShowRusticalLogin] = useState(false);
-  const nameInputRef = useRef<HTMLInputElement>(null);
   const focusTrapRef = useFocusTrap();
+  const nameInputFocusedRef = useRef(false);
 
   // handle ESC key to close modal
   useModalEscapeKey(onClose);
 
-  // Autofocus name input after modal is mounted and visible
-  useEffect(() => {
-    // Delay to ensure modal animation (150ms) has completed
-    const timer = setTimeout(() => {
-      nameInputRef.current?.focus();
-    }, 200);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Prefill server URL when server type changes to one with a predefined URL
-  useEffect(() => {
-    if (!account && !preloadedConfig) {
-      // Only for new accounts without preloaded config: set predefined URL or clear if none exists
-      const predefinedUrl = getPredefinedServerUrl(serverType);
-      setServerUrl(predefinedUrl || '');
+  // Reset test state when credentials change
+  const [prevCredentials, setPrevCredentials] = useState({ serverUrl, username, password });
+  if (
+    serverUrl !== prevCredentials.serverUrl ||
+    username !== prevCredentials.username ||
+    password !== prevCredentials.password
+  ) {
+    setPrevCredentials({ serverUrl, username, password });
+    if (testSuccess || testedConnectionId) {
+      setTestSuccess(false);
+      setTestedConnectionId(null);
+      setTestedCalendars([]);
     }
-    // Reset test success when server type changes
-    setTestSuccess(false);
-  }, [serverType, account, preloadedConfig]);
-
-  // Reset test success when form fields change
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally reset test success when credentials change
-  useEffect(() => {
-    setTestSuccess(false);
-    setTestedConnectionId(null);
-    setTestedCalendars([]);
-  }, [serverUrl, username, password]);
+  }
 
   /**
    * ensure a tag exists by name, returns the tag ID
@@ -282,6 +271,19 @@ export const AccountModal = ({ account, onClose, preloadedConfig }: AccountModal
           throw new Error('Password is required');
         }
 
+        // Check for duplicate accounts (same server URL and username)
+        const existingAccounts = getAllAccounts();
+        const duplicate = existingAccounts.find(
+          (a) =>
+            a.serverUrl.replace(/\/$/, '') === serverUrl.replace(/\/$/, '') &&
+            a.username === username,
+        );
+        if (duplicate) {
+          throw new Error(
+            `An account with the same credentials already exists: ${duplicate.name}.`,
+          );
+        }
+
         let tempId: string;
         let calendars: Calendar[];
 
@@ -423,9 +425,14 @@ export const AccountModal = ({ account, onClose, preloadedConfig }: AccountModal
                   Account Display Name
                 </label>
                 <ComposedInput
-                  ref={nameInputRef}
                   id="account-name"
                   type="text"
+                  ref={(el) => {
+                    if (el && !nameInputFocusedRef.current) {
+                      nameInputFocusedRef.current = true;
+                      setTimeout(() => el.focus(), 100);
+                    }
+                  }}
                   value={name}
                   onChange={setName}
                   placeholder="My CalDAV Account"
@@ -441,10 +448,16 @@ export const AccountModal = ({ account, onClose, preloadedConfig }: AccountModal
                 >
                   Server Type
                 </label>
-                <select
+                <AppSelect
                   id="server-type"
                   value={serverType}
-                  onChange={(e) => setServerType(e.target.value as ServerType)}
+                  onChange={(e) => {
+                    const newType = e.target.value as ServerType;
+                    setServerType(newType);
+                    if (!account && !preloadedConfig) {
+                      setServerUrl(getPredefinedServerUrl(newType) || '');
+                    }
+                  }}
                   className="w-full px-3 py-2 text-sm text-surface-800 dark:text-surface-200 bg-surface-100 dark:bg-surface-700 border border-transparent rounded-lg focus:outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors"
                 >
                   {SERVER_TYPE_GROUPS.map((group) => (
@@ -456,7 +469,7 @@ export const AccountModal = ({ account, onClose, preloadedConfig }: AccountModal
                       ))}
                     </optgroup>
                   ))}
-                </select>
+                </AppSelect>
                 <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
                   {getServerTypeDescription(serverType)}
                 </p>

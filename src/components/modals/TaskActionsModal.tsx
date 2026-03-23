@@ -32,7 +32,7 @@ export const TaskActionsModal = ({ isOpen, onClose, taskId }: TaskActionsModalPr
   const handleComplete = () => {
     updateTaskMutation.mutate({
       id: taskId,
-      updates: { completed: true },
+      updates: { status: 'completed' as const, completed: true, completedAt: new Date() },
     });
     onClose();
   };

@@ -156,7 +156,7 @@ export const SettingsModal = ({ onClose, initialCategory, initialSubtab }: Setti
     >
       <div
         ref={focusTrapRef}
-        className="bg-white dark:bg-surface-800 rounded-xl shadow-xl w-full max-w-3xl h-[80vh] flex flex-col animate-scale-in"
+        className="bg-white dark:bg-surface-800 rounded-xl shadow-xl w-full max-w-3xl flex flex-col animate-scale-in h-full max-h-[75vh] overflow-hidden"
       >
         <div className="flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700">
           <h2 className="text-lg font-semibold text-surface-800 dark:text-surface-200">Settings</h2>

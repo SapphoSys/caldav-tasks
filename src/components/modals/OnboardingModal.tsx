@@ -2,7 +2,8 @@ import AlertTriangle from 'lucide-react/icons/alert-triangle';
 import ArrowLeft from 'lucide-react/icons/arrow-left';
 import ArrowRight from 'lucide-react/icons/arrow-right';
 import User from 'lucide-react/icons/user';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { AppSelect } from '$components/AppSelect';
 import { ModalWrapper } from '$components/ModalWrapper';
 import { ONBOARDING_STEPS } from '$data/onboarding';
 import { SYNC_INTERVAL_OPTIONS } from '$data/settings';
@@ -19,7 +20,7 @@ interface OnboardingModalProps {
 
 export const OnboardingModal = ({ onComplete, onAddAccount }: OnboardingModalProps) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [initialAccountCount, setInitialAccountCount] = useState<number | null>(null);
+  const initialAccountCountRef = useRef<number | null>(null);
   const {
     setOnboardingCompleted,
     autoSync,
@@ -48,23 +49,16 @@ export const OnboardingModal = ({ onComplete, onAddAccount }: OnboardingModalPro
   }, [isGNOME, currentStep, setEnableSystemTray]);
 
   // Track initial account count and advance step when an account is added
-  useEffect(() => {
-    if (currentStep === 2) {
-      // Just entered account step, record the current account count
-      if (initialAccountCount === null) {
-        setInitialAccountCount(accounts.length);
-      }
-      // If account count increased, advance to next step
-      else if (accounts.length > initialAccountCount) {
-        setCurrentStep(currentStep + 1);
-        // Reset for potential future use
-        setInitialAccountCount(null);
-      }
-    } else {
-      // Reset when leaving the account step
-      setInitialAccountCount(null);
+  if (currentStep === 2) {
+    if (initialAccountCountRef.current === null) {
+      initialAccountCountRef.current = accounts.length;
+    } else if (accounts.length > initialAccountCountRef.current) {
+      initialAccountCountRef.current = null;
+      setCurrentStep(currentStep + 1);
     }
-  }, [accounts, currentStep, initialAccountCount]);
+  } else {
+    initialAccountCountRef.current = null;
+  }
 
   const step = ONBOARDING_STEPS[currentStep];
   const isLastStep = currentStep === ONBOARDING_STEPS.length - 1;
@@ -175,7 +169,7 @@ export const OnboardingModal = ({ onComplete, onAddAccount }: OnboardingModalPro
                 <div className="block text-sm font-medium text-surface-900 dark:text-surface-100 mb-2">
                   Sync interval
                 </div>
-                <select
+                <AppSelect
                   value={syncInterval}
                   onChange={(e) => setSyncInterval(Number(e.target.value))}
                   disabled={!autoSync}
@@ -186,7 +180,7 @@ export const OnboardingModal = ({ onComplete, onAddAccount }: OnboardingModalPro
                       {option.label}
                     </option>
                   ))}
-                </select>
+                </AppSelect>
               </div>
 
               <label className="flex items-center justify-between rounded-lg bg-surface-50 dark:bg-surface-800 cursor-pointer hover:bg-surface-100 dark:hover:bg-surface-750 transition-colors">

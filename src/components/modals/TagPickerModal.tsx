@@ -1,6 +1,7 @@
+import Plus from 'lucide-react/icons/plus';
 import Search from 'lucide-react/icons/search';
 import X from 'lucide-react/icons/x';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { getIconByName } from '$data/icons';
 import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
@@ -11,8 +12,10 @@ interface TagPickerModalProps {
   onClose: () => void;
   availableTags: Tag[];
   onSelectTag: (tagId: string) => void;
+  onCreateTag?: (name: string) => void;
   allTagsAssigned: boolean;
   noTagsExist: boolean;
+  initialQuery?: string;
 }
 
 export const TagPickerModal = ({
@@ -20,26 +23,16 @@ export const TagPickerModal = ({
   onClose,
   availableTags,
   onSelectTag,
+  onCreateTag,
   allTagsAssigned,
   noTagsExist,
+  initialQuery = '',
 }: TagPickerModalProps) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const focusTrapRef = useFocusTrap(isOpen);
 
   // Handle ESC key to close modal
   useModalEscapeKey(onClose);
-
-  // Auto-focus the search input when modal opens
-  useEffect(() => {
-    if (isOpen && !noTagsExist && !allTagsAssigned) {
-      // Small delay to ensure modal is fully rendered
-      const timer = setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, noTagsExist, allTagsAssigned]);
 
   const filteredTags = useMemo(() => {
     if (!searchQuery.trim()) return availableTags;
@@ -81,7 +74,9 @@ export const TagPickerModal = ({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
               <input
-                ref={searchInputRef}
+                ref={(el) => {
+                  if (el) setTimeout(() => el.focus(), 100);
+                }}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -102,9 +97,23 @@ export const TagPickerModal = ({
               All available tags have been assigned to this task.
             </div>
           ) : filteredTags.length === 0 ? (
-            <div className="p-4 text-center text-sm text-surface-500 dark:text-surface-400">
-              No tags match your search.
-            </div>
+            onCreateTag && searchQuery.trim() ? (
+              <button
+                type="button"
+                onClick={() => {
+                  onCreateTag(searchQuery.trim());
+                  onClose();
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors text-surface-700 dark:text-surface-300"
+              >
+                <Plus className="w-4 h-4 text-surface-400 flex-shrink-0" />
+                Create tag "{searchQuery.trim()}"
+              </button>
+            ) : (
+              <div className="p-4 text-center text-sm text-surface-500 dark:text-surface-400">
+                No tags match your search.
+              </div>
+            )
           ) : (
             <div className="space-y-1">
               {filteredTags.map((tag) => {

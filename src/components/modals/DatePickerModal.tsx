@@ -3,22 +3,23 @@ import {
   addMonths,
   eachDayOfInterval,
   endOfMonth,
-  format,
   isSameDay,
   isSameMonth,
   isToday,
   startOfMonth,
   subMonths,
 } from 'date-fns';
+import { AppSelect } from '$components/AppSelect';
 import ChevronLeft from 'lucide-react/icons/chevron-left';
 import ChevronRight from 'lucide-react/icons/chevron-right';
 import Clock from 'lucide-react/icons/clock';
 import Sun from 'lucide-react/icons/sun';
 import Trash2 from 'lucide-react/icons/trash-2';
 import X from 'lucide-react/icons/x';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { settingsStore } from '$context/settingsContext';
 import { useFocusTrap } from '$hooks/useFocusTrap';
+import { formatMonthYear } from '$utils/date';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import {
   createAllDayDate,
@@ -64,8 +65,9 @@ export const DatePickerModal = ({
   });
   const [localAllDay, setLocalAllDay] = useState(allDay);
 
-  // Sync local state when modal opens or value changes
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
       setLocalValue(value);
       setInitialValue(value);
@@ -77,7 +79,7 @@ export const DatePickerModal = ({
         });
       }
     }
-  }, [isOpen, value, allDay]);
+  }
 
   const focusTrapRef = useFocusTrap(isOpen);
 
@@ -217,7 +219,7 @@ export const DatePickerModal = ({
               <ChevronLeft className="w-5 h-5" />
             </button>
             <span className="text-sm font-medium text-surface-800 dark:text-surface-200">
-              {format(currentMonth, 'MMMM yyyy')}
+              {formatMonthYear(currentMonth)}
             </span>
             <button
               type="button"
@@ -269,7 +271,7 @@ export const DatePickerModal = ({
                     }
                   `}
                 >
-                  {format(day, 'd')}
+                  {day.getDate()}
                 </button>
               );
             })}
@@ -300,7 +302,7 @@ export const DatePickerModal = ({
               <Clock className="w-4 h-4 text-surface-400" />
               <span className="text-sm text-surface-600 dark:text-surface-400">Time</span>
               <div className="flex-1 flex items-center justify-end gap-1">
-                <select
+                <AppSelect
                   value={selectedTime.hours}
                   onChange={(e) => handleTimeChange('hours', parseInt(e.target.value, 10))}
                   className="px-2 py-1 text-sm bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded text-surface-700 dark:text-surface-300 outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors"
@@ -311,9 +313,9 @@ export const DatePickerModal = ({
                       {i.toString().padStart(2, '0')}
                     </option>
                   ))}
-                </select>
+                </AppSelect>
                 <span className="text-surface-500">:</span>
-                <select
+                <AppSelect
                   value={selectedTime.minutes}
                   onChange={(e) => handleTimeChange('minutes', parseInt(e.target.value, 10))}
                   className="px-2 py-1 text-sm bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded text-surface-700 dark:text-surface-300 outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors"
@@ -324,7 +326,7 @@ export const DatePickerModal = ({
                       {i.toString().padStart(2, '0')}
                     </option>
                   ))}
-                </select>
+                </AppSelect>
               </div>
             </div>
           )}

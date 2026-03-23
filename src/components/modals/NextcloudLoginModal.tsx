@@ -2,7 +2,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import Cloud from 'lucide-react/icons/cloud';
 import Loader2 from 'lucide-react/icons/loader-2';
 import X from 'lucide-react/icons/x';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ComposedInput } from '$components/ComposedInput';
 import { useAddCalendar, useCreateAccount } from '$hooks/queries/useAccounts';
 import { useSyncQuery } from '$hooks/queries/useSync';
@@ -33,7 +33,6 @@ export const NextcloudLoginModal = ({ onClose, onSuccess }: NextcloudLoginModalP
   const [error, setError] = useState('');
   const [step, setStep] = useState<'input' | 'authenticating' | 'processing'>('input');
 
-  const serverInputRef = useRef<HTMLInputElement>(null);
   const focusTrapRef = useFocusTrap();
   const createAccountMutation = useCreateAccount();
   const addCalendarMutation = useAddCalendar();
@@ -47,14 +46,6 @@ export const NextcloudLoginModal = ({ onClose, onSuccess }: NextcloudLoginModalP
     return () => {
       cancelNextcloudLogin();
     };
-  }, []);
-
-  // Autofocus server input after modal is mounted
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      serverInputRef.current?.focus();
-    }, 200);
-    return () => clearTimeout(timer);
   }, []);
 
   const handleValidateAndLogin = async () => {
@@ -224,8 +215,10 @@ export const NextcloudLoginModal = ({ onClose, onSuccess }: NextcloudLoginModalP
                   Nextcloud Server URL
                 </label>
                 <ComposedInput
-                  ref={serverInputRef}
                   id="nextcloud-url"
+                  ref={(el) => {
+                    if (el) setTimeout(() => el.focus(), 100);
+                  }}
                   type="text"
                   placeholder="cloud.example.com or https://cloud.example.com"
                   value={serverUrl}

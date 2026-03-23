@@ -2,7 +2,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import Cloud from 'lucide-react/icons/cloud';
 import Loader2 from 'lucide-react/icons/loader-2';
 import X from 'lucide-react/icons/x';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ComposedInput } from '$components/ComposedInput';
 import { useAddCalendar, useCreateAccount } from '$hooks/queries/useAccounts';
 import { useSyncQuery } from '$hooks/queries/useSync';
@@ -37,7 +37,6 @@ export const RusticalLoginModal = ({ onClose, onSuccess }: RusticalLoginModalPro
   const addCalendarMutation = useAddCalendar();
   const { syncAll } = useSyncQuery();
 
-  const inputRef = useRef<HTMLInputElement>(null);
   const focusTrapRef = useFocusTrap();
 
   // Disable escape key when processing to prevent accidental dismissal
@@ -48,14 +47,6 @@ export const RusticalLoginModal = ({ onClose, onSuccess }: RusticalLoginModalPro
     return () => {
       cancelNextcloudLogin();
     };
-  }, []);
-
-  // Autofocus input
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      inputRef.current?.focus();
-    }, 100);
-    return () => clearTimeout(timer);
   }, []);
 
   const handleValidateAndLogin = async () => {
@@ -221,7 +212,9 @@ export const RusticalLoginModal = ({ onClose, onSuccess }: RusticalLoginModalPro
                   RustiCal Server URL
                 </label>
                 <ComposedInput
-                  ref={inputRef}
+                  ref={(el) => {
+                    if (el) setTimeout(() => el.focus(), 100);
+                  }}
                   id="rustical-server-url"
                   type="url"
                   value={serverUrl}

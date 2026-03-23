@@ -1,6 +1,6 @@
 import Loader2 from 'lucide-react/icons/loader-2';
 import X from 'lucide-react/icons/x';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { ComposedInput } from '$components/ComposedInput';
 import { IconEmojiPicker } from '$components/IconEmojiPicker';
 import { useAddCalendar } from '$hooks/queries/useAccounts';
@@ -25,20 +25,10 @@ export const CreateCalendarModal = ({ accountId, onClose }: CreateCalendarModalP
   const [emoji, setEmoji] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const nameInputRef = useRef<HTMLInputElement>(null);
   const focusTrapRef = useFocusTrap();
 
   // handle ESC key to close modal
   useModalEscapeKey(onClose);
-
-  // Autofocus name input after modal is mounted and visible
-  useEffect(() => {
-    // Delay to ensure modal animation (150ms) has completed
-    const timer = setTimeout(() => {
-      nameInputRef.current?.focus();
-    }, 200);
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +91,9 @@ export const CreateCalendarModal = ({ accountId, onClose }: CreateCalendarModalP
                 color={color}
               />
               <ComposedInput
-                ref={nameInputRef}
+                ref={(el) => {
+                  if (el) setTimeout(() => el.focus(), 100);
+                }}
                 id="calendar-name"
                 type="text"
                 value={displayName}

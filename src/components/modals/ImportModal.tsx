@@ -6,6 +6,7 @@ import FileText from 'lucide-react/icons/file-text';
 import Upload from 'lucide-react/icons/upload';
 import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
+import { AppSelect } from '$components/AppSelect';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useCreateTask } from '$hooks/queries/useTasks';
 import { useFocusTrap } from '$hooks/useFocusTrap';
@@ -46,31 +47,17 @@ export const ImportModal = ({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
   // get available calendars for the selected account
   const availableCalendars = allCalendars.filter((cal) => cal.accountId === selectedAccountId);
 
-  // set default account when modal opens
-  useEffect(() => {
-    if (isOpen && hasAccounts && !selectedAccountId) {
-      setSelectedAccountId(accounts[0].id);
-    }
-    if (isOpen && !hasAccounts) {
-      setSelectedAccountId('');
-    }
-  }, [isOpen, accounts, selectedAccountId, hasAccounts]);
+  // set default account when no account is selected and accounts are available
+  if (isOpen && hasAccounts && !selectedAccountId) {
+    setSelectedAccountId(accounts[0].id);
+  } else if (isOpen && !hasAccounts && selectedAccountId) {
+    setSelectedAccountId('');
+  }
 
-  // set default calendar when account changes - only if calendar doesn't belong to account
-  useEffect(() => {
-    if (selectedAccountId) {
-      const cals = allCalendars.filter((cal) => cal.accountId === selectedAccountId);
-      // only reset calendar if current selection doesn't belong to the selected account
-      const currentCalBelongsToAccount = cals.some((c) => c.id === selectedCalendarId);
-      if (!currentCalBelongsToAccount) {
-        if (cals.length > 0) {
-          setSelectedCalendarId(cals[0].id);
-        } else {
-          setSelectedCalendarId('');
-        }
-      }
-    }
-  }, [selectedAccountId, allCalendars.filter, selectedCalendarId]);
+  // derive effective calendar: keep current selection if valid, else fall back to first available
+  const effectiveCalendarId = availableCalendars.some((c) => c.id === selectedCalendarId)
+    ? selectedCalendarId
+    : (availableCalendars[0]?.id ?? '');
 
   // handle preloaded file
   // biome-ignore lint/correctness/useExhaustiveDependencies: handleFileContent uses only stable setters and is called only when preloadedFile changes
@@ -128,13 +115,13 @@ export const ImportModal = ({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
   };
 
   const handleImport = async () => {
-    if (!selectedCalendarId || parsedTasks.length === 0) return;
+    if (!effectiveCalendarId || parsedTasks.length === 0) return;
 
     setImporting(true);
     setError('');
 
     try {
-      const selectedCalendar = allCalendars.find((c) => c.id === selectedCalendarId);
+      const selectedCalendar = allCalendars.find((c) => c.id === effectiveCalendarId);
       if (!selectedCalendar) {
         setError('Selected calendar not found.');
         return;
@@ -159,8 +146,10 @@ export const ImportModal = ({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
           uid: newUid || `${generateUUID()}@chiri`,
           title: partialTask.title || 'Untitled Task',
           description: partialTask.description || '',
+          status: partialTask.status || 'needs-action',
           completed: partialTask.completed || false,
           completedAt: partialTask.completedAt,
+          percentComplete: partialTask.percentComplete,
           priority: partialTask.priority || 'none',
           categoryId: partialTask.categoryId,
           startDate: partialTask.startDate,
@@ -171,7 +160,7 @@ export const ImportModal = ({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
           isCollapsed: partialTask.isCollapsed || false,
           sortOrder: partialTask.sortOrder || Date.now(),
           accountId: selectedAccountId,
-          calendarId: selectedCalendarId,
+          calendarId: effectiveCalendarId,
           synced: false,
         };
 
@@ -347,7 +336,7 @@ export const ImportModal = ({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
             >
               Account
             </label>
-            <select
+            <AppSelect
               id="import-account-select"
               value={selectedAccountId}
               onChange={(e) => setSelectedAccountId(e.target.value)}
@@ -365,7 +354,7 @@ export const ImportModal = ({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
                   </option>
                 ))
               )}
-            </select>
+            </AppSelect>
           </div>
 
           <div>
@@ -375,9 +364,9 @@ export const ImportModal = ({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
             >
               Import to Calendar
             </label>
-            <select
+            <AppSelect
               id="import-calendar-select"
-              value={selectedCalendarId}
+              value={effectiveCalendarId}
               onChange={(e) => setSelectedCalendarId(e.target.value)}
               className={`w-full px-3 py-2 text-sm border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${availableCalendars.length === 0 ? 'cursor-not-allowed text-surface-400 dark:text-surface-500' : ''}`}
               disabled={availableCalendars.length === 0}
@@ -391,7 +380,7 @@ export const ImportModal = ({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
                   </option>
                 ))
               )}
-            </select>
+            </AppSelect>
           </div>
         </div>
 
@@ -406,7 +395,9 @@ export const ImportModal = ({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
           <button
             type="button"
             onClick={handleImport}
-            disabled={parsedTasks.length === 0 || !selectedCalendarId || importing || importSuccess}
+            disabled={
+              parsedTasks.length === 0 || !effectiveCalendarId || importing || importSuccess
+            }
             className="px-4 py-2 text-sm bg-primary-600 text-primary-contrast rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-inset"
           >
             {importSuccess ? (

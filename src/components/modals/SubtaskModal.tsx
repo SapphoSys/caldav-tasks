@@ -1,5 +1,5 @@
 import X from 'lucide-react/icons/x';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { ComposedInput } from '$components/ComposedInput';
 import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
@@ -12,23 +12,10 @@ interface SubtaskModalProps {
 
 export const SubtaskModal = ({ isOpen, onClose, onAdd }: SubtaskModalProps) => {
   const [title, setTitle] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
   const focusTrapRef = useFocusTrap(isOpen);
 
   // Handle ESC key to close modal
   useModalEscapeKey(onClose);
-
-  // Autofocus input after modal is mounted and visible
-  useEffect(() => {
-    if (isOpen) {
-      setTitle(''); // Reset title when modal opens
-      // Delay to ensure modal animation has completed
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 200);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +69,9 @@ export const SubtaskModal = ({ isOpen, onClose, onAdd }: SubtaskModalProps) => {
               Subtask Title
             </label>
             <ComposedInput
-              ref={inputRef}
+              ref={(el) => {
+                if (el) setTimeout(() => el.focus(), 100);
+              }}
               id="subtask-title"
               type="text"
               value={title}
