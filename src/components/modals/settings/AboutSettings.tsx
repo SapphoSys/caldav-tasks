@@ -1,28 +1,247 @@
+import { openUrl } from '@tauri-apps/plugin-opener';
+import Bug from 'lucide-react/icons/bug';
+import Code from 'lucide-react/icons/Code';
+import ChevronRight from 'lucide-react/icons/chevron-right';
+import Coffee from 'lucide-react/icons/coffee';
+import ExternalLink from 'lucide-react/icons/external-link';
+import Heart from 'lucide-react/icons/heart';
+import Loader2 from 'lucide-react/icons/loader-2';
+import ScrollText from 'lucide-react/icons/scroll-text';
+import Sparkles from 'lucide-react/icons/sparkles';
+import type { ReactNode } from 'react';
+import { useState } from 'react';
+import { ChangelogModal } from '$components/modals/ChangelogModal';
 import { getAppInfo } from '$utils/version';
+
+const GITHUB_URL = 'https://github.com/SapphoSys/chiri';
+const ISSUES_URL = 'https://github.com/SapphoSys/chiri/issues/new';
+
+const link = (url: string) => () => openUrl(url);
+
+const LIBRARIES: { name: string; url: string }[] = [
+  { name: 'React', url: 'https://react.dev' },
+  { name: 'Tauri', url: 'https://tauri.app' },
+  { name: 'TanStack Query', url: 'https://tanstack.com/query' },
+  { name: 'date-fns', url: 'https://date-fns.org' },
+  { name: 'Lucide', url: 'https://lucide.dev' },
+  { name: 'dnd-kit', url: 'https://dndkit.com' },
+  { name: 'Tailwind CSS', url: 'https://tailwindcss.com' },
+  { name: 'sonner', url: 'https://sonner.emilkowal.ski' },
+  { name: 'frimousse', url: 'https://www.npmjs.com/package/frimousse' },
+];
+
+interface LinkRowProps {
+  icon: ReactNode;
+  label: string;
+  description?: string;
+  loading?: boolean;
+  /** 'internal' shows a chevron (in-app navigation); 'external' shows a persistent ExternalLink */
+  variant?: 'internal' | 'external';
+  onClick: () => void;
+}
+
+const LinkRow = ({
+  icon,
+  label,
+  description,
+  loading,
+  variant = 'external',
+  onClick,
+}: LinkRowProps) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={loading}
+    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-surface-100 dark:hover:bg-surface-700/60 transition-colors group outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500 disabled:opacity-60 disabled:cursor-not-allowed"
+  >
+    <span className="text-surface-400 dark:text-surface-500 flex-shrink-0">{icon}</span>
+    <div className="flex-1 min-w-0">
+      <p className="text-sm text-surface-800 dark:text-surface-200">{label}</p>
+      {description && (
+        <p className="text-xs text-surface-500 dark:text-surface-400 mt-0.5">{description}</p>
+      )}
+    </div>
+    {loading ? (
+      <Loader2 className="w-3.5 h-3.5 text-surface-400 dark:text-surface-500 animate-spin flex-shrink-0" />
+    ) : variant === 'internal' ? (
+      <ChevronRight className="w-5 h-5 text-surface-400 dark:text-surface-500 group-hover:text-surface-600 dark:group-hover:text-surface-300 transition-colors flex-shrink-0" />
+    ) : (
+      <ExternalLink className="w-3.5 h-3.5 text-surface-400 dark:text-surface-500 flex-shrink-0" />
+    )}
+  </button>
+);
+
+interface SectionProps {
+  title: string;
+  children: ReactNode;
+}
+
+const Section = ({ title, children }: SectionProps) => (
+  <div className="space-y-2">
+    <p className="text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider px-1">
+      {title}
+    </p>
+    <div className="rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 overflow-hidden divide-y divide-surface-100 dark:divide-surface-700">
+      {children}
+    </div>
+  </div>
+);
 
 export const AboutSettings = () => {
   const { version, name, description, author } = getAppInfo();
+  const [changelog, setChangelog] = useState<string | null>(null);
+  const [isFetchingChangelog, setIsFetchingChangelog] = useState(false);
+  const [showChangelog, setShowChangelog] = useState(false);
+
+  const handleWhatsNew = async () => {
+    setIsFetchingChangelog(true);
+    try {
+      const response = await fetch(
+        `https://api.github.com/repos/SapphoSys/caldav-tasks/releases/tags/app-v${version}`,
+        { headers: { Accept: 'application/vnd.github.v3+json' } },
+      );
+      const body = response.ok ? ((await response.json()).body ?? '') : '';
+      setChangelog(body);
+    } catch {
+      setChangelog('');
+    } finally {
+      setIsFetchingChangelog(false);
+      setShowChangelog(true);
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="text-center py-4">
-        <h1 className="text-2xl font-bold text-surface-800 dark:text-surface-200 mb-1">{name}</h1>
-        <p className="text-sm text-surface-500 dark:text-surface-400">Version {version}</p>
-      </div>
-
-      <div className="space-y-4">
-        <div className="p-4 bg-surface-50 dark:bg-surface-700 rounded-lg">
-          <h3 className="text-sm font-medium text-surface-800 dark:text-surface-200 mb-2">About</h3>
-          <p className="text-sm text-surface-600 dark:text-surface-400">{description}</p>
+    <>
+      <div className="space-y-6">
+        <div className="flex flex-col items-center gap-3 py-4">
+          <img
+            src="/icon.png"
+            alt={name}
+            className="w-16 h-16 rounded-2xl shadow-md select-none"
+            draggable={false}
+          />
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-surface-800 dark:text-surface-200 mb-1">
+              {name}
+            </h1>
+            <p className="text-sm text-surface-500 dark:text-surface-400">Version {version}</p>
+            <p className="text-xs text-surface-400 dark:text-surface-500 mt-2 max-w-xs">
+              {description}
+            </p>
+          </div>
         </div>
 
-        <div className="p-4 bg-surface-50 dark:bg-surface-700 rounded-lg">
-          <h3 className="text-sm font-medium text-surface-800 dark:text-surface-200 mb-2">
-            Credits
-          </h3>
-          <p className="text-sm text-surface-600 dark:text-surface-400">{author}</p>
-        </div>
+        <Section title="Updates">
+          <LinkRow
+            icon={<ScrollText className="w-5 h-5" />}
+            label="What's New"
+            description={`See what changed in v${version}`}
+            variant="internal"
+            loading={isFetchingChangelog}
+            onClick={handleWhatsNew}
+          />
+        </Section>
+
+        <Section title="Support">
+          <LinkRow
+            icon={<Bug className="w-5 h-5" />}
+            label="Report a bug"
+            description="Open an issue on GitHub"
+            onClick={link(ISSUES_URL)}
+          />
+        </Section>
+
+        <Section title="Donate">
+          <LinkRow
+            icon={<Coffee className="w-5 h-5" />}
+            label="Ko-fi"
+            description="ko-fi.com/solelychloe"
+            onClick={link('https://ko-fi.com/solelychloe')}
+          />
+          <LinkRow
+            icon={<Heart className="w-5 h-5" />}
+            label="Liberapay"
+            description="liberapay.com/chloe"
+            onClick={link('https://liberapay.com/chloe')}
+          />
+        </Section>
+
+        <Section title="Open Source">
+          <LinkRow
+            icon={<Code className="w-5 h-5" />}
+            label="Source code"
+            description="Licensed under the zlib/libpng license"
+            onClick={link(GITHUB_URL)}
+          />
+        </Section>
+
+        <Section title="Credits">
+          <div className="flex items-center gap-3 px-4 py-3">
+            <span className="text-surface-400 dark:text-surface-500 flex-shrink-0">
+              <Sparkles className="text-[#2196F2] w-5 h-5" />
+            </span>
+            <p className="text-sm text-surface-800 dark:text-surface-200">
+              Special thanks to{' '}
+              <button
+                type="button"
+                onClick={link('https://github.com/abaker')}
+                className="font-medium hover:underline outline-none focus-visible:underline"
+              >
+                Alex Baker
+              </button>{' '}
+              for {''}
+              <button
+                type="button"
+                onClick={link('https://tasks.org')}
+                className="font-medium hover:underline outline-none focus-visible:underline"
+              >
+                Tasks.org
+              </button>
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 px-4 py-3">
+            <span className="text-surface-400 dark:text-surface-500 flex-shrink-0">
+              <Heart className="text-[#F5C2E7] w-5 h-5" />
+            </span>
+            <p className="text-sm text-surface-800 dark:text-surface-200">
+              Made with love by{' '}
+              <button
+                type="button"
+                onClick={link('https://sapphic.moe')}
+                className="font-medium hover:underline outline-none focus-visible:underline"
+              >
+                {author}
+              </button>
+            </p>
+          </div>
+
+          <div className="px-4 py-3 space-y-2">
+            <p className="text-xs text-surface-500 dark:text-surface-400">Built with</p>
+            <div className="flex flex-wrap gap-1.5">
+              {LIBRARIES.map(({ name: libName, url }) => (
+                <button
+                  key={libName}
+                  type="button"
+                  onClick={link(url)}
+                  className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 text-surface-600 dark:text-surface-300 rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                >
+                  {libName}
+                  <ExternalLink className="w-2.5 h-2.5 opacity-50" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </Section>
       </div>
-    </div>
+
+      {showChangelog && changelog !== null && (
+        <ChangelogModal
+          version={version}
+          changelog={changelog}
+          onClose={() => setShowChangelog(false)}
+        />
+      )}
+    </>
   );
 };

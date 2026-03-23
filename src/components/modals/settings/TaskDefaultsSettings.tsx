@@ -1,25 +1,171 @@
+import Ban from 'lucide-react/icons/ban';
+import BellRing from 'lucide-react/icons/bell-ring';
+import Check from 'lucide-react/icons/check';
+import Loader from 'lucide-react/icons/loader';
 import Plus from 'lucide-react/icons/plus';
+import RotateCcw from 'lucide-react/icons/rotate-ccw';
 import X from 'lucide-react/icons/x';
 import { useState } from 'react';
+import { AppSelect } from '$components/AppSelect';
+import { TagModal } from '$components/modals/TagModal';
 import { TagPickerModal } from '$components/modals/TagPickerModal';
 import { getIconByName } from '$data/icons';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useTags } from '$hooks/queries/useTags';
+import { useFocusTrap } from '$hooks/useFocusTrap';
+import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import { useSettingsStore } from '$hooks/useSettingsStore';
+import type { DefaultReminderOffset, TaskStatus } from '$types/index';
 import { PRIORITIES } from '$utils/priority';
+
+const REMINDER_OPTIONS: { value: DefaultReminderOffset; label: string }[] = [
+  { value: 'at-due', label: 'At due time' },
+  { value: '5min-before-due', label: '5 minutes before due' },
+  { value: '15min-before-due', label: '15 minutes before due' },
+  { value: '30min-before-due', label: '30 minutes before due' },
+  { value: '1hr-before-due', label: '1 hour before due' },
+  { value: '2hr-before-due', label: '2 hours before due' },
+  { value: '1day-before-due', label: '1 day before due' },
+  { value: '2days-before-due', label: '2 days before due' },
+  { value: '1week-before-due', label: '1 week before due' },
+];
+
+const REMINDER_LABELS = Object.fromEntries(
+  REMINDER_OPTIONS.map((o) => [o.value, o.label]),
+) as Record<DefaultReminderOffset, string>;
+
+const DUE_DATE_OPTIONS = [
+  { value: 'none', label: 'None' },
+  { value: 'today', label: 'Today' },
+  { value: 'tomorrow', label: 'Tomorrow' },
+  { value: '1week', label: 'In 1 week' },
+  { value: '2weeks', label: 'In 2 weeks' },
+] as const;
+
+const START_DATE_OPTION_GROUPS = [
+  {
+    label: 'Relative to today',
+    options: [
+      { value: 'today', label: 'Today' },
+      { value: 'tomorrow', label: 'Tomorrow' },
+      { value: '1week', label: 'In 1 week' },
+      { value: '2weeks', label: 'In 2 weeks' },
+    ],
+  },
+  {
+    label: 'Relative to due date',
+    options: [
+      { value: 'due-date', label: 'Due date' },
+      { value: 'due-time', label: 'Due time' },
+      { value: '1day-before-due', label: 'Day before due' },
+      { value: '1week-before-due', label: 'Week before due' },
+    ],
+  },
+] as const;
+
+interface ReminderPickerModalProps {
+  available: { value: DefaultReminderOffset; label: string }[];
+  onSelect: (offset: DefaultReminderOffset) => void;
+  onClose: () => void;
+  editing?: DefaultReminderOffset;
+}
+
+const DefaultReminderPickerModal = ({
+  available,
+  onSelect,
+  onClose,
+  editing,
+}: ReminderPickerModalProps) => {
+  const focusTrapRef = useFocusTrap();
+  useModalEscapeKey(onClose);
+
+  return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: Modal backdrop
+    // biome-ignore lint/a11y/useKeyWithClickEvents: Modal backdrop
+    <div
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 animate-fade-in"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div
+        ref={focusTrapRef}
+        className="bg-white dark:bg-surface-800 rounded-xl shadow-xl w-full max-w-xs animate-scale-in"
+      >
+        <div className="flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700">
+          <h2 className="text-lg font-semibold text-surface-800 dark:text-surface-200">
+            {editing ? 'Edit Default Reminder' : 'Add Default Reminder'}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="py-2 max-h-[28rem] overflow-y-auto">
+          {available.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => {
+                onSelect(opt.value);
+                onClose();
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors outline-none focus-visible:bg-surface-50 dark:focus-visible:bg-surface-700 ${
+                opt.value === editing
+                  ? 'bg-surface-100 dark:bg-surface-700 text-surface-800 dark:text-surface-200 font-medium'
+                  : 'text-surface-700 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700'
+              }`}
+            >
+              <BellRing className="w-4 h-4 text-surface-400 flex-shrink-0" />
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const TaskDefaultsSettings = () => {
   const {
     defaultPriority,
     setDefaultPriority,
+    defaultStatus,
+    setDefaultStatus,
+    defaultPercentComplete,
+    setDefaultPercentComplete,
     defaultTags,
     setDefaultTags,
     defaultCalendarId,
     setDefaultCalendarId,
+    defaultStartDate,
+    setDefaultStartDate,
+    defaultDueDate,
+    setDefaultDueDate,
+    defaultReminders,
+    setDefaultReminders,
   } = useSettingsStore();
   const { data: accounts = [] } = useAccounts();
   const { data: tags = [] } = useTags();
   const [showTagPicker, setShowTagPicker] = useState(false);
+  const [createTagName, setCreateTagName] = useState<string | null>(null);
+  const [tagPickerInitialQuery, setTagPickerInitialQuery] = useState('');
+  const [showReminderPicker, setShowReminderPicker] = useState(false);
+  const [editingReminderOffset, setEditingReminderOffset] = useState<DefaultReminderOffset | null>(
+    null,
+  );
+
+  const availableReminderOptions = REMINDER_OPTIONS.filter(
+    (o) => !defaultReminders.includes(o.value),
+  );
+
+  const reminderOptionsForPicker =
+    editingReminderOffset !== null
+      ? REMINDER_OPTIONS.filter(
+          (o) => !defaultReminders.includes(o.value) || o.value === editingReminderOffset,
+        )
+      : availableReminderOptions;
 
   const handleAddTag = (tagId: string) => {
     if (!defaultTags.includes(tagId)) {
@@ -31,9 +177,33 @@ export const TaskDefaultsSettings = () => {
     setDefaultTags(defaultTags.filter((id) => id !== tagId));
   };
 
-  // Get selected tags and available tags
+  const handleSelectReminder = (offset: DefaultReminderOffset) => {
+    if (editingReminderOffset !== null) {
+      setDefaultReminders(defaultReminders.map((r) => (r === editingReminderOffset ? offset : r)));
+    } else if (!defaultReminders.includes(offset)) {
+      setDefaultReminders([...defaultReminders, offset]);
+    }
+  };
+
+  const handleEditReminder = (offset: DefaultReminderOffset) => {
+    setEditingReminderOffset(offset);
+    setShowReminderPicker(true);
+  };
+
+  const handleRemoveReminder = (offset: DefaultReminderOffset) => {
+    setDefaultReminders(defaultReminders.filter((r) => r !== offset));
+  };
+
+  const handleCloseReminderPicker = () => {
+    setShowReminderPicker(false);
+    setEditingReminderOffset(null);
+  };
+
   const selectedTags = defaultTags.map((tagId) => tags.find((t) => t.id === tagId)).filter(Boolean);
   const availableTags = tags.filter((t) => !defaultTags.includes(t.id));
+
+  const selectClassName =
+    'w-[160px] text-sm border border-transparent bg-surface-100 dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors';
 
   return (
     <div className="space-y-4">
@@ -42,40 +212,119 @@ export const TaskDefaultsSettings = () => {
       </h3>
 
       <div className="rounded-lg border border-surface-200 dark:border-surface-700 p-4 bg-white dark:bg-surface-800">
-        <div className="flex flex-row items-center justify-between">
-          <div>
-            <h4 className="text-sm font-medium text-surface-800 dark:text-surface-200">
-              Default Calendar
-            </h4>
-            <p className="text-xs text-surface-500 dark:text-surface-400">
-              Used for new tasks in "All Tasks"
-            </p>
-          </div>
-          <select
-            value={defaultCalendarId || ''}
-            onChange={(e) => setDefaultCalendarId(e.target.value || null)}
-            disabled={
-              accounts.length === 0 || !accounts.some((account) => account.calendars.length > 0)
-            }
-            className="px-3 py-2 text-sm border border-transparent bg-surface-100 dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        <h4 className="text-sm font-medium text-surface-800 dark:text-surface-200 mb-3">
+          Default Status
+        </h4>
+        <div className="grid grid-cols-2 gap-2">
+          {(
+            [
+              {
+                value: 'needs-action',
+                label: 'Needs Action',
+                Icon: RotateCcw,
+                activeClass:
+                  'border-surface-400 bg-surface-100 dark:border-surface-500 dark:bg-surface-700 text-surface-700 dark:text-surface-200',
+              },
+              {
+                value: 'in-process',
+                label: 'In Process',
+                Icon: Loader,
+                activeClass:
+                  'border-blue-400 bg-blue-50 dark:border-blue-500 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+              },
+              {
+                value: 'completed',
+                label: 'Completed',
+                Icon: Check,
+                activeClass:
+                  'border-primary-400 bg-primary-50 dark:border-primary-500 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300',
+              },
+              {
+                value: 'cancelled',
+                label: 'Cancelled',
+                Icon: Ban,
+                activeClass:
+                  'border-rose-400 bg-rose-50 dark:border-rose-500 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300',
+              },
+            ] as const
+          ).map(({ value, label, Icon, activeClass }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setDefaultStatus(value as TaskStatus)}
+              className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500 ${
+                defaultStatus === value
+                  ? activeClass
+                  : 'border-surface-200 dark:border-surface-600 hover:border-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700 text-surface-600 dark:text-surface-400'
+              }`}
+            >
+              <Icon className="w-4 h-4 flex-shrink-0" />
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-surface-200 dark:border-surface-700 p-4 bg-white dark:bg-surface-800">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-medium text-surface-800 dark:text-surface-200">
+            Default Progress
+          </h4>
+          <span className="text-sm font-medium text-surface-600 dark:text-surface-400">
+            {defaultPercentComplete}%
+          </span>
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={5}
+          value={defaultPercentComplete}
+          onChange={(e) => setDefaultPercentComplete(Number(e.target.value))}
+          className="w-full accent-primary-500 cursor-pointer"
+        />
+        <div className="flex justify-between mt-1">
+          <span className="text-xs text-surface-400">0%</span>
+          <span className="text-xs text-surface-400">100%</span>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-surface-200 dark:border-surface-700 p-4 bg-white dark:bg-surface-800 space-y-3">
+        <h4 className="text-sm font-medium text-surface-800 dark:text-surface-200">
+          Default Dates
+        </h4>
+        <div className="flex flex-row items-center justify-between gap-4">
+          <span className="text-sm text-surface-600 dark:text-surface-400">Start date</span>
+          <AppSelect
+            value={defaultStartDate}
+            onChange={(e) => setDefaultStartDate(e.target.value as typeof defaultStartDate)}
+            className={selectClassName}
           >
-            {accounts.length === 0 || !accounts.some((account) => account.calendars.length > 0) ? (
-              <option value="">No accounts available</option>
-            ) : (
-              <>
-                <option value="">Use active calendar</option>
-                {accounts.map((account) => (
-                  <optgroup key={account.id} label={account.name}>
-                    {account.calendars.map((cal) => (
-                      <option key={cal.id} value={cal.id}>
-                        {cal.displayName}
-                      </option>
-                    ))}
-                  </optgroup>
+            <option value="none">None</option>
+            {START_DATE_OPTION_GROUPS.map((group) => (
+              <optgroup key={group.label} label={group.label}>
+                {group.options.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
-              </>
-            )}
-          </select>
+              </optgroup>
+            ))}
+          </AppSelect>
+        </div>
+        <div className="flex flex-row items-center justify-between gap-4">
+          <span className="text-sm text-surface-600 dark:text-surface-400">Due date</span>
+          <AppSelect
+            value={defaultDueDate}
+            onChange={(e) => setDefaultDueDate(e.target.value as typeof defaultDueDate)}
+            className={selectClassName}
+          >
+            {DUE_DATE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </AppSelect>
         </div>
       </div>
 
@@ -101,6 +350,39 @@ export const TaskDefaultsSettings = () => {
               <span className={p.color}>{p.label}</span>
             </button>
           ))}
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-surface-200 dark:border-surface-700 p-4 bg-white dark:bg-surface-800">
+        <div className="flex flex-row items-center justify-between gap-4">
+          <h4 className="text-sm font-medium text-surface-800 dark:text-surface-200">
+            Default Calendar
+          </h4>
+          <AppSelect
+            value={defaultCalendarId || ''}
+            onChange={(e) => setDefaultCalendarId(e.target.value || null)}
+            disabled={
+              accounts.length === 0 || !accounts.some((account) => account.calendars.length > 0)
+            }
+            className="max-w-[200px] text-sm border border-transparent bg-surface-100 dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {accounts.length === 0 || !accounts.some((account) => account.calendars.length > 0) ? (
+              <option value="">No accounts available</option>
+            ) : (
+              <>
+                <option value="">Use active calendar</option>
+                {accounts.map((account) => (
+                  <optgroup key={account.id} label={account.name}>
+                    {account.calendars.map((cal) => (
+                      <option key={cal.id} value={cal.id}>
+                        {cal.displayName}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </>
+            )}
+          </AppSelect>
         </div>
       </div>
 
@@ -142,7 +424,7 @@ export const TaskDefaultsSettings = () => {
           <button
             type="button"
             onClick={() => setShowTagPicker(true)}
-            className="inline-flex items-center gap-1 px-2 py-1 text-xs text-surface-500 dark:text-surface-400 border border-dashed border-surface-300 dark:border-surface-600 rounded-full hover:border-surface-400 dark:hover:border-surface-500 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+            className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-surface-50 dark:bg-surface-800 text-surface-500 dark:text-surface-400 border border-surface-200 dark:border-surface-600 rounded hover:border-surface-400 dark:hover:border-surface-500 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
           >
             <Plus className="w-3 h-3" />
             Add tag
@@ -150,15 +432,95 @@ export const TaskDefaultsSettings = () => {
         </div>
       </div>
 
-      {/* Tag Picker Modal */}
+      <div className="rounded-lg border border-surface-200 dark:border-surface-700 p-4 bg-white dark:bg-surface-800">
+        <h4 className="text-sm font-medium text-surface-800 dark:text-surface-200 mb-3">
+          Default Reminders
+        </h4>
+        <div className="space-y-1.5">
+          {defaultReminders.map((offset) => (
+            // biome-ignore lint/a11y/useSemanticElements: Using div with role=button to allow nested delete button without button nesting
+            <div
+              key={offset}
+              role="button"
+              tabIndex={0}
+              onClick={() => handleEditReminder(offset)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleEditReminder(offset);
+                }
+              }}
+              className="flex items-center gap-2 px-3 py-2 bg-surface-100 dark:bg-surface-700 rounded-lg hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+            >
+              <BellRing className="w-4 h-4 text-surface-400 flex-shrink-0" />
+              <span className="flex-1 text-sm text-surface-700 dark:text-surface-300">
+                {REMINDER_LABELS[offset]}
+              </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveReminder(offset);
+                }}
+                className="p-1 text-surface-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-full invisible group-hover:visible focus-visible:visible outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+                title="Remove reminder"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+
+          {availableReminderOptions.length > 0 && (
+            <button
+              type="button"
+              style={{ marginTop: defaultReminders.length > 0 ? '1rem' : undefined }}
+              onClick={() => {
+                setEditingReminderOffset(null);
+                setShowReminderPicker(true);
+              }}
+              className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-surface-50 dark:bg-surface-800 text-surface-500 dark:text-surface-400 border border-surface-200 dark:border-surface-600 rounded hover:border-surface-400 dark:hover:border-surface-500 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+            >
+              <Plus className="w-3 h-3" />
+              Add reminder
+            </button>
+          )}
+        </div>
+      </div>
+
       {showTagPicker && (
         <TagPickerModal
           isOpen={showTagPicker}
           onClose={() => setShowTagPicker(false)}
           availableTags={availableTags}
           onSelectTag={handleAddTag}
+          onCreateTag={(name) => {
+            setTagPickerInitialQuery(name);
+            setShowTagPicker(false);
+            setCreateTagName(name);
+          }}
           allTagsAssigned={availableTags.length === 0 && tags.length > 0}
           noTagsExist={tags.length === 0}
+          initialQuery={tagPickerInitialQuery}
+        />
+      )}
+
+      {createTagName !== null && (
+        <TagModal
+          tagId={null}
+          initialName={createTagName}
+          onClose={() => {
+            setCreateTagName(null);
+            setShowTagPicker(true);
+          }}
+        />
+      )}
+
+      {showReminderPicker && (
+        <DefaultReminderPickerModal
+          available={reminderOptionsForPicker}
+          onSelect={handleSelectReminder}
+          onClose={handleCloseReminderPicker}
+          editing={editingReminderOffset ?? undefined}
         />
       )}
     </div>

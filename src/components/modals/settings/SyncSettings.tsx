@@ -1,3 +1,4 @@
+import { AppSelect } from '$components/AppSelect';
 import { SYNC_INTERVAL_OPTIONS } from '$data/settings';
 import { useSettingsStore } from '$hooks/useSettingsStore';
 
@@ -37,18 +38,18 @@ export const SyncSettings = () => {
             className="flex items-center justify-between text-sm text-surface-700 dark:text-surface-300 mb-2"
           >
             Sync interval
-            <select
+            <AppSelect
               id="sync-interval"
               value={syncInterval.toString()}
               onChange={(e) => setSyncInterval(Number(e.target.value))}
-              className="px-3 py-2 text-sm border border-transparent bg-surface-100 dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors"
+              className="max-w-[200px] text-sm border border-transparent bg-surface-100 dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors"
             >
               {SYNC_INTERVAL_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
-            </select>
+            </AppSelect>
           </label>
         )}
         <label className="flex items-center justify-between">

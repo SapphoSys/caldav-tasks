@@ -2,12 +2,53 @@ import ChevronDown from 'lucide-react/icons/chevron-down';
 import Download from 'lucide-react/icons/download';
 import Upload from 'lucide-react/icons/upload';
 import { useState } from 'react';
+import { useConfirmDialog } from '$hooks/useConfirmDialog';
 import { useSettingsStore } from '$hooks/useSettingsStore';
+import { deleteDatabase } from '$lib/bootstrap';
 import { exportSettingsToFile, importSettingsFromFile } from '$utils/settings';
 
 export const DataSettings = () => {
-  const { exportSettings, importSettings } = useSettingsStore();
+  const { exportSettings, importSettings, resetSettings } = useSettingsStore();
+  const { confirm } = useConfirmDialog();
   const [showIncluded, setShowIncluded] = useState(false);
+
+  const handleResetPreferences = async () => {
+    const confirmed = await confirm({
+      title: 'Reset Preferences',
+      message: (
+        <p>
+          <span className="font-bold">Are you sure?</span> This will restore all user preferences to
+          their default values.
+        </p>
+      ),
+      confirmLabel: 'Reset Preferences',
+      destructive: true,
+    });
+
+    if (confirmed) resetSettings();
+  };
+
+  const handleResetDatabase = async () => {
+    const confirmed = await confirm({
+      title: 'Reset Database',
+      message: (
+        <div className="space-y-2">
+          <p>
+            <span className="font-bold">Are you sure?</span> This will not affect data on your
+            CalDAV servers, but local data will be lost and accounts will need to be set up again.
+          </p>
+          <p className="text-sm text-amber-600 dark:text-amber-400">
+            Not recommended unless you are experiencing issues or want to start fresh.
+          </p>
+        </div>
+      ),
+      confirmLabel: 'Reset Database',
+      destructive: true,
+      delayConfirmSeconds: 5,
+    });
+
+    if (confirmed) await deleteDatabase();
+  };
 
   return (
     <div className="space-y-4">
@@ -70,6 +111,43 @@ export const DataSettings = () => {
               </p>
             </div>
           )}
+        </div>
+      </div>
+
+      <h3 className="text-base font-semibold text-surface-800 dark:text-surface-200">Reset</h3>
+      <div className="space-y-4 rounded-lg border border-surface-200 dark:border-surface-700 p-4 bg-white dark:bg-surface-800">
+        <div>
+          <h3 className="text-sm font-medium text-surface-800 dark:text-surface-200 mb-3">
+            Reset Preferences
+          </h3>
+          <p className="text-sm text-surface-500 dark:text-surface-400 mb-4">
+            Restores all user preferences to their default values.
+          </p>
+          <button
+            type="button"
+            onClick={handleResetPreferences}
+            className="px-3 py-2 text-sm bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-300 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+          >
+            Reset Preferences
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-4 rounded-lg border border-red-600 dark:border-red-500 p-4 bg-white dark:bg-surface-800">
+        <div>
+          <h3 className="text-sm font-medium text-surface-800 dark:text-surface-200 mb-3">
+            Reset Database
+          </h3>
+          <p className="text-sm text-surface-500 dark:text-surface-400 mb-4">
+            Deletes all local data. Only use this as a last resort.
+          </p>
+          <button
+            type="button"
+            onClick={handleResetDatabase}
+            className="px-3 py-2 text-sm bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-inset"
+          >
+            Reset Database
+          </button>
         </div>
       </div>
     </div>
