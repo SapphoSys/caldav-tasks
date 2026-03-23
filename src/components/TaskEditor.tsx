@@ -1,7 +1,10 @@
+import { closestCenter, DndContext, DragOverlay } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { openUrl } from '@tauri-apps/plugin-opener';
-import { format } from 'date-fns';
 import { CalendarPlus } from 'lucide-react';
+import Activity from 'lucide-react/icons/activity';
 import AlignLeft from 'lucide-react/icons/align-left';
+import Ban from 'lucide-react/icons/ban';
 import Bell from 'lucide-react/icons/bell';
 import BellRing from 'lucide-react/icons/bell-ring';
 import Calendar from 'lucide-react/icons/calendar';
@@ -12,19 +15,25 @@ import CheckCircle2 from 'lucide-react/icons/check-circle-2';
 import ExternalLink from 'lucide-react/icons/external-link';
 import Flag from 'lucide-react/icons/flag';
 import FolderSync from 'lucide-react/icons/folder-sync';
+import History from 'lucide-react/icons/history';
 import Link from 'lucide-react/icons/link';
+import Loader from 'lucide-react/icons/loader';
 import Plus from 'lucide-react/icons/plus';
+import RotateCcw from 'lucide-react/icons/rotate-ccw';
+import Settings from 'lucide-react/icons/settings';
 import Tag from 'lucide-react/icons/tag';
 import Trash2 from 'lucide-react/icons/trash-2';
 import Type from 'lucide-react/icons/type';
 import X from 'lucide-react/icons/x';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { AppSelect } from '$components/AppSelect';
 import { ComposedInput } from '$components/ComposedInput';
 import { ComposedTextarea } from '$components/ComposedTextarea';
 import { DatePickerModal } from '$components/modals/DatePickerModal';
 import { ReminderPickerModal } from '$components/modals/ReminderPickerModal';
-import { SubtaskModal } from '$components/modals/SubtaskModal';
+import { TagModal } from '$components/modals/TagModal';
 import { TagPickerModal } from '$components/modals/TagPickerModal';
+import { TaskHistoryModal } from '$components/modals/TaskHistoryModal';
 import { SubtaskTreeItem } from '$components/SubtaskTreeItem';
 import { Tooltip } from '$components/Tooltip';
 import { getIconByName } from '$data/icons';
@@ -33,9 +42,11 @@ import { useTags } from '$hooks/queries/useTags';
 import {
   useAddReminder,
   useAddTagToTask,
+  useChildTasks,
   useCreateTask,
   useRemoveReminder,
   useRemoveTagFromTask,
+  useTasks,
   useToggleTaskComplete,
   useUpdateReminder,
   useUpdateTask,
@@ -45,20 +56,25 @@ import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
 import { useDebouncedTaskUpdate } from '$hooks/useDebouncedTaskUpdate';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import { useSettingsStore } from '$hooks/useSettingsStore';
+import { truncateName, useSortableDrag } from '$hooks/useSortableDrag';
+import { getSortedTasks } from '$lib/store/filters';
 import { getTags } from '$lib/store/tags';
-import { countChildren, getChildTasks } from '$lib/store/tasks';
-import type { Priority, Task } from '$types/index';
+import { countChildren } from '$lib/store/tasks';
+import type { Priority, Task, TaskStatus } from '$types/index';
 import { getContrastTextColor } from '$utils/color';
-import { formatTime } from '$utils/date';
+import { formatDate, formatTime } from '$utils/date';
 import { filterCalDavDescription } from '$utils/ical';
 import { hasOpenModalElements } from '$utils/misc';
+import { isMacPlatform } from '$utils/platform';
 import { PRIORITIES } from '$utils/priority';
+import type { FlattenedTask } from '$utils/tree';
 
 interface TaskEditorProps {
   task: Task;
+  onOpenNotificationSettings?: () => void;
 }
 
-export const TaskEditor = ({ task }: TaskEditorProps) => {
+export const TaskEditor = ({ task, onOpenNotificationSettings }: TaskEditorProps) => {
   const updateTaskMutation = useUpdateTask();
   const setEditorOpenMutation = useSetEditorOpen();
   const createTaskMutation = useCreateTask();
@@ -70,14 +86,18 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
   const toggleTaskCompleteMutation = useToggleTaskComplete();
   const { data: tags = [] } = useTags();
   const { data: accounts = [] } = useAccounts();
-  const { accentColor } = useSettingsStore();
+  const { accentColor, notifications } = useSettingsStore();
   const { confirmAndDelete } = useConfirmTaskDelete();
 
   // get contrast color for checkbox checkmarks
   const checkmarkColor = getContrastTextColor(accentColor);
 
-  const [showSubtaskModal, setShowSubtaskModal] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showAddSubtask, setShowAddSubtask] = useState(false);
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [showTagPicker, setShowTagPicker] = useState(false);
+  const [createTagName, setCreateTagName] = useState<string | null>(null);
+  const [tagPickerInitialQuery, setTagPickerInitialQuery] = useState('');
   const [expandedSubtasks, setExpandedSubtasks] = useState<Set<string>>(new Set());
   const [showReminderPicker, setShowReminderPicker] = useState(false);
   const [editingReminderId, setEditingReminderId] = useState<string | null>(null);
@@ -99,8 +119,51 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const urlRef = useRef<HTMLInputElement>(null);
   const editorContainerRef = useRef<HTMLDivElement>(null);
-  const childTasks = getChildTasks(task.uid);
+  // Reactive: invalidated whenever any task query is invalidated (e.g. after reorder)
+  const { data: childTasks = [] } = useChildTasks(task.uid);
   const childCount = countChildren(task.uid);
+  // allTasks changes reference whenever ANY task changes (including re-parenting a
+  // grandchild). Using it as a memo dependency ensures flattenedSubtasks is rebuilt
+  // even when the direct children of this task haven't changed.
+  const { data: allTasks = [] } = useTasks();
+
+  // Build a flat list of all *currently visible* subtasks (respecting expandedSubtasks),
+  // with the edited task as a depth-0 anchor so reorderTasks can walk backwards and
+  // find the correct parent uid for any depth. Mirrors how TaskList uses flattenTasks.
+  const flattenedSubtasks = useMemo<FlattenedTask[]>(() => {
+    const getChildren = (uid: string) =>
+      getSortedTasks(allTasks.filter((t) => t.parentUid === uid));
+
+    const flatten = (tasks: Task[], ancestorIds: string[]): FlattenedTask[] => {
+      const result: FlattenedTask[] = [];
+      for (const t of tasks) {
+        result.push({ ...t, depth: ancestorIds.length, ancestorIds });
+        if (expandedSubtasks.has(t.id)) {
+          result.push(...flatten(getChildren(t.uid), [...ancestorIds, t.id]));
+        }
+      }
+      return result;
+    };
+    return [{ ...task, depth: 0, ancestorIds: [] }, ...flatten(getChildren(task.uid), [task.id])];
+  }, [task, allTasks, expandedSubtasks]);
+
+  // Drag is available for all items whenever there are 2+ visible subtasks total,
+  // matching how TaskList enables drag for every item in manual mode.
+  const anySubtaskDragEnabled = flattenedSubtasks.length > 2;
+
+  const {
+    activeItem: activeDragSubtask,
+    targetIndent: targetSubtaskIndent,
+    targetParentName: targetSubtaskParentName,
+    originalIndentRef: subtaskOriginalIndentRef,
+    visibleItems: visibleFlattenedSubtasks,
+    sensors: subtaskSensors,
+    handleDragStart: handleSubtaskDragStart,
+    handleDragMove: handleSubtaskDragMove,
+    handleDragEnd: handleSubtaskDragEnd,
+    handleDragCancel: handleSubtaskDragCancel,
+  } = useSortableDrag({ flattenedItems: flattenedSubtasks, minIndent: 1 });
+
   const taskTags = (task.tags || [])
     .map((tagId) => getTags().find((t) => t.id === tagId))
     .filter(Boolean);
@@ -155,8 +218,10 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
           (activeElement instanceof HTMLInputElement ||
             activeElement instanceof HTMLTextAreaElement)
         ) {
-          // Only blur the input, don't stop propagation so useModalEscapeKey can run on next press
+          // Blur the input only; stop immediate propagation so useModalEscapeKey doesn't
+          // also close the editor on this same keypress — a second Escape will close it.
           e.preventDefault();
+          e.stopImmediatePropagation();
           activeElement.blur();
           return;
         }
@@ -204,6 +269,38 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
 
   const handlePriorityChange = (priority: Priority) => {
     updateTaskMutation.mutate({ id: task.id, updates: { priority } });
+  };
+
+  const handleStatusChange = (status: TaskStatus) => {
+    updateTaskMutation.mutate({
+      id: task.id,
+      updates: {
+        status,
+        completed: status === 'completed',
+        completedAt: status === 'completed' ? (task.completedAt ?? new Date()) : undefined,
+      },
+    });
+  };
+
+  const [draftPercent, setDraftPercent] = useState<number | undefined>(undefined);
+
+  const commitPercentComplete = (value: number) => {
+    setDraftPercent(undefined);
+    const updates: Partial<Task> = { percentComplete: value };
+    if (value === 100) {
+      updates.status = 'completed';
+      updates.completed = true;
+      updates.completedAt = task.completedAt ?? new Date();
+    } else if (value === 0) {
+      updates.status = 'needs-action';
+      updates.completed = false;
+      updates.completedAt = undefined;
+    } else {
+      updates.status = 'in-process';
+      updates.completed = false;
+      updates.completedAt = undefined;
+    }
+    updateTaskMutation.mutate({ id: task.id, updates });
   };
 
   const handleCalendarChange = (calendarId: string) => {
@@ -286,6 +383,29 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
     });
   };
 
+  const handleSubtaskKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (newSubtaskTitle.trim()) {
+        handleAddChildTask(newSubtaskTitle.trim());
+        setNewSubtaskTitle('');
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      setNewSubtaskTitle('');
+      setShowAddSubtask(false);
+    }
+  };
+
+  const handleSubtaskBlur = () => {
+    if (newSubtaskTitle.trim()) {
+      handleAddChildTask(newSubtaskTitle.trim());
+    }
+    setNewSubtaskTitle('');
+    setShowAddSubtask(false);
+  };
+
   const handleDelete = async () => {
     const deleted = await confirmAndDelete(task.id);
     if (deleted) {
@@ -314,14 +434,16 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
             </button>
           </Tooltip>
 
-          <button
-            type="button"
-            onClick={() => setEditorOpenMutation.mutate(false)}
-            className="p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
-            aria-label="Close editor"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <Tooltip content="Close" position="bottom">
+            <button
+              type="button"
+              onClick={() => setEditorOpenMutation.mutate(false)}
+              className="p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+              aria-label="Close editor"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </Tooltip>
         </div>
       </div>
 
@@ -352,17 +474,36 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
             <button
               type="button"
               onClick={handleCheckboxClick}
+              title={
+                task.status === 'cancelled'
+                  ? 'Cancelled'
+                  : task.status === 'in-process'
+                    ? 'In Progress'
+                    : task.status === 'completed'
+                      ? 'Completed — click to reopen'
+                      : 'Mark complete'
+              }
               className={`
                 flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset
                 ${
-                  task.completed
+                  task.status === 'completed'
                     ? 'bg-primary-500 border-primary-500'
-                    : 'border-surface-300 dark:border-surface-600 hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30'
+                    : task.status === 'cancelled'
+                      ? 'bg-rose-400 border-rose-400 dark:bg-rose-500 dark:border-rose-500'
+                      : task.status === 'in-process'
+                        ? 'bg-blue-400 border-blue-400 dark:bg-blue-500 dark:border-blue-500'
+                        : 'border-surface-300 dark:border-surface-600 hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30'
                 }
               `}
             >
-              {task.completed && (
+              {task.status === 'completed' && (
                 <Check className="w-4 h-4" style={{ color: checkmarkColor }} strokeWidth={3} />
+              )}
+              {task.status === 'cancelled' && (
+                <X className="w-4 h-4 text-white dark:text-surface-200" strokeWidth={3} />
+              )}
+              {task.status === 'in-process' && (
+                <Loader className="w-4 h-4 text-white dark:text-blue-100" />
               )}
             </button>
             <ComposedTextarea
@@ -374,6 +515,98 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
               rows={1}
               className="flex-1 text-sm font-medium text-surface-700 dark:text-surface-300 bg-transparent border-0 focus:outline-none focus:ring-0 p-0 overflow-hidden resize-none w-full"
             />
+          </div>
+        </div>
+
+        <div>
+          <div
+            id="status-label"
+            className="flex items-center gap-2 text-sm font-medium text-surface-600 dark:text-surface-400 mb-2"
+          >
+            <Activity className="w-4 h-4" />
+            Status
+          </div>
+          {/* biome-ignore lint/a11y/useSemanticElements: fieldset would change semantic structure; div with role="group" is appropriate here */}
+          <div className="grid grid-cols-2 gap-2" role="group" aria-labelledby="status-label">
+            {(
+              [
+                {
+                  value: 'needs-action',
+                  label: 'Needs Action',
+                  icon: RotateCcw,
+                  color: 'text-surface-600 dark:text-surface-400',
+                  borderColor: 'border-surface-400',
+                  bgColor: 'bg-surface-100 dark:bg-surface-800',
+                },
+                {
+                  value: 'in-process',
+                  label: 'In Process',
+                  icon: Loader,
+                  color: 'text-blue-600 dark:text-blue-400',
+                  borderColor: 'border-blue-400',
+                  bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+                },
+                {
+                  value: 'completed',
+                  label: 'Completed',
+                  icon: Check,
+                  color: 'text-primary-600 dark:text-primary-400',
+                  borderColor: 'border-primary-400',
+                  bgColor: 'bg-primary-50 dark:bg-primary-900/30',
+                },
+                {
+                  value: 'cancelled',
+                  label: 'Cancelled',
+                  icon: Ban,
+                  color: 'text-rose-600 dark:text-rose-400',
+                  borderColor: 'border-rose-400',
+                  bgColor: 'bg-rose-50 dark:bg-rose-900/30',
+                },
+              ] as const
+            ).map((s) => {
+              const Icon = s.icon;
+              const isActive = task.status === s.value;
+              return (
+                <button
+                  type="button"
+                  key={s.value}
+                  onClick={() => handleStatusChange(s.value)}
+                  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500
+                    ${isActive ? `${s.borderColor} ${s.bgColor}` : 'border-surface-200 dark:border-surface-700 hover:border-surface-300 hover:bg-surface-50 dark:hover:bg-surface-800 text-surface-600 dark:text-surface-400'}
+                  `}
+                >
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? s.color : ''}`} />
+                  <span className={isActive ? s.color : ''}>{s.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <label
+            htmlFor="task-percent-complete"
+            className="flex items-center gap-2 text-sm font-medium text-surface-600 dark:text-surface-400 mb-2"
+          >
+            <Loader className="w-4 h-4" />
+            Progress ({draftPercent ?? task.percentComplete ?? 0}%)
+          </label>
+          <input
+            id="task-percent-complete"
+            type="range"
+            min={0}
+            max={100}
+            step={5}
+            value={draftPercent ?? task.percentComplete ?? 0}
+            onChange={(e) => setDraftPercent(Number(e.target.value))}
+            onPointerUp={(e) => commitPercentComplete(Number((e.target as HTMLInputElement).value))}
+            onKeyUp={(e) => commitPercentComplete(Number((e.target as HTMLInputElement).value))}
+            className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-blue-500"
+          />
+          <div className="flex justify-between text-xs text-surface-400 mt-1">
+            <span>0%</span>
+            <span>50%</span>
+            <span>100%</span>
           </div>
         </div>
 
@@ -454,8 +687,8 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
               >
                 {task.startDate
                   ? task.startDateAllDay
-                    ? `${format(new Date(task.startDate), 'MMM d, yyyy')} (All day)`
-                    : `${format(new Date(task.startDate), 'MMM d, yyyy')} ${formatTime(new Date(task.startDate), timeFormat)}`
+                    ? `${formatDate(new Date(task.startDate), true)} (All day)`
+                    : `${formatDate(new Date(task.startDate), true)} ${formatTime(new Date(task.startDate), timeFormat)}`
                   : 'Set start date...'}
               </span>
             </button>
@@ -486,8 +719,8 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
               >
                 {task.dueDate
                   ? task.dueDateAllDay
-                    ? `${format(new Date(task.dueDate), 'MMM d, yyyy')} (All day)`
-                    : `${format(new Date(task.dueDate), 'MMM d, yyyy')} ${formatTime(new Date(task.dueDate), timeFormat)}`
+                    ? `${formatDate(new Date(task.dueDate), true)} (All day)`
+                    : `${formatDate(new Date(task.dueDate), true)} ${formatTime(new Date(task.dueDate), timeFormat)}`
                   : 'Set due date...'}
               </span>
             </button>
@@ -534,11 +767,11 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
           </label>
           {allCalendars.length > 0 ? (
             <>
-              <select
+              <AppSelect
                 id="task-calendar"
                 value={task.calendarId}
                 onChange={(e) => handleCalendarChange(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-transparent bg-surface-100 dark:bg-surface-800 text-surface-800 dark:text-surface-200 rounded-lg focus:outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors"
+                className="w-full text-sm border border-transparent bg-surface-100 dark:bg-surface-800 text-surface-800 dark:text-surface-200 rounded-lg focus:outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors"
               >
                 {accounts.map((account) => (
                   <optgroup key={account.id} label={account.name}>
@@ -549,7 +782,7 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
                     ))}
                   </optgroup>
                 ))}
-              </select>
+              </AppSelect>
               {currentCalendar && currentAccount && (
                 <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
                   Currently in: {currentAccount.name} / {currentCalendar.displayName}
@@ -654,7 +887,7 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
               >
                 <BellRing className="w-4 h-4 text-surface-400 flex-shrink-0" />
                 <span className="flex-1 text-sm text-surface-700 dark:text-surface-300">
-                  {format(new Date(reminder.trigger), 'MMM d, yyyy')}{' '}
+                  {formatDate(new Date(reminder.trigger), true)}{' '}
                   {formatTime(new Date(reminder.trigger), timeFormat)}
                 </span>
                 <button
@@ -671,61 +904,192 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
               </div>
             ))}
 
-            <button
-              type="button"
-              onClick={() => setShowReminderPicker(true)}
-              className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-surface-50 dark:bg-surface-800 text-surface-500 dark:text-surface-400 border border-surface-200 dark:border-surface-600 rounded hover:border-surface-400 dark:hover:border-surface-500 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
-            >
-              <Plus className="w-3 h-3" />
-              Add reminder
-            </button>
+            {notifications ? (
+              <button
+                type="button"
+                onClick={() => setShowReminderPicker(true)}
+                className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-surface-50 dark:bg-surface-800 text-surface-500 dark:text-surface-400 border border-surface-200 dark:border-surface-600 rounded hover:border-surface-400 dark:hover:border-surface-500 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+              >
+                <Plus className="w-3 h-3" />
+                Add reminder
+              </button>
+            ) : (
+              <div className="flex items-center justify-between gap-2 text-xs text-surface-700 dark:text-surface-200 border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/30 rounded-md p-2">
+                <span>
+                  {isMacPlatform()
+                    ? 'Grant notification permission to add reminders.'
+                    : 'Enable notifications to add reminders.'}
+                </span>
+                {onOpenNotificationSettings && (
+                  <button
+                    type="button"
+                    onClick={onOpenNotificationSettings}
+                    className="flex items-center gap-1 shrink-0 font-medium text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-200 transition-colors outline-none focus-visible:underline"
+                  >
+                    <Settings className="w-3 h-3" />
+                    Settings
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <div
-              id="subtasks-label"
-              className="flex items-center gap-2 text-sm font-medium text-surface-600 dark:text-surface-400"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              Subtasks {childCount > 0 && `(${childCount})`}
-            </div>
+          <div
+            id="subtasks-label"
+            className="flex items-center gap-2 text-sm font-medium text-surface-600 dark:text-surface-400 mb-3"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            Subtasks
+            {childCount > 0 && (
+              <span className="text-xs bg-surface-100 dark:bg-surface-800 text-surface-500 dark:text-surface-400 rounded-full px-1.5 py-0.5 font-normal tabular-nums">
+                {childCount}
+              </span>
+            )}
           </div>
 
           {/* biome-ignore lint/a11y/useSemanticElements: fieldset would change semantic structure; div with role="group" is appropriate here */}
-          <div className="space-y-1" role="group" aria-labelledby="subtasks-label">
-            {childTasks.map((childTask) => (
-              <SubtaskTreeItem
-                key={childTask.id}
-                task={childTask}
-                depth={0}
-                checkmarkColor={checkmarkColor}
-                expandedSubtasks={expandedSubtasks}
-                setExpandedSubtasks={setExpandedSubtasks}
-                updateTask={(id, updates) => updateTaskMutation.mutate({ id, updates })}
-                confirmAndDelete={confirmAndDelete}
-                getChildTasks={getChildTasks}
-                countChildren={countChildren}
-              />
-            ))}
+          <div
+            className={`rounded-lg border overflow-hidden ${
+              childTasks.length === 0 && !showAddSubtask
+                ? 'border-dashed border-surface-200 dark:border-surface-700'
+                : 'border-surface-200 dark:border-surface-700'
+            }`}
+            role="group"
+            aria-labelledby="subtasks-label"
+          >
+            {childTasks.length > 0 && (
+              <div className="p-1">
+                <DndContext
+                  sensors={subtaskSensors}
+                  collisionDetection={closestCenter}
+                  onDragStart={handleSubtaskDragStart}
+                  onDragMove={handleSubtaskDragMove}
+                  onDragEnd={handleSubtaskDragEnd}
+                  onDragCancel={handleSubtaskDragCancel}
+                >
+                  {/* All visible subtasks at all depths in one SortableContext —
+                      mirrors how TaskList puts every flattened task in a single context.
+                      depth - 1 converts from the 1-indexed flat list (parent = 0) to
+                      the 0-indexed display depth SubtaskTreeItem expects. */}
+                  <SortableContext
+                    items={visibleFlattenedSubtasks.slice(1).map((t) => t.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {visibleFlattenedSubtasks.slice(1).map((flatItem) => (
+                      <SubtaskTreeItem
+                        key={flatItem.id}
+                        task={flatItem}
+                        depth={flatItem.depth - 1}
+                        checkmarkColor={checkmarkColor}
+                        expandedSubtasks={expandedSubtasks}
+                        setExpandedSubtasks={setExpandedSubtasks}
+                        updateTask={(id, updates) => updateTaskMutation.mutate({ id, updates })}
+                        confirmAndDelete={confirmAndDelete}
+                        isDragEnabled={anySubtaskDragEnabled}
+                      />
+                    ))}
+                  </SortableContext>
 
-            <button
-              type="button"
-              onClick={() => setShowSubtaskModal(true)}
-              className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-surface-50 dark:bg-surface-800 text-surface-500 dark:text-surface-400 border border-surface-200 dark:border-surface-600 rounded hover:border-surface-400 dark:hover:border-surface-500 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
-            >
-              <Plus className="w-3 h-3" />
-              Add a subtask
-            </button>
+                  <DragOverlay dropAnimation={null}>
+                    {activeDragSubtask ? (
+                      <div className="relative">
+                        {targetSubtaskIndent !== subtaskOriginalIndentRef.current && (
+                          <div className="absolute -top-6 left-2 px-2 py-0.5 bg-primary-600 text-primary-contrast text-xs rounded shadow whitespace-nowrap">
+                            {targetSubtaskIndent > subtaskOriginalIndentRef.current
+                              ? `→ Nest in ${truncateName(targetSubtaskParentName || 'parent')}`
+                              : targetSubtaskIndent === 1
+                                ? '← Move to top level'
+                                : `← Move under ${truncateName(targetSubtaskParentName || 'parent')}`}
+                          </div>
+                        )}
+                        <SubtaskTreeItem
+                          task={activeDragSubtask}
+                          depth={targetSubtaskIndent - 1}
+                          checkmarkColor={checkmarkColor}
+                          expandedSubtasks={expandedSubtasks}
+                          setExpandedSubtasks={setExpandedSubtasks}
+                          updateTask={(id, updates) => updateTaskMutation.mutate({ id, updates })}
+                          confirmAndDelete={confirmAndDelete}
+                          isDragEnabled={false}
+                          isOverlay
+                        />
+                      </div>
+                    ) : null}
+                  </DragOverlay>
+                </DndContext>
+              </div>
+            )}
+
+            {showAddSubtask ? (
+              <div
+                className={`flex items-center gap-2 py-2 pr-3 ${
+                  childTasks.length > 0 ? 'border-t border-surface-200 dark:border-surface-700' : ''
+                }`}
+                style={{ paddingLeft: '12px' }}
+              >
+                <div className="w-4 h-4 rounded border-[1.5px] border-dashed border-surface-300 dark:border-surface-600 flex-shrink-0" />
+                <input
+                  // biome-ignore lint/a11y/noAutofocus: intentional — user just clicked "Add subtask"
+                  autoFocus
+                  type="text"
+                  value={newSubtaskTitle}
+                  onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                  onKeyDown={handleSubtaskKeyDown}
+                  onBlur={handleSubtaskBlur}
+                  placeholder="New subtask..."
+                  className="flex-1 text-sm bg-transparent outline-none text-surface-700 dark:text-surface-300 placeholder:text-surface-400 dark:placeholder:text-surface-500"
+                />
+                <span className="text-xs text-surface-400 dark:text-surface-500 select-none">
+                  ↵ add
+                </span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowAddSubtask(true)}
+                className={`flex items-center gap-2 w-full px-3 py-2 text-sm text-surface-400 dark:text-surface-500 hover:text-surface-600 dark:hover:text-surface-400 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500 ${
+                  childTasks.length > 0 ? 'border-t border-surface-200 dark:border-surface-700' : ''
+                }`}
+              >
+                <Plus className="w-4 h-4" />
+                Add subtask
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="p-4 border-t border-surface-200 dark:border-surface-700 text-xs text-surface-400">
-        <div>Created: {format(new Date(task.createdAt), 'PPp')}</div>
-        <div>Modified: {format(new Date(task.modifiedAt), 'PPp')}</div>
+      <div className="flex items-center justify-between p-4 border-t border-surface-200 dark:border-surface-700 text-xs text-surface-400">
+        <div>
+          <div>
+            Created: {formatDate(new Date(task.createdAt), true)}{' '}
+            {formatTime(new Date(task.createdAt), timeFormat)}
+          </div>
+          <div>
+            Modified: {formatDate(new Date(task.modifiedAt), true)}{' '}
+            {formatTime(new Date(task.modifiedAt), timeFormat)}
+          </div>
+        </div>
+        <Tooltip content="History" position="top">
+          <button
+            type="button"
+            onClick={() => setShowHistory(true)}
+            className="p-2 text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+            aria-label="View task history"
+          >
+            <History className="w-5 h-5" />
+          </button>
+        </Tooltip>
       </div>
+
+      <TaskHistoryModal
+        isOpen={showHistory}
+        taskTitle={task.title}
+        taskUid={task.uid}
+        onClose={() => setShowHistory(false)}
+      />
 
       {/* Start Date Picker Modal */}
       {showStartDatePicker && (
@@ -760,8 +1124,25 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
           onClose={() => setShowTagPicker(false)}
           availableTags={availableTags}
           onSelectTag={(tagId) => addTagToTaskMutation.mutate({ taskId: task.id, tagId })}
+          onCreateTag={(name) => {
+            setTagPickerInitialQuery(name);
+            setShowTagPicker(false);
+            setCreateTagName(name);
+          }}
           allTagsAssigned={availableTags.length === 0 && tags.length > 0}
           noTagsExist={tags.length === 0}
+          initialQuery={tagPickerInitialQuery}
+        />
+      )}
+
+      {createTagName !== null && (
+        <TagModal
+          tagId={null}
+          initialName={createTagName}
+          onClose={() => {
+            setCreateTagName(null);
+            setShowTagPicker(true);
+          }}
         />
       )}
 
@@ -793,15 +1174,6 @@ export const TaskEditor = ({ task }: TaskEditorProps) => {
             }
           }}
           title="Edit Reminder"
-        />
-      )}
-
-      {/* Add Subtask Modal */}
-      {showSubtaskModal && (
-        <SubtaskModal
-          isOpen={showSubtaskModal}
-          onClose={() => setShowSubtaskModal(false)}
-          onAdd={handleAddChildTask}
         />
       )}
     </div>

@@ -1,9 +1,19 @@
+import type { AnimateLayoutChanges } from '@dnd-kit/sortable';
+import { defaultAnimateLayoutChanges, useSortable } from '@dnd-kit/sortable';
 import Check from 'lucide-react/icons/check';
-import ChevronDown from 'lucide-react/icons/chevron-down';
 import ChevronRight from 'lucide-react/icons/chevron-right';
 import X from 'lucide-react/icons/x';
+import { useRef, useState } from 'react';
+import { useChildTasks } from '$hooks/queries/useTasks';
 import type { Task } from '$types/index';
 import { getPriorityDot } from '$utils/priority';
+
+const animateLayoutChanges: AnimateLayoutChanges = (args) =>
+  defaultAnimateLayoutChanges({ ...args, wasDragging: true });
+
+// Each depth level adds 20px of left-padding. The chevron/spacer (w-4) + gap (gap-1.5)
+// is always shown before the checkbox so all levels align consistently.
+const getPaddingLeft = (depth: number) => 8 + depth * 20;
 
 interface SubtaskTreeItemProps {
   task: Task;
@@ -13,8 +23,8 @@ interface SubtaskTreeItemProps {
   setExpandedSubtasks: React.Dispatch<React.SetStateAction<Set<string>>>;
   updateTask: (id: string, updates: Partial<Task>) => void;
   confirmAndDelete: (id: string) => Promise<boolean>;
-  getChildTasks: (parentUid: string) => Task[];
-  countChildren: (parentUid: string) => number;
+  isDragEnabled: boolean;
+  isOverlay?: boolean;
 }
 
 export const SubtaskTreeItem = ({
@@ -25,120 +35,166 @@ export const SubtaskTreeItem = ({
   setExpandedSubtasks,
   updateTask,
   confirmAndDelete,
-  getChildTasks,
-  countChildren,
+  isDragEnabled,
+  isOverlay = false,
 }: SubtaskTreeItemProps) => {
-  const childTasks = getChildTasks(task.uid);
-  const childCount = countChildren(task.uid);
+  const { data: children = [] } = useChildTasks(task.uid);
+  const hasChildren = children.length > 0;
   const isExpanded = expandedSubtasks.has(task.id);
 
-  // Calculate total descendants recursively
-  const getTotalDescendants = (parentUid: string): number => {
-    const children = getChildTasks(parentUid);
-    return children.reduce((acc, child) => acc + 1 + getTotalDescendants(child.uid), 0);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(task.title);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const { listeners, setNodeRef, transform, isDragging } = useSortable({
+    id: task.id,
+    disabled: !isDragEnabled,
+    animateLayoutChanges,
+  });
+
+  const style: React.CSSProperties = {
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transition: 'none',
+    opacity: isDragging ? 0 : undefined,
+    pointerEvents: isDragging ? 'none' : undefined,
   };
-  const totalDescendants = getTotalDescendants(task.uid);
 
   const toggleExpanded = () => {
     setExpandedSubtasks((prev) => {
       const next = new Set(prev);
-      if (next.has(task.id)) {
-        next.delete(task.id);
-      } else {
-        next.add(task.id);
-      }
+      if (next.has(task.id)) next.delete(task.id);
+      else next.add(task.id);
       return next;
     });
   };
 
+  const handleStartEdit = () => {
+    setEditValue(task.title);
+    setIsEditing(true);
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
+
+  const handleCommitEdit = () => {
+    const trimmed = editValue.trim();
+    if (trimmed && trimmed !== task.title) {
+      updateTask(task.id, { title: trimmed });
+    } else if (!trimmed) {
+      setEditValue(task.title);
+    }
+    setIsEditing(false);
+  };
+
+  const handleEditKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleCommitEdit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      setEditValue(task.title);
+      setIsEditing(false);
+    }
+  };
+
   return (
-    <div>
+    <div ref={setNodeRef} style={style}>
       <div
-        className="group/row flex items-center gap-2 py-1 hover:bg-surface-50 dark:hover:bg-surface-800/50 rounded"
-        style={{ paddingLeft: `${depth * 16 + 8}px` }}
+        {...(isDragEnabled ? listeners : {})}
+        className={`group/row flex items-center gap-1.5 py-1.5 pr-2 rounded-md transition-colors ${
+          isDragEnabled ? 'cursor-grab active:cursor-grabbing' : ''
+        } ${
+          isOverlay
+            ? 'bg-surface-50 dark:bg-surface-800 shadow-lg'
+            : 'hover:bg-surface-50 dark:hover:bg-surface-800/60'
+        }`}
+        style={{ paddingLeft: `${getPaddingLeft(depth)}px` }}
       >
-        {/* Expand/collapse button */}
-        {childCount > 0 ? (
+        {/* Chevron if has children; spacer if depth > 0 (preserves hierarchy indent);
+            nothing for root-level leaves (no unnecessary extra padding) */}
+        {hasChildren ? (
           <button
             type="button"
             onClick={toggleExpanded}
-            className="flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-surface-200 dark:border-surface-600 bg-surface-50 dark:bg-surface-800 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors text-xs text-surface-500 dark:text-surface-400"
+            className="cursor-pointer flex-shrink-0 w-4 h-4 flex items-center justify-center rounded text-surface-400 dark:text-surface-500 hover:text-surface-600 dark:hover:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
+            aria-label={isExpanded ? 'Collapse subtasks' : 'Expand subtasks'}
           >
-            {isExpanded ? (
-              <ChevronDown className="w-3 h-3" />
-            ) : (
-              <ChevronRight className="w-3 h-3" />
-            )}
-            <span>{totalDescendants}</span>
+            <ChevronRight
+              className={`w-3 h-3 transition-transform duration-150 ${isExpanded ? 'rotate-90' : ''}`}
+            />
           </button>
-        ) : (
-          <div className="w-[34px]" />
-        )}
-
-        {/* Priority indicator */}
-        {task.priority !== 'none' && (
-          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getPriorityDot(task.priority)}`} />
-        )}
+        ) : depth > 0 ? (
+          <div className="flex-shrink-0 w-4 h-4" aria-hidden="true" />
+        ) : null}
 
         {/* Checkbox */}
         <button
           type="button"
-          onClick={() => updateTask(task.id, { completed: !task.completed })}
-          className={`
-            w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0
-            ${
-              task.completed
-                ? 'bg-primary-500 border-primary-500'
-                : 'border-surface-300 dark:border-surface-600 hover:border-primary-400'
-            }
-          `}
+          onClick={() => {
+            const newStatus = task.status === 'needs-action' ? 'completed' : 'needs-action';
+            updateTask(task.id, {
+              status: newStatus,
+              completed: newStatus === 'completed',
+              completedAt: newStatus === 'completed' ? new Date() : undefined,
+            });
+          }}
+          className={`cursor-pointer w-4 h-4 rounded border-[1.5px] flex items-center justify-center flex-shrink-0 transition-colors ${
+            task.status === 'completed'
+              ? 'bg-primary-500 border-primary-500'
+              : task.status === 'cancelled'
+                ? 'bg-surface-400 border-surface-400'
+                : 'border-surface-300 dark:border-surface-600 hover:border-primary-400 dark:hover:border-primary-500'
+          }`}
         >
           {task.completed && (
-            <Check className="w-3 h-3" style={{ color: checkmarkColor }} strokeWidth={3} />
+            <Check className="w-2.5 h-2.5" style={{ color: checkmarkColor }} strokeWidth={3} />
           )}
         </button>
 
-        {/* Title */}
-        <span
-          className={`
-            flex-1 text-sm truncate
-            ${task.completed ? 'line-through text-surface-400' : 'text-surface-700 dark:text-surface-300'}
-          `}
-        >
-          {task.title || <span className="text-surface-400 italic">Untitled</span>}
-        </span>
+        {/* Priority dot */}
+        {task.priority !== 'none' && (
+          <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${getPriorityDot(task.priority)}`} />
+        )}
 
-        {/* Delete button */}
-        <button
-          type="button"
-          onClick={async () => {
-            await confirmAndDelete(task.id);
-          }}
-          className="invisible group-hover/row:visible p-1 flex-shrink-0 text-surface-400 hover:!text-red-500 dark:hover:!text-red-400"
-        >
-          <X className="w-4 h-4" />
-        </button>
+        {/* Title — click to edit inline */}
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={handleEditKeyDown}
+            onBlur={handleCommitEdit}
+            className="flex-1 text-sm bg-transparent outline-none text-surface-700 dark:text-surface-300 min-w-0"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={handleStartEdit}
+            className={`flex-1 text-sm text-left truncate ${
+              task.completed
+                ? 'line-through text-surface-400 dark:text-surface-500'
+                : 'text-surface-700 dark:text-surface-300 hover:text-surface-900 dark:hover:text-surface-100'
+            }`}
+          >
+            {task.title || (
+              <span className="text-surface-400 dark:text-surface-500 italic">Untitled</span>
+            )}
+          </button>
+        )}
+
+        {/* Delete */}
+        {!isEditing && (
+          <button
+            type="button"
+            onClick={async () => {
+              await confirmAndDelete(task.id);
+            }}
+            className="cursor-pointer opacity-0 group-hover/row:opacity-100 p-0.5 flex-shrink-0 rounded text-surface-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
-
-      {/* Nested children */}
-      {isExpanded && childTasks.length > 0 && (
-        <div style={{ marginLeft: `${depth * 16 + 24}px` }}>
-          {childTasks.map((childTask) => (
-            <SubtaskTreeItem
-              key={childTask.id}
-              task={childTask}
-              depth={depth + 1}
-              checkmarkColor={checkmarkColor}
-              expandedSubtasks={expandedSubtasks}
-              setExpandedSubtasks={setExpandedSubtasks}
-              updateTask={updateTask}
-              confirmAndDelete={confirmAndDelete}
-              getChildTasks={getChildTasks}
-              countChildren={countChildren}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 };

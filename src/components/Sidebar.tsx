@@ -105,24 +105,18 @@ export const Sidebar = ({
   const initializedAccountIdsRef = useRef<Set<string>>(new Set(expandedAccountIds));
 
   // Initialize expanded accounts: new accounts should follow defaultAccountsExpanded setting
-  useEffect(() => {
-    const currentAccountIds = accounts.map((a) => a.id);
-    const newAccountIds = currentAccountIds.filter(
-      (id) => !initializedAccountIdsRef.current.has(id),
-    );
+  const newAccountIds = accounts
+    .map((a) => a.id)
+    .filter((id) => !initializedAccountIdsRef.current.has(id));
 
-    if (newAccountIds.length > 0) {
-      // Mark these accounts as initialized
-      for (const id of newAccountIds) {
-        initializedAccountIdsRef.current.add(id);
-      }
-
-      // If they should be expanded by default, add them to the expanded list
-      if (defaultAccountsExpanded) {
-        setExpandedAccountIds([...expandedAccountIds, ...newAccountIds]);
-      }
+  if (newAccountIds.length > 0) {
+    for (const id of newAccountIds) {
+      initializedAccountIdsRef.current.add(id);
     }
-  }, [accounts, defaultAccountsExpanded, setExpandedAccountIds, expandedAccountIds]);
+    if (defaultAccountsExpanded) {
+      setExpandedAccountIds([...expandedAccountIds, ...newAccountIds]);
+    }
+  }
 
   // Convert expandedAccountIds array to a Set for efficient lookups
   const expandedAccounts = useMemo(() => new Set(expandedAccountIds), [expandedAccountIds]);
@@ -272,16 +266,18 @@ export const Sidebar = ({
   // register for global context menu close
   useGlobalContextMenuClose(handleCloseContextMenu, contextMenu !== null);
 
+  const isActiveTask = (t: { status: string }) => t.status !== 'completed' && t.status !== 'cancelled';
+
   const getTaskCount = (calendarId: string) => {
-    return tasks.filter((t) => t.calendarId === calendarId && !t.completed).length;
+    return tasks.filter((t) => t.calendarId === calendarId && isActiveTask(t)).length;
   };
 
   const getTotalActiveTaskCount = () => {
-    return tasks.filter((t) => !t.completed).length;
+    return tasks.filter(isActiveTask).length;
   };
 
   const getTagTaskCount = (tagId: string) => {
-    return tasks.filter((t) => (t.tags || []).includes(tagId) && !t.completed).length;
+    return tasks.filter((t) => (t.tags || []).includes(tagId) && isActiveTask(t)).length;
   };
 
   return (
@@ -423,7 +419,11 @@ export const Sidebar = ({
                           onContextMenu={(e) => handleContextMenu(e, 'account', account.id)}
                           role="button"
                           tabIndex={0}
-                          className={`relative w-full flex items-center gap-2 px-4 py-1.5 text-sm ${!isAnyModalOpen ? 'hover:bg-surface-200 dark:hover:bg-surface-700' : ''} transition-colors group cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset`}
+                          className={`relative w-full flex items-center gap-2 px-4 py-1.5 text-sm transition-colors group cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset ${
+                            contextMenu?.type === 'account' && contextMenu.id === account.id
+                              ? 'bg-surface-200 dark:bg-surface-700'
+                              : !isAnyModalOpen ? 'hover:bg-surface-200 dark:hover:bg-surface-700' : ''
+                          }`}
                         >
                           {expandedAccounts.has(account.id) ? (
                             <ChevronDown className="w-4 h-4 text-surface-400 flex-shrink-0" />
@@ -503,7 +503,11 @@ export const Sidebar = ({
                                     className={`w-full flex items-center gap-2 px-4 py-2 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset ${
                                       isActive
                                         ? ''
-                                        : `text-surface-600 dark:text-surface-400 ${!isAnyModalOpen ? 'hover:bg-surface-200 dark:hover:bg-surface-700' : ''}`
+                                        : `text-surface-600 dark:text-surface-400 ${
+                                            contextMenu?.type === 'calendar' && contextMenu.id === calendar.id
+                                              ? 'bg-surface-200 dark:bg-surface-700'
+                                              : !isAnyModalOpen ? 'hover:bg-surface-200 dark:hover:bg-surface-700' : ''
+                                          }`
                                     }`}
                                     style={
                                       isActive
@@ -592,7 +596,11 @@ export const Sidebar = ({
                           className={`w-full flex items-center gap-2 px-4 py-2 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset ${
                             isActive
                               ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
-                              : `text-surface-600 dark:text-surface-400 ${!isAnyModalOpen ? 'hover:bg-surface-200 dark:hover:bg-surface-700' : ''}`
+                              : `text-surface-600 dark:text-surface-400 ${
+                                  contextMenu?.type === 'tag' && contextMenu.id === tag.id
+                                    ? 'bg-surface-200 dark:bg-surface-700'
+                                    : !isAnyModalOpen ? 'hover:bg-surface-200 dark:hover:bg-surface-700' : ''
+                                }`
                           }`}
                           style={
                             isActive
@@ -713,7 +721,9 @@ export const Sidebar = ({
                       className={`p-2 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset ${
                         isActive
                           ? 'bg-primary-50 dark:bg-primary-900/30'
-                          : 'hover:bg-surface-200 dark:hover:bg-surface-700'
+                          : contextMenu?.type === 'calendar' && contextMenu.id === calendar.id
+                            ? 'bg-surface-200 dark:bg-surface-700'
+                            : 'hover:bg-surface-200 dark:hover:bg-surface-700'
                       }`}
                       style={
                         isActive
@@ -768,7 +778,9 @@ export const Sidebar = ({
                     className={`p-2 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset ${
                       isActive
                         ? 'bg-primary-50 dark:bg-primary-900/30'
-                        : 'hover:bg-surface-200 dark:hover:bg-surface-700'
+                        : contextMenu?.type === 'tag' && contextMenu.id === tag.id
+                          ? 'bg-surface-200 dark:bg-surface-700'
+                          : 'hover:bg-surface-200 dark:hover:bg-surface-700'
                     }`}
                     style={
                       isActive
@@ -829,12 +841,55 @@ export const Sidebar = ({
         // biome-ignore lint/a11y/useKeyWithClickEvents: Context menu container uses stopPropagation to prevent backdrop close
         <div
           data-context-menu-content
-          className="fixed bg-white dark:bg-surface-800 rounded-lg shadow-lg border border-surface-200 dark:border-surface-700 z-50 animate-scale-in"
+          className="fixed bg-white dark:bg-surface-800 rounded-lg shadow-lg border border-surface-200 dark:border-surface-700 z-50 animate-scale-in min-w-[6rem]"
           style={{ left: contextMenu.x, top: contextMenu.y }}
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
         >
           {contextMenu.type === 'account' && (
             <>
+              {(() => {
+                const account = accounts.find((a) => a.id === contextMenu.id);
+                const isAccountSyncing = account?.calendars.some((c) => c.id === syncingCalendarId);
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleCloseContextMenu();
+                      if (account) {
+                        for (const calendar of account.calendars) {
+                          syncCalendar(calendar.id).catch((error) => {
+                            const errorMessage =
+                              error instanceof Error ? error.message : 'Unknown error';
+                            toastManager.error(
+                              `Calendar sync failed: ${calendar.displayName || 'Unknown'}`,
+                              errorMessage,
+                              `sync-error-calendar-${calendar.id}`,
+                              {
+                                label: 'Edit Account',
+                                onClick: () => {
+                                  emit(MENU_EVENTS.EDIT_ACCOUNT, { accountId: account.id });
+                                },
+                              },
+                            );
+                          });
+                        }
+                      }
+                    }}
+                    disabled={isAccountSyncing}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+                      isAccountSyncing
+                        ? 'text-surface-400 dark:text-surface-500 cursor-not-allowed'
+                        : 'text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700'
+                    }`}
+                  >
+                    <RefreshCw className={`w-4 h-4 ${isAccountSyncing ? 'animate-spin' : ''}`} />
+                    {isAccountSyncing ? 'Syncing...' : 'Sync'}
+                  </button>
+                );
+              })()}
+
+              <div className="border-t border-surface-200 dark:border-surface-700" />
+
               <button
                 type="button"
                 onClick={() => {

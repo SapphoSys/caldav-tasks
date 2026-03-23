@@ -26,22 +26,18 @@ import { useSettingsStore } from '$hooks/useSettingsStore';
 import { useTheme } from '$hooks/useTheme';
 import { useTray } from '$hooks/useTray';
 import { useUpdateChecker } from '$hooks/useUpdateChecker';
+import { MAX_EDITOR_WIDTH, MIN_EDITOR_WIDTH } from '$utils/constants';
 import type { CalDAVConfig } from '$utils/mobileconfig';
-import { initWebKitDragFix } from '$utils/webkit';
 
 const App = () => {
-  // Initialize WebKit drag-and-drop fix for Safari/Tauri
-  useEffect(() => {
-    initWebKitDragFix();
-  }, []);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
 
   const [preloadedFile, setPreloadedFile] = useState<{
     name: string;
     content: string;
   } | null>(null);
   const [preloadedConfig, setPreloadedConfig] = useState<CalDAVConfig | null>(null);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
+
   const { isSyncing, syncingCalendarId, isOffline, lastSyncTime, syncAll } = useSyncQuery();
   const handleHeaderSync = useCallback(() => {
     void syncAll({
@@ -81,16 +77,39 @@ const App = () => {
     sidebarWidth,
     toggleSidebarCollapsed,
     setSidebarWidth,
+    taskEditorWidth,
+    setTaskEditorWidth,
     onboardingCompleted,
     syncOnReconnect,
   } = useSettingsStore();
 
-  // show onboarding modal on first launch
+  const [isEditorResizing, setIsEditorResizing] = useState(false);
+
   useEffect(() => {
-    if (!onboardingCompleted) {
-      setShowOnboarding(true);
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isEditorResizing) return;
+      const newWidth = Math.min(
+        MAX_EDITOR_WIDTH,
+        Math.max(MIN_EDITOR_WIDTH, window.innerWidth - e.clientX),
+      );
+      setTaskEditorWidth(newWidth);
+    };
+    const handleMouseUp = () => {
+      setIsEditorResizing(false);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    if (isEditorResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
     }
-  }, [onboardingCompleted]);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isEditorResizing, setTaskEditorWidth]);
+
+  const showOnboarding = !onboardingCompleted;
 
   // system tray integration (sync button, status updates)
   useTray({
@@ -216,7 +235,20 @@ const App = () => {
           </div>
 
           {isEditorOpen && selectedTask && (
-            <div className="w-full lg:w-[400px] flex-shrink-0 border-l border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 overflow-hidden">
+            <div
+              className="relative hidden lg:block flex-shrink-0 border-l border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 overflow-hidden"
+              style={{ width: taskEditorWidth }}
+            >
+              {/* biome-ignore lint/a11y/noStaticElementInteractions: Resize handle requires mouse events for drag functionality */}
+              <div
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setIsEditorResizing(true);
+                  document.body.style.cursor = 'col-resize';
+                  document.body.style.userSelect = 'none';
+                }}
+                className="absolute top-0 left-0 w-1 h-full cursor-col-resize hover:bg-primary-400 dark:hover:bg-primary-600 transition-colors z-10"
+              />
               <TaskEditor task={selectedTask} />
             </div>
           )}
@@ -288,7 +320,7 @@ const App = () => {
 
       {showOnboarding && (
         <OnboardingModal
-          onComplete={() => setShowOnboarding(false)}
+          onComplete={() => {}}
           onAddAccount={() => {
             menuHandlers.setShowAccountModal(true);
           }}

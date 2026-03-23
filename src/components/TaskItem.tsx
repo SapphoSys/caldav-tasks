@@ -7,12 +7,11 @@ import CheckCircle2 from 'lucide-react/icons/check-circle-2';
 import ChevronDown from 'lucide-react/icons/chevron-down';
 import ChevronRight from 'lucide-react/icons/chevron-right';
 import Clock from 'lucide-react/icons/clock';
-import Edit2 from 'lucide-react/icons/edit-2';
 import Link from 'lucide-react/icons/link';
-import Share2 from 'lucide-react/icons/share-2';
-import Trash2 from 'lucide-react/icons/trash-2';
-import { useEffect, useRef, useState } from 'react';
-import { ExportModal } from '$components/modals/ExportModal';
+import Loader from 'lucide-react/icons/loader';
+import X from 'lucide-react/icons/x';
+import { useEffect, useRef } from 'react';
+import { TaskContextMenu } from '$components/TaskContextMenu';
 import { getIconByName } from '$data/icons';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useToggleTaskComplete } from '$hooks/queries/useTasks';
@@ -24,23 +23,199 @@ import {
   useSetSelectedTask,
   useUIState,
 } from '$hooks/queries/useUIState';
-import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
 import { useContextMenu } from '$hooks/useContextMenu';
 import { useSettingsStore } from '$hooks/useSettingsStore';
 import { getTags } from '$lib/store/tags';
-import {
-  countChildren,
-  exportTaskAndChildren,
-  getChildTasks,
-  toggleTaskCollapsed,
-} from '$lib/store/tasks';
-import type { Task } from '$types/index';
+import { countChildren, getChildTasks, toggleTaskCollapsed } from '$lib/store/tasks';
+import type { Account, Task } from '$types/index';
 import { getContrastTextColor } from '$utils/color';
 import { FALLBACK_ITEM_COLOR } from '$utils/constants';
 import { formatDueDate, formatStartDate } from '$utils/date';
 import { pluralize } from '$utils/format';
 import { filterCalDavDescription } from '$utils/ical';
 import { getPriorityColor, getPriorityRingColor } from '$utils/priority';
+
+// Moved outside component — does not close over any component state
+const animateLayoutChanges: AnimateLayoutChanges = (args) => {
+  const { isSorting, wasDragging } = args;
+  if (wasDragging || !isSorting) return false;
+  return defaultAnimateLayoutChanges(args);
+};
+
+interface TaskBadgesRowProps {
+  task: Task;
+  accounts: Account[];
+  activeCalendarId: string | null;
+  showCompletedTasks: boolean;
+  onTagClick: (tagId: string) => void;
+  onCalendarClick: (calendarId: string) => void;
+  onToggleCollapsed: (e: React.MouseEvent) => void;
+}
+
+const TaskBadgesRow = ({
+  task,
+  accounts,
+  activeCalendarId,
+  showCompletedTasks,
+  onTagClick,
+  onCalendarClick,
+  onToggleCollapsed,
+}: TaskBadgesRowProps) => {
+  const allChildTasks = getChildTasks(task.uid);
+  const hiddenChildCount = !showCompletedTasks
+    ? allChildTasks.filter((c) => c.status === 'completed' || c.status === 'cancelled').length
+    : 0;
+  const completedSubtasks = allChildTasks.filter(
+    (s) => s.status === 'completed' || s.status === 'cancelled',
+  ).length;
+  const totalSubtasks = allChildTasks.length;
+  const childCount = countChildren(task.uid);
+  const allCalendars = accounts.flatMap((a) => a.calendars);
+  const calendar = allCalendars.find((c) => c.id === task.calendarId);
+  const calendarColor = calendar?.color ?? FALLBACK_ITEM_COLOR;
+  const showCalendar = activeCalendarId === null && calendar;
+  const isUnstarted = task.startDate && new Date(task.startDate) > new Date();
+  const startDateDisplay = isUnstarted && task.startDate ? formatStartDate(task.startDate) : null;
+  const taskTags = (task.tags || [])
+    .map((tagId) => getTags().find((t) => t.id === tagId))
+    .filter(Boolean);
+
+  if (
+    !startDateDisplay &&
+    !taskTags.length &&
+    !showCalendar &&
+    !totalSubtasks &&
+    !childCount &&
+    !task.url
+  ) {
+    return null;
+  }
+
+  const CalendarIcon = calendar ? getIconByName(calendar.icon || 'calendar') : null;
+
+  return (
+    <div className="flex items-center gap-2 mt-2 flex-wrap">
+      {startDateDisplay && (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-surface-300 dark:border-surface-600 bg-surface-50 dark:bg-surface-800 text-surface-600 dark:text-surface-400">
+          <CalendarClock className="w-3 h-3" />
+          {startDateDisplay.text}
+        </span>
+      )}
+
+      {taskTags.map((tag) => {
+        if (!tag) return null;
+        const TagIcon = getIconByName(tag.icon || 'tag');
+        return (
+          <button
+            type="button"
+            key={tag.id}
+            onClick={(e) => {
+              e.stopPropagation();
+              onTagClick(tag.id);
+            }}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium hover:opacity-80 transition-opacity border outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500"
+            style={{ borderColor: tag.color, backgroundColor: `${tag.color}15`, color: tag.color }}
+          >
+            {tag.emoji ? (
+              <span className="text-xs leading-none">{tag.emoji}</span>
+            ) : (
+              <TagIcon className="w-3 h-3" />
+            )}
+            {tag.name}
+          </button>
+        );
+      })}
+
+      {showCalendar && calendar && CalendarIcon && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onCalendarClick(calendar.id);
+          }}
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border hover:opacity-80 transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+          style={{
+            borderColor: calendarColor,
+            backgroundColor: `${calendarColor}15`,
+            color: calendarColor,
+          }}
+        >
+          {calendar.emoji ? (
+            <span className="text-xs leading-none">{calendar.emoji}</span>
+          ) : (
+            <CalendarIcon className="w-3 h-3" />
+          )}
+          {calendar.displayName || 'Calendar'}
+        </button>
+      )}
+
+      {task.url && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            openUrl(task.url!);
+          }}
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:opacity-80 transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+          title={task.url}
+        >
+          <Link className="w-3 h-3" />
+          URL
+        </button>
+      )}
+
+      {task.status === 'cancelled' && (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-rose-300 dark:border-rose-700 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">
+          Cancelled
+        </span>
+      )}
+
+      {task.status === 'in-process' && (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+          <Loader className="w-3 h-3" />
+          {task.percentComplete}%
+        </span>
+      )}
+
+      {totalSubtasks > 0 && (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-surface-300 dark:border-surface-600 bg-surface-50 dark:bg-surface-800 text-surface-600 dark:text-surface-400">
+          <CheckCircle2 className="w-3 h-3" />
+          {completedSubtasks}/{totalSubtasks}
+        </span>
+      )}
+
+      {childCount > 0 && (
+        <button
+          type="button"
+          onClick={onToggleCollapsed}
+          className="collapse-button inline-flex items-center gap-0.5 px-2 py-0.5 rounded border border-surface-200 dark:border-surface-600 bg-surface-50 dark:bg-surface-800 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors text-xs text-surface-500 dark:text-surface-400 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+        >
+          {task.isCollapsed ? (
+            <>
+              <ChevronRight className="w-3 h-3" />
+              <span>
+                {childCount} {pluralize(childCount, 'subtask')}
+              </span>
+            </>
+          ) : (
+            <>
+              <ChevronDown className="w-3 h-3" />
+              <span>
+                {childCount} {pluralize(childCount, 'subtask')}
+              </span>
+            </>
+          )}
+        </button>
+      )}
+
+      {hiddenChildCount > 0 && (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-surface-300 dark:border-surface-600 bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-400">
+          {hiddenChildCount} hidden {pluralize(hiddenChildCount, 'subtask')}
+        </span>
+      )}
+    </div>
+  );
+};
 
 interface TaskItemProps {
   task: Task;
@@ -62,8 +237,6 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
   const { accentColor } = useSettingsStore();
   const { contextMenu, handleContextMenu, handleCloseContextMenu, setContextMenu } =
     useContextMenu();
-  const [showExportModal, setShowExportModal] = useState(false);
-  const { confirmAndDelete } = useConfirmTaskDelete();
 
   // Ref for the task element to manage focus
   const taskElementRef = useRef<HTMLDivElement>(null);
@@ -87,29 +260,6 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
 
   // get contrast color for checkbox checkmark
   const checkmarkColor = getContrastTextColor(accentColor);
-
-  const childCount = countChildren(task.uid);
-  const allChildTasks = getChildTasks(task.uid);
-  const hiddenChildCount = !showCompletedTasks
-    ? allChildTasks.filter((child) => child.completed).length
-    : 0;
-  const completedSubtasks = allChildTasks.filter((s) => s.completed).length;
-  const totalSubtasks = allChildTasks.length;
-
-  // helper to get tag by id
-  const getTagById = (tagId: string) => getTags().find((t) => t.id === tagId);
-
-  // Custom animateLayoutChanges: disable animation when the drag ends (wasDragging transitions to false)
-  // This prevents the "items crossing each other" animation glitch
-  const animateLayoutChanges: AnimateLayoutChanges = (args) => {
-    const { isSorting, wasDragging } = args;
-    // Disable animation when sorting ends (wasDragging means this item was being dragged)
-    // or when any sorting operation ends (isSorting becoming false)
-    if (wasDragging || !isSorting) {
-      return false;
-    }
-    return defaultAnimateLayoutChanges(args);
-  };
 
   // pass ancestorIds as data so it can be accessed in handleDragEnd
   const { attributes, listeners, setNodeRef, transform, isDragging } = useSortable({
@@ -136,15 +286,8 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
     pointerEvents: isDragging ? 'none' : undefined,
   };
 
-  const taskTags = (task.tags || []).map((tagId) => getTagById(tagId)).filter(Boolean);
-  const calendar = accounts.flatMap((a) => a.calendars).find((c) => c.id === task.calendarId);
-  const showCalendar = activeCalendarId === null && calendar;
-  const calendarColor = calendar?.color ?? FALLBACK_ITEM_COLOR;
   const dueDateDisplay = task.dueDate ? formatDueDate(task.dueDate) : null;
-
-  // Check if task is unstarted (has future start date)
   const isUnstarted = task.startDate && new Date(task.startDate) > new Date();
-  const startDateDisplay = isUnstarted && task.startDate ? formatStartDate(task.startDate) : null;
 
   const handleClick = (e: React.MouseEvent) => {
     // don't select if clicking the checkbox or collapse button
@@ -167,23 +310,6 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
   const handleCheckboxClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     toggleTaskCompleteMutation.mutate(task.id);
-  };
-
-  const handleDelete = async () => {
-    // Close context menu before opening the confirm dialog so Esc only targets the dialog
-    setContextMenu(null);
-    const deleted = await confirmAndDelete(task.id);
-    if (deleted) {
-      setContextMenu(null);
-    }
-  };
-
-  const handleExport = () => {
-    const result = exportTaskAndChildren(task.id);
-    if (result) {
-      setShowExportModal(true);
-    }
-    setContextMenu(null);
   };
 
   const handleToggleCollapsed = (e: React.MouseEvent) => {
@@ -212,10 +338,11 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
         tabIndex={0}
         data-context-menu
         className={`
-          group relative flex items-start gap-3 pr-3 py-3 bg-white dark:bg-surface-800 rounded-lg border transition-all outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-900
+          group relative flex items-start gap-3 pr-3 py-3 rounded-lg border transition-all outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-900
+          ${contextMenu && !isOverlay ? 'bg-surface-100 dark:bg-surface-700/60' : 'bg-white dark:bg-surface-800'}
           ${isOverlay ? 'shadow-xl' : 'shadow-sm hover:shadow-md'}
           ${isSelected ? '' : task.priority === 'none' ? 'border-surface-200 dark:border-surface-700' : ''}
-          ${task.completed ? 'opacity-60' : isUnstarted ? 'opacity-70' : ''}
+          ${task.status === 'completed' || task.status === 'cancelled' ? 'opacity-60' : isUnstarted ? 'opacity-70' : ''}
           ${isDragEnabled ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}
           ${!isOverlay ? 'hover:bg-surface-50 dark:hover:bg-surface-800/70' : ''}
           ${isSelected && `border-transparent ${getPriorityRingColor(task.priority)}`}
@@ -226,17 +353,36 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
           <button
             type="button"
             onClick={handleCheckboxClick}
+            title={
+              task.status === 'cancelled'
+                ? 'Cancelled'
+                : task.status === 'in-process'
+                  ? 'In Progress'
+                  : task.status === 'completed'
+                    ? 'Completed — click to reopen'
+                    : 'Mark complete'
+            }
             className={`
               w-5 h-5 rounded border-2 flex items-center justify-center transition-all outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset
               ${
-                task.completed
+                task.status === 'completed'
                   ? 'bg-primary-500 border-primary-500'
-                  : 'border-surface-300 dark:border-surface-600 hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30'
+                  : task.status === 'cancelled'
+                    ? 'bg-rose-400 border-rose-400 dark:bg-rose-500 dark:border-rose-500'
+                    : task.status === 'in-process'
+                      ? 'bg-blue-400 border-blue-400 dark:bg-blue-500 dark:border-blue-500'
+                      : 'border-surface-300 dark:border-surface-600 hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30'
               }
             `}
           >
-            {task.completed && (
+            {task.status === 'completed' && (
               <Check className="w-4 h-4" style={{ color: checkmarkColor }} strokeWidth={3} />
+            )}
+            {task.status === 'cancelled' && (
+              <X className="w-4 h-4 text-white dark:text-surface-200" strokeWidth={3} />
+            )}
+            {task.status === 'in-process' && (
+              <Loader className="w-4 h-4 text-white dark:text-blue-100" />
             )}
           </button>
         </div>
@@ -245,11 +391,13 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
           <div className="flex items-start justify-between gap-2">
             <div
               className={`text-sm font-medium leading-5 truncate flex-1 min-w-0 ${
-                task.completed
+                task.status === 'completed'
                   ? 'line-through text-surface-400'
-                  : isUnstarted
-                    ? 'text-surface-500 dark:text-surface-400'
-                    : 'text-surface-800 dark:text-surface-200'
+                  : task.status === 'cancelled'
+                    ? 'line-through text-surface-400 dark:text-surface-500'
+                    : isUnstarted
+                      ? 'text-surface-500 dark:text-surface-400'
+                      : 'text-surface-800 dark:text-surface-200'
               }`}
             >
               {task.title || <span className="text-surface-400 italic">Untitled task</span>}
@@ -273,215 +421,36 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
 
           {filterCalDavDescription(task.description) && (
             <div
-              className={`text-xs mt-1 line-clamp-1 ${task.completed ? 'text-surface-400 dark:text-surface-500' : 'text-surface-500 dark:text-surface-400'}`}
+              className={`text-xs mt-1 line-clamp-1 ${task.status === 'completed' || task.status === 'cancelled' ? 'text-surface-400 dark:text-surface-500' : 'text-surface-500 dark:text-surface-400'}`}
             >
               {filterCalDavDescription(task.description)}
             </div>
           )}
 
-          {(startDateDisplay ||
-            taskTags.length > 0 ||
-            showCalendar ||
-            totalSubtasks > 0 ||
-            childCount > 0 ||
-            task.url) && (
-            <div className="flex items-center gap-2 mt-2 flex-wrap">
-              {startDateDisplay && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-surface-300 dark:border-surface-600 bg-surface-50 dark:bg-surface-800 text-surface-600 dark:text-surface-400">
-                  <CalendarClock className="w-3 h-3" />
-                  {startDateDisplay.text}
-                </span>
-              )}
-
-              {taskTags.map((tag) => {
-                if (!tag) return null;
-                const TagIcon = getIconByName(tag.icon || 'tag');
-                return (
-                  <button
-                    type="button"
-                    key={tag.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveTagMutation.mutate(tag.id);
-                    }}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium hover:opacity-80 transition-opacity border outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500"
-                    style={{
-                      borderColor: tag.color,
-                      backgroundColor: `${tag.color}15`,
-                      color: tag.color,
-                    }}
-                  >
-                    {tag.emoji ? (
-                      <span className="text-xs leading-none">{tag.emoji}</span>
-                    ) : (
-                      <TagIcon className="w-3 h-3" />
-                    )}
-                    {tag.name}
-                  </button>
-                );
-              })}
-
-              {showCalendar &&
-                calendar &&
-                (() => {
-                  const CalendarIcon = getIconByName(calendar.icon || 'calendar');
-                  return (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Find the account that owns this calendar
-                        const account = accounts.find((a) =>
-                          a.calendars.some((c) => c.id === calendar.id),
-                        );
-                        if (account) {
-                          setActiveAccountMutation.mutate(account.id);
-                        }
-                        setActiveCalendarMutation.mutate(calendar.id);
-                      }}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border hover:opacity-80 transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
-                      style={{
-                        borderColor: calendarColor,
-                        backgroundColor: `${calendarColor}15`,
-                        color: calendarColor,
-                      }}
-                    >
-                      {calendar.emoji ? (
-                        <span className="text-xs leading-none">{calendar.emoji}</span>
-                      ) : (
-                        <CalendarIcon className="w-3 h-3" />
-                      )}
-                      {calendar.displayName || 'Calendar'}
-                    </button>
-                  );
-                })()}
-
-              {task.url && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openUrl(task.url!);
-                  }}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:opacity-80 transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
-                  title={task.url}
-                >
-                  <Link className="w-3 h-3" />
-                  URL
-                </button>
-              )}
-
-              {totalSubtasks > 0 && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-surface-300 dark:border-surface-600 bg-surface-50 dark:bg-surface-800 text-surface-600 dark:text-surface-400">
-                  <CheckCircle2 className="w-3 h-3" />
-                  {completedSubtasks}/{totalSubtasks}
-                </span>
-              )}
-
-              {childCount > 0 && (
-                <button
-                  type="button"
-                  onClick={handleToggleCollapsed}
-                  className="collapse-button inline-flex items-center gap-0.5 px-2 py-0.5 rounded border border-surface-200 dark:border-surface-600 bg-surface-50 dark:bg-surface-800 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors text-xs text-surface-500 dark:text-surface-400 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
-                >
-                  {task.isCollapsed ? (
-                    <>
-                      <ChevronRight className="w-3 h-3" />
-                      <span>
-                        {childCount} {pluralize(childCount, 'subtask')}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="w-3 h-3" />
-                      <span>
-                        {childCount} {pluralize(childCount, 'subtask')}
-                      </span>
-                    </>
-                  )}
-                </button>
-              )}
-
-              {hiddenChildCount > 0 && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-surface-300 dark:border-surface-600 bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-400">
-                  {hiddenChildCount} hidden {pluralize(hiddenChildCount, 'subtask')}
-                </span>
-              )}
-            </div>
-          )}
+          <TaskBadgesRow
+            task={task}
+            accounts={accounts}
+            activeCalendarId={activeCalendarId}
+            showCompletedTasks={showCompletedTasks}
+            onTagClick={(tagId) => setActiveTagMutation.mutate(tagId)}
+            onCalendarClick={(calendarId) => {
+              const account = accounts.find((a) => a.calendars.some((c) => c.id === calendarId));
+              if (account) setActiveAccountMutation.mutate(account.id);
+              setActiveCalendarMutation.mutate(calendarId);
+            }}
+            onToggleCollapsed={handleToggleCollapsed}
+          />
         </div>
 
         <ChevronRight className="w-5 h-5 text-surface-300 dark:text-surface-600 group-hover:text-surface-500 dark:group-hover:text-surface-400 transition-colors flex-shrink-0" />
       </div>
 
       {contextMenu && (
-        <>
-          {/* biome-ignore lint/a11y/noStaticElementInteractions: Context menu backdrop for closing on outside click */}
-          {/* biome-ignore lint/a11y/useKeyWithClickEvents: Context menu backdrop for closing on outside click */}
-          <div
-            className="fixed inset-0 z-40"
-            onClick={handleCloseContextMenu}
-            onContextMenu={(e) => {
-              e.preventDefault();
-              handleCloseContextMenu();
-            }}
-          />
-          <div
-            data-context-menu-content
-            className="fixed bg-white dark:bg-surface-800 rounded-lg shadow-lg border border-surface-200 dark:border-surface-700 my-1 z-50 min-w-[160px] animate-scale-in"
-            style={{ left: contextMenu.x, top: contextMenu.y }}
-          >
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedTaskMutation.mutate(task.id);
-                setContextMenu(null);
-              }}
-              className="w-full rounded-t-md flex items-center gap-2 px-3 py-2 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
-            >
-              <Edit2 className="w-4 h-4" />
-              Edit
-            </button>
-            <div className="border-t border-surface-200 dark:border-surface-700" />
-            <button
-              type="button"
-              onClick={() => {
-                toggleTaskCompleteMutation.mutate(task.id);
-                setContextMenu(null);
-              }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              {task.completed ? 'Mark Incomplete' : 'Mark Complete'}
-            </button>
-            <div className="border-t border-surface-200 dark:border-surface-700" />
-            <button
-              type="button"
-              onClick={handleExport}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
-            >
-              <Share2 className="w-4 h-4" />
-              Export
-            </button>
-            <div className="border-t border-surface-200 dark:border-surface-700" />
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="w-full rounded-b-md flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
-            >
-              <Trash2 className="w-4 h-4" />
-              Delete
-            </button>
-          </div>
-        </>
-      )}
-
-      {showExportModal && (
-        <ExportModal
-          tasks={[task, ...(exportTaskAndChildren(task.id)?.descendants || [])]}
-          fileName={task.title.replace(/[^a-z0-9]/gi, '-').toLowerCase() || 'task'}
-          type="tasks"
-          onClose={() => setShowExportModal(false)}
+        <TaskContextMenu
+          task={task}
+          contextMenu={contextMenu}
+          onClose={handleCloseContextMenu}
+          setContextMenu={setContextMenu}
         />
       )}
     </>

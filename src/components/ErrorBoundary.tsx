@@ -14,6 +14,7 @@ interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
   errorInfo: ErrorInfo | null;
+  confirmResetPrefs: boolean;
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -23,6 +24,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       hasError: false,
       error: null,
       errorInfo: null,
+      confirmResetPrefs: false,
     };
   }
 
@@ -52,10 +54,16 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       hasError: false,
       error: null,
       errorInfo: null,
+      confirmResetPrefs: false,
     });
   };
 
   handleReload = (): void => {
+    window.location.reload();
+  };
+
+  handleResetPreferences = (): void => {
+    localStorage.removeItem('chiri-settings');
     window.location.reload();
   };
 
@@ -106,7 +114,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
 
   render(): ReactNode {
     if (this.state.hasError) {
-      const { error, errorInfo } = this.state;
+      const { error, errorInfo, confirmResetPrefs } = this.state;
 
       return (
         <div className="flex min-h-screen items-center justify-center bg-white dark:bg-surface-900 p-8">
@@ -147,10 +155,52 @@ ${errorInfo?.componentStack || 'No component stack available'}
                 <button
                   type="button"
                   onClick={this.handleReportIssue}
-                  className="rounded-md bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500 px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  className="rounded-md bg-primary-500 text-primary-contrast hover:bg-primary-600 focus:ring-primary-500 px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                 >
                   File issue on GitHub
                 </button>
+              </div>
+
+              <div className="rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900/30 p-5 shadow-lg space-y-2.5">
+                <h2 className="text-xl font-semibold text-surface-900 dark:text-surface-50">
+                  Reset Preferences
+                </h2>
+                <p className="text-sm text-surface-600 dark:text-surface-400">
+                  Reset all preferences to their defaults and reload. Your accounts and task data
+                  will not be affected.
+                </p>
+                {!confirmResetPrefs ? (
+                  <button
+                    type="button"
+                    onClick={() => this.setState({ confirmResetPrefs: true })}
+                    className="rounded-md bg-surface-200 dark:bg-surface-700 px-4 py-2 text-sm font-medium text-surface-800 dark:text-surface-200 hover:bg-surface-300 dark:hover:bg-surface-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                  >
+                    Reset Preferences
+                  </button>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm font-semibold text-red-600 dark:text-red-400">
+                      Are you sure? All preferences will be reset to defaults and the app will
+                      reload.
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={this.handleResetPreferences}
+                        className="rounded-md bg-red-600 dark:bg-red-500 px-4 py-2 text-sm font-medium text-primary-contrast hover:bg-red-700 dark:hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                      >
+                        Yes, Reset Preferences
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => this.setState({ confirmResetPrefs: false })}
+                        className="rounded-md border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 px-4 py-2 text-sm font-medium text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900/30 p-5 shadow-lg space-y-2.5">
@@ -164,7 +214,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
                   <button
                     type="button"
                     onClick={this.handleReset}
-                    className="rounded-md bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                    className="rounded-md bg-primary-500 px-4 py-2 text-sm font-medium text-primary-contrast hover:bg-primary-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                   >
                     Continue anyway
                   </button>
@@ -172,7 +222,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
                   <button
                     type="button"
                     onClick={this.handleReload}
-                    className="rounded-md bg-primary-500/80 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                    className="rounded-md bg-primary-500/80 px-4 py-2 text-sm font-medium text-primary-contrast hover:bg-primary-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                   >
                     Reload app
                   </button>
