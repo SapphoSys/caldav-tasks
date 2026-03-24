@@ -6,7 +6,6 @@ import X from 'lucide-react/icons/x';
 import { useRef, useState } from 'react';
 import { useChildTasks } from '$hooks/queries/useTasks';
 import type { Task } from '$types/index';
-import { getPriorityDot } from '$utils/priority';
 
 const animateLayoutChanges: AnimateLayoutChanges = (args) =>
   defaultAnimateLayoutChanges({ ...args, wasDragging: true });
@@ -52,6 +51,10 @@ export const SubtaskTreeItem = ({
     animateLayoutChanges,
   });
 
+  // Disable all transitions - items will snap to positions immediately.
+  // This prevents the "jumping" animation when drag ends and displaced items
+  // return to their natural positions.
+  // Use opacity: 0 instead of visibility: hidden for instant hiding without flash.
   const style: React.CSSProperties = {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     transition: 'none',
@@ -150,11 +153,6 @@ export const SubtaskTreeItem = ({
           )}
         </button>
 
-        {/* Priority dot */}
-        {task.priority !== 'none' && (
-          <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${getPriorityDot(task.priority)}`} />
-        )}
-
         {/* Title — click to edit inline */}
         {isEditing ? (
           <input
@@ -170,7 +168,7 @@ export const SubtaskTreeItem = ({
           <button
             type="button"
             onClick={handleStartEdit}
-            className={`flex-1 text-sm text-left truncate ${
+            className={`flex-1 pl-0.5 text-sm text-left whitespace-nowrap ${
               task.completed
                 ? 'line-through text-surface-400 dark:text-surface-500'
                 : 'text-surface-700 dark:text-surface-300 hover:text-surface-900 dark:hover:text-surface-100'
