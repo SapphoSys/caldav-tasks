@@ -5,7 +5,8 @@ import { useSettingsStore } from '$hooks/useSettingsStore';
 import { pluralize } from '$utils/format';
 
 export const useConfirmTaskDelete = () => {
-  const { confirmBeforeDeletion, confirmBeforeDelete, deleteSubtasksWithParent } = useSettingsStore();
+  const { confirmBeforeDeletion, confirmBeforeDelete, deleteSubtasksWithParent } =
+    useSettingsStore();
   const { data: tasks = [] } = useTasks();
   const deleteTaskMutation = useDeleteTask();
   const { confirm, close } = useConfirmDialog();
@@ -60,7 +61,15 @@ export const useConfirmTaskDelete = () => {
       close();
       return true;
     },
-    [confirmBeforeDeletion, confirmBeforeDelete, deleteSubtasksWithParent, deleteTaskMutation, confirm, close, tasks],
+    [
+      confirmBeforeDeletion,
+      confirmBeforeDelete,
+      deleteSubtasksWithParent,
+      deleteTaskMutation,
+      confirm,
+      close,
+      tasks,
+    ],
   );
 
   return { confirmAndDelete };

@@ -140,7 +140,6 @@ export const useTasksByCalendar = (calendarId: string | null) => {
   });
 };
 
-
 /**
  * Hook to create a task
  */
