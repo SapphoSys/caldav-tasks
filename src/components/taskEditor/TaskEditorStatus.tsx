@@ -1,0 +1,124 @@
+import Activity from 'lucide-react/icons/activity';
+import Ban from 'lucide-react/icons/ban';
+import Check from 'lucide-react/icons/check';
+import Loader from 'lucide-react/icons/loader';
+import RotateCcw from 'lucide-react/icons/rotate-ccw';
+import { useState } from 'react';
+import type { Task, TaskStatus } from '$types/index';
+
+interface TaskEditorStatusProps {
+  task: Task;
+  onStatusChange: (status: TaskStatus) => void;
+  onCommitPercent: (value: number) => void;
+}
+
+export const TaskEditorStatus = ({
+  task,
+  onStatusChange,
+  onCommitPercent,
+}: TaskEditorStatusProps) => {
+  const [draftPercent, setDraftPercent] = useState<number | undefined>(undefined);
+
+  return (
+    <>
+      <div>
+        <div
+          id="status-label"
+          className="flex items-center gap-2 text-sm font-medium text-surface-600 dark:text-surface-400 mb-2"
+        >
+          <Activity className="w-4 h-4" />
+          Status
+        </div>
+        {/* biome-ignore lint/a11y/useSemanticElements: fieldset would change semantic structure; div with role="group" is appropriate here */}
+        <div className="grid grid-cols-2 gap-2" role="group" aria-labelledby="status-label">
+          {(
+            [
+              {
+                value: 'needs-action',
+                label: 'Needs Action',
+                icon: RotateCcw,
+                color: 'text-surface-600 dark:text-surface-400',
+                borderColor: 'border-surface-400',
+                bgColor: 'bg-surface-100 dark:bg-surface-800',
+              },
+              {
+                value: 'in-process',
+                label: 'In Process',
+                icon: Loader,
+                color: 'text-blue-600 dark:text-blue-400',
+                borderColor: 'border-blue-400',
+                bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+              },
+              {
+                value: 'completed',
+                label: 'Completed',
+                icon: Check,
+                color: 'text-primary-600 dark:text-primary-400',
+                borderColor: 'border-primary-400',
+                bgColor: 'bg-primary-50 dark:bg-primary-900/30',
+              },
+              {
+                value: 'cancelled',
+                label: 'Cancelled',
+                icon: Ban,
+                color: 'text-rose-600 dark:text-rose-400',
+                borderColor: 'border-rose-400',
+                bgColor: 'bg-rose-50 dark:bg-rose-900/30',
+              },
+            ] as const
+          ).map((s) => {
+            const Icon = s.icon;
+            const isActive = task.status === s.value;
+            return (
+              <button
+                type="button"
+                key={s.value}
+                onClick={() => onStatusChange(s.value)}
+                className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500
+                  ${isActive ? `${s.borderColor} ${s.bgColor}` : 'border-surface-200 dark:border-surface-700 hover:border-surface-300 hover:bg-surface-50 dark:hover:bg-surface-800 text-surface-600 dark:text-surface-400'}
+                `}
+              >
+                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? s.color : ''}`} />
+                <span className={isActive ? s.color : ''}>{s.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <label
+          htmlFor="task-percent-complete"
+          className="flex items-center gap-2 text-sm font-medium text-surface-600 dark:text-surface-400 mb-2"
+        >
+          <Loader className="w-4 h-4" />
+          Progress ({draftPercent ?? task.percentComplete ?? 0}%)
+        </label>
+        <input
+          id="task-percent-complete"
+          type="range"
+          min={0}
+          max={100}
+          step={5}
+          value={draftPercent ?? task.percentComplete ?? 0}
+          onChange={(e) => setDraftPercent(Number(e.target.value))}
+          onPointerUp={(e) => {
+            const value = Number((e.target as HTMLInputElement).value);
+            setDraftPercent(undefined);
+            onCommitPercent(value);
+          }}
+          onKeyUp={(e) => {
+            const value = Number((e.target as HTMLInputElement).value);
+            setDraftPercent(undefined);
+            onCommitPercent(value);
+          }}
+          className="w-full accent-primary-500 cursor-pointer"
+        />
+        <div className="flex justify-between text-xs text-surface-400 mt-1">
+          <span>0%</span>
+          <span>100%</span>
+        </div>
+      </div>
+    </>
+  );
+};
