@@ -1,5 +1,4 @@
 import { EmojiPicker } from 'frimousse';
-import Search from 'lucide-react/icons/search';
 import { useEffect, useRef, useState } from 'react';
 import { CALENDAR_ICONS, getIconByName } from '$data/icons';
 import { FALLBACK_ITEM_COLOR } from '$utils/constants';
@@ -124,14 +123,16 @@ export const IconEmojiPicker = ({
                           setIsOpen(false);
                         }}
                         className={`
-                          w-8 h-8 rounded flex items-center justify-center transition-colors cursor-pointer
+                          w-8 h-8 rounded flex items-center justify-center transition-colors cursor-pointer border
                           ${
                             iconValue === name && !emojiValue
-                              ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
-                              : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700'
+                              ? 'bg-surface-100 dark:bg-surface-700'
+                              : 'border-transparent text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700'
                           }
                         `}
-                        style={iconValue === name && !emojiValue ? { color } : undefined}
+                        style={
+                          iconValue === name && !emojiValue ? { borderColor: color } : undefined
+                        }
                       >
                         <Icon className="w-4 h-4" />
                       </button>
@@ -140,56 +141,82 @@ export const IconEmojiPicker = ({
                 </div>
               </div>
             ) : (
-              <div className="p-2">
-                <EmojiPicker.Root
-                  onEmojiSelect={(emoji) => {
-                    onEmojiChange(emoji.emoji);
-                    setIsOpen(false);
-                  }}
-                  columns={9}
-                >
-                  <div className="relative px-2 py-2">
-                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
-                    <EmojiPicker.Search className="w-full pl-9 pr-4 py-2 bg-surface-100 dark:bg-surface-700 border border-transparent rounded-lg text-sm text-surface-800 dark:text-surface-200 placeholder:text-surface-400 focus:outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors" />
-                  </div>
+              <EmojiPicker.Root
+                className="w-full"
+                onEmojiSelect={(emoji) => {
+                  onEmojiChange(emoji.emoji);
+                  setIsOpen(false);
+                }}
+                columns={9}
+              >
+                <div className="px-2 pt-2">
+                  <EmojiPicker.Search className="w-full appearance-none rounded-md bg-surface-100 dark:bg-surface-700 px-2.5 py-2 text-sm text-surface-800 dark:text-surface-200 placeholder:text-surface-400 focus:outline-none" />
+                </div>
 
-                  <EmojiPicker.Viewport className="relative flex-1 outline-hidden h-[280px] overflow-auto">
-                    <EmojiPicker.Loading className="absolute inset-0 flex items-center justify-center text-surface-400 text-sm dark:text-surface-500">
-                      Loading…
-                    </EmojiPicker.Loading>
-                    <EmojiPicker.Empty className="absolute inset-0 flex items-center justify-center text-surface-400 text-sm dark:text-surface-500">
-                      No emoji found
-                    </EmojiPicker.Empty>
-                    <EmojiPicker.List
-                      className="select-none pb-1.5"
-                      components={{
-                        CategoryHeader: ({ category, ...props }) => (
-                          <div
-                            className="bg-white dark:bg-surface-800 px-2 pt-2 pb-1 font-medium text-surface-600 dark:text-surface-400 text-xs sticky top-0"
-                            {...props}
-                          >
-                            {category.label}
-                          </div>
-                        ),
-                        Row: ({ children, ...props }) => (
-                          <div className="px-2 scroll-my-1.5" {...props}>
-                            {children}
-                          </div>
-                        ),
-                        Emoji: ({ emoji, ...props }) => (
-                          <button
-                            type="button"
-                            className="flex w-9 h-9 items-center justify-center rounded-md text-lg data-[active]:bg-primary-50 dark:data-[active]:bg-primary-800 border border-transparent transition-colors data-[active]:border-primary-400"
-                            {...props}
-                          >
-                            {emoji.emoji}
-                          </button>
-                        ),
-                      }}
-                    />
-                  </EmojiPicker.Viewport>
-                </EmojiPicker.Root>
-              </div>
+                <EmojiPicker.Viewport className="outline-hidden h-[252px]">
+                  <EmojiPicker.Loading className="absolute inset-0 flex items-center justify-center text-surface-400 text-sm dark:text-surface-500">
+                    Loading…
+                  </EmojiPicker.Loading>
+                  <EmojiPicker.Empty className="absolute inset-0 flex items-center justify-center text-surface-400 text-sm dark:text-surface-500">
+                    No emoji found
+                  </EmojiPicker.Empty>
+                  <EmojiPicker.List
+                    className="select-none pb-1.5"
+                    components={{
+                      CategoryHeader: ({ category, ...props }) => (
+                        <div
+                          className="bg-white dark:bg-surface-800 px-3 pt-3 pb-1.5 font-medium text-surface-600 dark:text-surface-400 text-xs sticky top-0"
+                          {...props}
+                        >
+                          {category.label}
+                        </div>
+                      ),
+                      Row: ({ children, ...props }) => (
+                        <div className="scroll-my-1.5 px-2" {...props}>
+                          {children}
+                        </div>
+                      ),
+                      Emoji: ({ emoji, ...props }) => (
+                        <button
+                          type="button"
+                          className="flex flex-1 max-w-[calc(100%/9)] h-8 items-center justify-center rounded-lg text-lg data-[active]:bg-surface-100 dark:data-[active]:bg-surface-700"
+                          {...props}
+                          style={
+                            emoji.emoji === emojiValue
+                              ? {
+                                  backgroundColor: `${color}20`,
+                                  borderColor: color,
+                                  borderWidth: '1px',
+                                }
+                              : undefined
+                          }
+                        >
+                          {emoji.emoji}
+                        </button>
+                      ),
+                    }}
+                  />
+                </EmojiPicker.Viewport>
+
+                <div className="flex items-center gap-2 border-t border-surface-200 dark:border-surface-700 px-3 py-2 min-h-[34px]">
+                  <EmojiPicker.ActiveEmoji>
+                    {({ emoji }) =>
+                      emoji ? (
+                        <>
+                          <span className="text-base leading-none">{emoji.emoji}</span>
+                          <span className="text-xs text-surface-600 dark:text-surface-400 truncate">
+                            {emoji.label}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-xs text-surface-400 dark:text-surface-500">
+                          Hover to preview…
+                        </span>
+                      )
+                    }
+                  </EmojiPicker.ActiveEmoji>
+                </div>
+              </EmojiPicker.Root>
             )}
           </div>
         </div>
