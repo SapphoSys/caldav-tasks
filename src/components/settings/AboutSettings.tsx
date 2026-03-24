@@ -9,8 +9,8 @@ import Loader2 from 'lucide-react/icons/loader-2';
 import ScrollText from 'lucide-react/icons/scroll-text';
 import Sparkles from 'lucide-react/icons/sparkles';
 import type { ReactNode } from 'react';
-import { useState } from 'react';
 import { ChangelogModal } from '$components/modals/ChangelogModal';
+import { useChangelog } from '$hooks/useChangelog';
 import { getAppInfo } from '$utils/version';
 
 const GITHUB_URL = 'https://github.com/SapphoSys/chiri';
@@ -89,26 +89,12 @@ const Section = ({ title, children }: SectionProps) => (
 
 export const AboutSettings = () => {
   const { version, name, description, author } = getAppInfo();
-  const [changelog, setChangelog] = useState<string | null>(null);
-  const [isFetchingChangelog, setIsFetchingChangelog] = useState(false);
-  const [showChangelog, setShowChangelog] = useState(false);
-
-  const handleWhatsNew = async () => {
-    setIsFetchingChangelog(true);
-    try {
-      const response = await fetch(
-        `https://api.github.com/repos/SapphoSys/caldav-tasks/releases/tags/app-v${version}`,
-        { headers: { Accept: 'application/vnd.github.v3+json' } },
-      );
-      const body = response.ok ? ((await response.json()).body ?? '') : '';
-      setChangelog(body);
-    } catch {
-      setChangelog('');
-    } finally {
-      setIsFetchingChangelog(false);
-      setShowChangelog(true);
-    }
-  };
+  const {
+    openChangelog,
+    closeChangelog,
+    isLoading: isFetchingChangelog,
+    changelogData,
+  } = useChangelog();
 
   return (
     <>
@@ -138,7 +124,7 @@ export const AboutSettings = () => {
             description={`See what changed in v${version}`}
             variant="internal"
             loading={isFetchingChangelog}
-            onClick={handleWhatsNew}
+            onClick={() => openChangelog(version)}
           />
         </Section>
 
@@ -235,11 +221,11 @@ export const AboutSettings = () => {
         </Section>
       </div>
 
-      {showChangelog && changelog !== null && (
+      {changelogData && (
         <ChangelogModal
-          version={version}
-          changelog={changelog}
-          onClose={() => setShowChangelog(false)}
+          version={changelogData.version}
+          changelog={changelogData.body}
+          onClose={closeChangelog}
         />
       )}
     </>
