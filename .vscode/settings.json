@@ -44,6 +44,7 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "json.schemaDownload.trustedDomains": {
-    "https://schema.tauri.app/config/2": true
+    "https://schema.tauri.app/config/2": true,
+    "https://biomejs.dev/schemas/2.4.6/schema.json": true
   }
 }
