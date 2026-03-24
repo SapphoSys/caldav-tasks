@@ -1,4 +1,3 @@
-import { formatDate, formatTime } from '$utils/date';
 import type { LucideIcon } from 'lucide-react';
 import Activity from 'lucide-react/icons/activity';
 import AlignLeft from 'lucide-react/icons/align-left';
@@ -21,6 +20,7 @@ import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import { useSettingsStore } from '$hooks/useSettingsStore';
 import type { TaskHistoryEntry } from '$types/index';
+import { formatDate, formatTime } from '$utils/date';
 
 const FIELD_LABELS: Record<string, string> = {
   created: 'Created',
@@ -102,7 +102,13 @@ const formatHistoryValue = (field: string, value: string | null): string => {
   return value;
 };
 
-const HistoryEntry = ({ entry, timeFormat }: { entry: TaskHistoryEntry; timeFormat: '12' | '24' }) => {
+const HistoryEntry = ({
+  entry,
+  timeFormat,
+}: {
+  entry: TaskHistoryEntry;
+  timeFormat: '12' | '24';
+}) => {
   const label = FIELD_LABELS[entry.field] ?? entry.field;
   const Icon = FIELD_ICONS[entry.field] ?? History;
   const isCreated = entry.field === 'created';
