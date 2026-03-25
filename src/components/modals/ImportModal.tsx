@@ -341,7 +341,7 @@ export const ImportModal = ({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
               value={selectedAccountId}
               onChange={(e) => setSelectedAccountId(e.target.value)}
               disabled={!hasAccounts}
-              className={`w-full px-3 py-2 text-sm border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${!hasAccounts ? 'cursor-not-allowed text-surface-400 dark:text-surface-500' : ''}`}
+              className={`w-full text-sm border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${!hasAccounts ? 'cursor-not-allowed text-surface-400 dark:text-surface-500' : ''}`}
             >
               {!hasAccounts ? (
                 <option value="" disabled>
@@ -368,7 +368,7 @@ export const ImportModal = ({ isOpen, onClose, preloadedFile, onFileDrop }: Impo
               id="import-calendar-select"
               value={effectiveCalendarId}
               onChange={(e) => setSelectedCalendarId(e.target.value)}
-              className={`w-full px-3 py-2 text-sm border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${availableCalendars.length === 0 ? 'cursor-not-allowed text-surface-400 dark:text-surface-500' : ''}`}
+              className={`w-full text-sm border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-800 dark:text-surface-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${availableCalendars.length === 0 ? 'cursor-not-allowed text-surface-400 dark:text-surface-500' : ''}`}
               disabled={availableCalendars.length === 0}
             >
               {availableCalendars.length === 0 ? (

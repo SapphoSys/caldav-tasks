@@ -296,7 +296,7 @@ export const OnboardingModal = ({ onComplete, onAddAccount }: OnboardingModalPro
               <button
                 type="button"
                 onClick={handleAddAccount}
-                className="w-full py-3 px-4 bg-primary-500 hover:bg-primary-600 text-primary-contrast font-medium rounded-lg transition-colors flex items-center justify-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-inset"
+                className="w-full bg-primary-500 hover:bg-primary-600 text-primary-contrast font-medium rounded-lg transition-colors flex items-center justify-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-inset"
               >
                 <User className="w-5 h-5" />
                 Add CalDAV Account
@@ -304,7 +304,7 @@ export const OnboardingModal = ({ onComplete, onAddAccount }: OnboardingModalPro
               <button
                 type="button"
                 onClick={handleNext}
-                className="w-full py-3 px-4 bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-300 font-medium rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+                className="w-full bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-300 font-medium rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
               >
                 I'll do this later
               </button>
@@ -313,7 +313,7 @@ export const OnboardingModal = ({ onComplete, onAddAccount }: OnboardingModalPro
             <button
               type="button"
               onClick={handleNext}
-              className="w-full py-3 px-4 bg-primary-500 hover:bg-primary-600 text-primary-contrast font-medium rounded-lg transition-colors flex items-center justify-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-inset"
+              className="w-full bg-primary-500 hover:bg-primary-600 text-primary-contrast font-medium rounded-lg transition-colors flex items-center justify-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-inset"
             >
               {isLastStep ? 'Get Started' : 'Continue'}
             </button>
