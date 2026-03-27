@@ -185,7 +185,6 @@ export const NextcloudLoginModal = ({ onClose, onSuccess }: NextcloudLoginModalP
         ref={focusTrapRef}
         className="bg-white dark:bg-surface-800 rounded-xl shadow-xl w-full max-w-md animate-scale-in"
       >
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700">
           <div className="flex items-center gap-2">
             <Cloud className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -203,7 +202,6 @@ export const NextcloudLoginModal = ({ onClose, onSuccess }: NextcloudLoginModalP
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-4 space-y-4">
           {step === 'input' && (
             <>

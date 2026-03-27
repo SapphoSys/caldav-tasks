@@ -37,7 +37,7 @@ export const TaskEditorSubtasks = ({
     const getChildren = (uid: string) =>
       getSortedTasks(allTasks.filter((t) => t.parentUid === uid));
 
-    const flatten = (tasks: Task[], ancestorIds: string[]): FlattenedTask[] => {
+    const flatten = (tasks: Task[], ancestorIds: string[]) => {
       const result: FlattenedTask[] = [];
       for (const t of tasks) {
         result.push({ ...t, depth: ancestorIds.length, ancestorIds });
@@ -126,64 +126,60 @@ export const TaskEditorSubtasks = ({
         {childTasks.length > 0 && (
           <div className="p-1 overflow-x-auto">
             <div className="min-w-max w-full">
-            <DndContext
-              sensors={subtaskSensors}
-              collisionDetection={closestCenter}
-              onDragStart={handleSubtaskDragStart}
-              onDragMove={handleSubtaskDragMove}
-              onDragEnd={handleSubtaskDragEnd}
-              onDragCancel={handleSubtaskDragCancel}
-            >
-              {/* All visible subtasks at all depths in one SortableContext —
-                  mirrors how TaskList puts every flattened task in a single context.
-                  depth - 1 converts from the 1-indexed flat list (parent = 0) to
-                  the 0-indexed display depth SubtaskTreeItem expects. */}
-              <SortableContext
-                items={visibleFlattenedSubtasks.slice(1).map((t) => t.id)}
-                strategy={verticalListSortingStrategy}
+              <DndContext
+                sensors={subtaskSensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleSubtaskDragStart}
+                onDragMove={handleSubtaskDragMove}
+                onDragEnd={handleSubtaskDragEnd}
+                onDragCancel={handleSubtaskDragCancel}
               >
-                {visibleFlattenedSubtasks.slice(1).map((flatItem) => (
-                  <SubtaskTreeItem
-                    key={flatItem.id}
-                    task={flatItem}
-                    depth={flatItem.depth - 1}
-                    checkmarkColor={checkmarkColor}
-                    expandedSubtasks={expandedSubtasks}
-                    setExpandedSubtasks={setExpandedSubtasks}
-                    updateTask={updateTask}
-                    confirmAndDelete={confirmAndDelete}
-                    isDragEnabled={anySubtaskDragEnabled}
-                  />
-                ))}
-              </SortableContext>
-
-              <DragOverlay dropAnimation={null}>
-                {activeDragSubtask ? (
-                  <div className="relative">
-                    {targetSubtaskIndent !== subtaskOriginalIndentRef.current && (
-                      <div className="absolute -top-6 left-2 px-2 py-0.5 bg-primary-600 text-primary-contrast text-xs rounded shadow whitespace-nowrap">
-                        {targetSubtaskIndent > subtaskOriginalIndentRef.current
-                          ? `→ Nest in ${truncateName(targetSubtaskParentName || 'parent')}`
-                          : targetSubtaskIndent === 1
-                            ? '← Move to top level'
-                            : `← Move under ${truncateName(targetSubtaskParentName || 'parent')}`}
-                      </div>
-                    )}
+                <SortableContext
+                  items={visibleFlattenedSubtasks.slice(1).map((t) => t.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {visibleFlattenedSubtasks.slice(1).map((flatItem) => (
                     <SubtaskTreeItem
-                      task={activeDragSubtask}
-                      depth={targetSubtaskIndent - 1}
+                      key={flatItem.id}
+                      task={flatItem}
+                      depth={flatItem.depth - 1}
                       checkmarkColor={checkmarkColor}
                       expandedSubtasks={expandedSubtasks}
                       setExpandedSubtasks={setExpandedSubtasks}
                       updateTask={updateTask}
                       confirmAndDelete={confirmAndDelete}
-                      isDragEnabled={false}
-                      isOverlay
+                      isDragEnabled={anySubtaskDragEnabled}
                     />
-                  </div>
-                ) : null}
-              </DragOverlay>
-            </DndContext>
+                  ))}
+                </SortableContext>
+
+                <DragOverlay dropAnimation={null}>
+                  {activeDragSubtask ? (
+                    <div className="relative">
+                      {targetSubtaskIndent !== subtaskOriginalIndentRef.current && (
+                        <div className="absolute -top-6 left-2 px-2 py-0.5 bg-primary-600 text-primary-contrast text-xs rounded shadow whitespace-nowrap">
+                          {targetSubtaskIndent > subtaskOriginalIndentRef.current
+                            ? `→ Nest in ${truncateName(targetSubtaskParentName || 'parent')}`
+                            : targetSubtaskIndent === 1
+                              ? '← Move to top level'
+                              : `← Move under ${truncateName(targetSubtaskParentName || 'parent')}`}
+                        </div>
+                      )}
+                      <SubtaskTreeItem
+                        task={activeDragSubtask}
+                        depth={targetSubtaskIndent - 1}
+                        checkmarkColor={checkmarkColor}
+                        expandedSubtasks={expandedSubtasks}
+                        setExpandedSubtasks={setExpandedSubtasks}
+                        updateTask={updateTask}
+                        confirmAndDelete={confirmAndDelete}
+                        isDragEnabled={false}
+                        isOverlay
+                      />
+                    </div>
+                  ) : null}
+                </DragOverlay>
+              </DndContext>
             </div>
           </div>
         )}

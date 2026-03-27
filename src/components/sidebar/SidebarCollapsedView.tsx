@@ -47,7 +47,6 @@ export const SidebarCollapsedView = ({
     <div
       className={`flex-1 flex flex-col items-center py-2 gap-1 overflow-y-auto transition-opacity duration-150 ${showCollapsedContent ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
     >
-      {/* All Tasks */}
       <Tooltip content="All Tasks" position="right">
         <button
           type="button"
@@ -62,10 +61,8 @@ export const SidebarCollapsedView = ({
         </button>
       </Tooltip>
 
-      {/* Separator */}
       <div className="w-6 h-px bg-surface-200 dark:bg-surface-700 my-1" />
 
-      {/* Calendars */}
       {accounts.flatMap((account) =>
         account.calendars.map((calendar) => {
           const CalendarIcon = getIconByName(calendar.icon ?? 'calendar');
@@ -117,10 +114,8 @@ export const SidebarCollapsedView = ({
         }),
       )}
 
-      {/* Tags section separator */}
       {tags.length > 0 && <div className="w-6 h-px bg-surface-200 dark:bg-surface-700 my-1" />}
 
-      {/* Tags */}
       {tags.map((tag) => {
         const isActive = activeTagId === tag.id;
         const TagIcon = getIconByName(tag.icon ?? 'tag');
@@ -164,7 +159,6 @@ export const SidebarCollapsedView = ({
         );
       })}
 
-      {/* Settings at bottom */}
       <div className="mt-auto flex flex-col pt-2 border-t border-surface-200 dark:border-surface-700">
         {updateAvailable && (
           <Tooltip content="Update available!" position="right">

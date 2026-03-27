@@ -138,7 +138,7 @@ export const MoveToCalendarModal = ({
           )}
         </div>
 
-        <div className="flex justify-end p-4 border-t border-surface-200 dark:border-surface-700">
+        <div className="flex justify-end p-3 border-t border-surface-200 dark:border-surface-700">
           <button
             type="button"
             onClick={onClose}

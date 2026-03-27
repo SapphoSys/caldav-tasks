@@ -19,31 +19,31 @@ let cachedPermissionStatus: NotificationPermissionStatus | null = null;
  * Get the cached notification permission status without making an async call.
  * Returns null if the status hasn't been checked yet.
  */
-export function getCachedNotificationPermission(): NotificationPermissionStatus | null {
+export const getCachedNotificationPermission = () => {
   return cachedPermissionStatus;
-}
+};
 
 /**
  * Check the current notification permission status.
  * On macOS, this uses the native UNUserNotificationCenter API to get the real permission state.
  * On other platforms, returns 'granted' by default.
  */
-export async function checkNotificationPermission(): Promise<NotificationPermissionStatusResult> {
+export const checkNotificationPermission = async () => {
   const result = await invoke<NotificationPermissionStatusResult>('check_notification_permission');
   cachedPermissionStatus = result.status;
   return result;
-}
+};
 
 /**
  * Request notification permission from the user.
  * On macOS, this displays the native system permission dialog.
  * On other platforms, returns granted immediately.
  */
-export async function requestNotificationPermission(): Promise<NotificationPermissionResult> {
+export const requestNotificationPermission = async () => {
   const result = await invoke<NotificationPermissionResult>('request_notification_permission');
   cachedPermissionStatus = result.status;
   return result;
-}
+};
 
 export type NotificationType = 'overdue' | 'reminder';
 
@@ -58,9 +58,9 @@ export interface SendNotificationOptions {
  * Send a notification with actions using the native macOS API.
  * This uses user-notify to send notifications with action buttons.
  */
-export async function sendNotification(options: SendNotificationOptions): Promise<void> {
+export const sendNotification = async (options: SendNotificationOptions) => {
   await invoke('send_notification_with_actions', { request: options });
-}
+};
 
 export interface NotificationActionEvent {
   action: 'complete' | 'snooze-15min' | 'snooze-1hr' | 'view';

@@ -102,7 +102,6 @@ export const UpdateModal = ({
         </div>
       </div>
 
-      {/* Changelog Modal */}
       {showChangelogModal && (
         <ChangelogModal
           version={updateInfo.version}

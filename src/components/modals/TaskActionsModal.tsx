@@ -68,7 +68,6 @@ export const TaskActionsModal = ({ isOpen, onClose, taskId }: TaskActionsModalPr
           onClick={(e) => e.stopPropagation()}
           ref={focusTrapRef}
         >
-          {/* Header */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <h2 className="text-lg font-semibold text-surface-900 dark:text-surface-100">
@@ -88,7 +87,6 @@ export const TaskActionsModal = ({ isOpen, onClose, taskId }: TaskActionsModalPr
             </button>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex flex-col gap-2">
             <button
               type="button"
