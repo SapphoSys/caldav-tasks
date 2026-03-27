@@ -51,6 +51,10 @@
         }
       ]
     },
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [{ "path": "$APPLOG" }, { "path": "$APPLOG/**" }]
+    },
     "updater:default"
   ]
 }
