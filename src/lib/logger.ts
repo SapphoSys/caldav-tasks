@@ -85,11 +85,11 @@ class Logger {
     };
   }
 
-  private shouldLog(level: LogLevel): boolean {
+  private shouldLog(level: LogLevel) {
     return LOG_LEVELS[level] >= LOG_LEVELS[this.options.minLevel];
   }
 
-  private formatPrefix(_level: LogLevel): string[] {
+  private formatPrefix(_level: LogLevel) {
     const parts: string[] = [];
 
     if (this.options.timestamps) {
@@ -108,7 +108,7 @@ class Logger {
     return parts;
   }
 
-  private getStyles(_level: LogLevel): string[] {
+  private getStyles(_level: LogLevel) {
     const styles: string[] = [];
 
     if (this.options.timestamps) {
@@ -120,7 +120,7 @@ class Logger {
     return styles;
   }
 
-  private log(level: LogLevel, message: string, ...args: unknown[]): void {
+  private log(level: LogLevel, message: string, ...args: unknown[]) {
     if (!this.shouldLog(level)) return;
 
     const prefix = this.formatPrefix(level);
@@ -164,29 +164,29 @@ class Logger {
     }
   }
 
-  debug(message: string, ...args: unknown[]): void {
+  debug(message: string, ...args: unknown[]) {
     this.log('debug', message, ...args);
   }
 
-  info(message: string, ...args: unknown[]): void {
+  info(message: string, ...args: unknown[]) {
     this.log('info', message, ...args);
   }
 
-  warn(message: string, ...args: unknown[]): void {
+  warn(message: string, ...args: unknown[]) {
     this.log('warn', message, ...args);
   }
 
-  error(message: string, ...args: unknown[]): void {
+  error(message: string, ...args: unknown[]) {
     this.log('error', message, ...args);
   }
 
   /** Create a child logger with a sub-category */
-  child(subCategory: string, color?: string): Logger {
+  child(subCategory: string, color?: string) {
     return new Logger(`${this.category}:${subCategory}`, color ?? this.color, this.options);
   }
 
   /** Log a group of related messages */
-  group(label: string, fn: () => void): void {
+  group(label: string, fn: () => void) {
     if (!this.shouldLog('debug')) return;
     console.group(`%c[${this.category}] ${label}`, `color: ${this.color}; font-weight: bold;`);
     fn();
@@ -194,7 +194,7 @@ class Logger {
   }
 
   /** Log with timing information */
-  time<T>(label: string, fn: () => T): T {
+  time<T>(label: string, fn: () => T) {
     if (!this.shouldLog('debug')) return fn();
 
     const start = performance.now();
@@ -206,7 +206,7 @@ class Logger {
   }
 
   /** Async version of time */
-  async timeAsync<T>(label: string, fn: () => Promise<T>): Promise<T> {
+  async timeAsync<T>(label: string, fn: () => Promise<T>) {
     if (!this.shouldLog('debug')) return fn();
 
     const start = performance.now();
@@ -226,7 +226,7 @@ class Logger {
  * log.info('Task created:', task.id);
  * log.error('Failed to save task:', error);
  */
-export const createLogger = (category: string, color?: string, options?: LoggerOptions): Logger => {
+export const createLogger = (category: string, color?: string, options?: LoggerOptions) => {
   return new Logger(category, color, options);
 };
 

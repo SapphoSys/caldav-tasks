@@ -81,7 +81,7 @@ export const propfind = async (
   credentials: CalDAVCredentials,
   body: string,
   depth: '0' | '1' | 'infinity' = '1',
-): Promise<HttpResponse> => {
+) => {
   return tauriRequest(url, 'PROPFIND', credentials, body, {
     Depth: depth,
     'Content-Type': 'application/xml; charset=utf-8',
@@ -96,7 +96,7 @@ export const report = async (
   credentials: CalDAVCredentials,
   body: string,
   depth: '0' | '1' = '1',
-): Promise<HttpResponse> => {
+) => {
   return tauriRequest(url, 'REPORT', credentials, body, {
     Depth: depth,
     'Content-Type': 'application/xml; charset=utf-8',
@@ -106,11 +106,7 @@ export const report = async (
 /**
  * PROPPATCH request for updating properties
  */
-export const proppatch = async (
-  url: string,
-  credentials: CalDAVCredentials,
-  body: string,
-): Promise<HttpResponse> => {
+export const proppatch = async (url: string, credentials: CalDAVCredentials, body: string) => {
   return tauriRequest(url, 'PROPPATCH', credentials, body, {
     'Content-Type': 'application/xml; charset=utf-8',
   });
@@ -124,7 +120,7 @@ export const put = async (
   credentials: CalDAVCredentials,
   body: string,
   etag?: string,
-): Promise<HttpResponse> => {
+) => {
   const headers: Record<string, string> = {
     'Content-Type': 'text/calendar; charset=utf-8',
   };
@@ -142,11 +138,7 @@ export const put = async (
 /**
  * DELETE request for removing calendar objects
  */
-export const del = async (
-  url: string,
-  credentials: CalDAVCredentials,
-  etag?: string,
-): Promise<HttpResponse> => {
+export const del = async (url: string, credentials: CalDAVCredentials, etag?: string) => {
   const headers: Record<string, string> = {};
 
   if (etag) {
@@ -160,18 +152,14 @@ export const del = async (
 /**
  * MKCALENDAR request for creating a new calendar collection
  */
-export const mkcalendar = async (
-  url: string,
-  credentials: CalDAVCredentials,
-  body: string,
-): Promise<HttpResponse> => {
+export const mkcalendar = async (url: string, credentials: CalDAVCredentials, body: string) => {
   return tauriRequest(url, 'MKCALENDAR', credentials, body);
 };
 
 /**
  * parse multistatus XML response
  */
-export const parseMultiStatus = (xml: string): MultiStatusResponse[] => {
+export const parseMultiStatus = (xml: string) => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(xml, 'application/xml');
 

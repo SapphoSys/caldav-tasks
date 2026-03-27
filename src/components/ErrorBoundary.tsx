@@ -36,7 +36,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log the error to the logger
     log.error('Error caught by boundary:', {
       error: error.toString(),
@@ -49,7 +49,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     });
   }
 
-  handleReset = (): void => {
+  handleReset = () => {
     this.setState({
       hasError: false,
       error: null,
@@ -58,16 +58,16 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     });
   };
 
-  handleReload = (): void => {
+  handleReload = () => {
     window.location.reload();
   };
 
-  handleResetPreferences = (): void => {
+  handleResetPreferences = () => {
     localStorage.removeItem('chiri-settings');
     window.location.reload();
   };
 
-  handleReportIssue = async (): Promise<void> => {
+  handleReportIssue = async () => {
     const { error, errorInfo } = this.state;
     if (!error) return;
 
@@ -222,7 +222,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
                   <button
                     type="button"
                     onClick={this.handleReload}
-                    className="rounded-md bg-primary-500/80 px-4 py-2 text-sm font-medium text-primary-contrast hover:bg-primary-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                    className="rounded-md bg-primary-500 px-4 py-2 text-sm font-medium text-primary-contrast hover:bg-primary-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                   >
                     Reload app
                   </button>

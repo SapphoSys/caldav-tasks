@@ -17,6 +17,6 @@ export const hasOpenModalElements = () => {
 /**
  * Check if a CalDAV server is a Vikunja server
  */
-export const isVikunjaServer = (calendarHome: string): boolean => {
+export const isVikunjaServer = (calendarHome: string) => {
   return calendarHome.includes('/dav/projects');
 };

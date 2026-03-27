@@ -6,7 +6,7 @@ import { getAppInfo } from '$utils/version';
 
 const log = loggers.bootstrap;
 
-export const createBootstrapErrorUI = async (error: unknown): Promise<void> => {
+export const createBootstrapErrorUI = async (error: unknown) => {
   const [currentPlatform, currentArch, currentVersion, currentExtension, currentLocale] =
     await Promise.all([platform(), arch(), version(), exeExtension(), locale()]);
 
@@ -247,7 +247,7 @@ const createActionCard = (
   cardClasses: string,
   buttonClasses: string,
   onButtonClick: () => void | Promise<void>,
-): HTMLDivElement => {
+) => {
   const card = document.createElement('div');
   card.className = `rounded-lg ${cardClasses} p-5 shadow-lg space-y-2.5`;
 

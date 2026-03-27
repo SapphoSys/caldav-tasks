@@ -29,10 +29,7 @@ export const getDaysOfWeekLabels = (weekStartsOn: WeekStartDay): readonly string
  * @param weekStartsOn - 0 for Sunday, 1 for Monday
  * @returns Number of empty cells needed at start of grid
  */
-export const getMonthStartPadding = (
-  firstDayOfMonth: number,
-  weekStartsOn: WeekStartDay,
-): number => {
+export const getMonthStartPadding = (firstDayOfMonth: number, weekStartsOn: WeekStartDay) => {
   if (weekStartsOn === 1) {
     return firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
   }
@@ -60,7 +57,7 @@ export const updateTimeComponent = (
   currentTime: { hours: number; minutes: number },
   type: 'hours' | 'minutes',
   value: number,
-): { hours: number; minutes: number } => {
+) => {
   return { ...currentTime, [type]: value };
 };
 
@@ -71,7 +68,7 @@ export const updateTimeComponent = (
  * @param minutes - Minutes to set
  * @returns New date with time set
  */
-export const setDateTime = (baseDate: Date, hours: number, minutes: number): Date => {
+export const setDateTime = (baseDate: Date, hours: number, minutes: number) => {
   const newDate = new Date(baseDate);
   newDate.setHours(hours, minutes, 0, 0);
   return newDate;
@@ -82,7 +79,7 @@ export const setDateTime = (baseDate: Date, hours: number, minutes: number): Dat
  * @param date - Date to convert
  * @returns New date with time set to start of day
  */
-export const createAllDayDate = (date: Date): Date => {
+export const createAllDayDate = (date: Date) => {
   const newDate = new Date(date);
   newDate.setHours(0, 0, 0, 0);
   return newDate;

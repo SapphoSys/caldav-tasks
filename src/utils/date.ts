@@ -52,7 +52,7 @@ const DATE_FORMAT_SHORT: Record<DateFormat, string> = {
  * @param withYear - Whether to include the year in the output
  * @param dateFormat - Override; defaults to the setting from the store
  */
-export const formatDate = (date: Date, withYear: boolean, dateFormat?: DateFormat): string => {
+export const formatDate = (date: Date, withYear: boolean, dateFormat?: DateFormat) => {
   const fmt = dateFormat ?? settingsStore.getState().dateFormat;
   const pattern = withYear ? fmt : DATE_FORMAT_SHORT[fmt];
   return format(date, pattern);
@@ -62,7 +62,7 @@ export const formatDate = (date: Date, withYear: boolean, dateFormat?: DateForma
  * Format a month/year header for calendar pickers, respecting the user's date format preference.
  * e.g. "March 2026" for MMM-style formats, "03/2026" for numeric, "2026-03" for ISO.
  */
-export const formatMonthYear = (date: Date, dateFormat?: DateFormat): string => {
+export const formatMonthYear = (date: Date, dateFormat?: DateFormat) => {
   const fmt = dateFormat ?? settingsStore.getState().dateFormat;
   return format(date, DATE_FORMAT_MONTH_YEAR[fmt]);
 };
@@ -70,21 +70,12 @@ export const formatMonthYear = (date: Date, dateFormat?: DateFormat): string => 
 /**
  * Format time according to user's time format preference
  */
-export const formatTime = (date: Date, timeFormat?: TimeFormat): string => {
+export const formatTime = (date: Date, timeFormat?: TimeFormat) => {
   const format12or24 = timeFormat ?? settingsStore.getState().timeFormat;
   return format(date, format12or24 === '12' ? DATE_FORMATS.time12 : DATE_FORMATS.time24);
 };
 
-export const formatDueDate = (
-  date: Date,
-  timeFormat?: TimeFormat,
-): {
-  text: string;
-  className: string;
-  borderColor: string;
-  bgColor: string;
-  textColor: string;
-} => {
+export const formatDueDate = (date: Date, timeFormat?: TimeFormat) => {
   const d = new Date(date);
   const now = new Date();
   const time = formatTime(d, timeFormat);
@@ -174,16 +165,7 @@ export const formatDueDate = (
 /**
  * Format start date for unstarted tasks
  */
-export const formatStartDate = (
-  date: Date,
-  timeFormat?: TimeFormat,
-): {
-  text: string;
-  className: string;
-  borderColor: string;
-  bgColor: string;
-  textColor: string;
-} => {
+export const formatStartDate = (date: Date, timeFormat?: TimeFormat) => {
   const d = new Date(date);
   const now = new Date();
   const colors = {

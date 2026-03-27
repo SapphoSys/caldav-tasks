@@ -22,7 +22,7 @@ export const closeAllContextMenus = () => {
 // custom event for closing context menus
 const CLOSE_CONTEXT_MENUS_EVENT = 'closeAllContextMenus';
 
-export const useGlobalContextMenuClose = (onClose: () => void, isOpen: boolean): void => {
+export const useGlobalContextMenuClose = (onClose: () => void, isOpen: boolean) => {
   useEffect(() => {
     if (!isOpen) return;
 

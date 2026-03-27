@@ -117,13 +117,13 @@ export const PREDEFINED_SERVER_URLS: Partial<Record<ServerType, string>> = {
 /**
  * Get description for a server type
  */
-export const getServerTypeDescription = (type: ServerType): string => {
+export const getServerTypeDescription = (type: ServerType) => {
   return SERVER_TYPE_OPTIONS.find((opt) => opt.value === type)?.description ?? '';
 };
 
 /**
  * Get predefined server URL for a server type
  */
-export const getPredefinedServerUrl = (type: ServerType): string | undefined => {
+export const getPredefinedServerUrl = (type: ServerType) => {
   return PREDEFINED_SERVER_URLS[type];
 };

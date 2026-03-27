@@ -31,9 +31,7 @@ export const exportSettingsToFile = async (
 /**
  * Import settings from a file
  */
-export const importSettingsFromFile = async (
-  onImport: (content: string) => boolean,
-): Promise<void> => {
+export const importSettingsFromFile = async (onImport: (content: string) => boolean) => {
   try {
     const path = await open({
       filters: [{ name: 'JSON', extensions: ['json'] }],

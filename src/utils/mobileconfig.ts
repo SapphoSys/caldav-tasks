@@ -105,7 +105,7 @@ export const parseAppleConfigProfile = (xmlContent: string): CalDAVConfig | null
     }
 
     // Helper to get value from plist dict
-    const getValue = (dict: Element, keyName: string): string | null => {
+    const getValue = (dict: Element, keyName: string) => {
       const keys = dict.querySelectorAll('key');
       for (const key of Array.from(keys)) {
         if (key.textContent === keyName) {
