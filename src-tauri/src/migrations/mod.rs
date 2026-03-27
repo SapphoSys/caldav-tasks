@@ -6,6 +6,13 @@ mod v005_add_show_unstarted;
 mod v006_remove_subtasks_column;
 mod v007_task_history;
 mod v008_task_status;
+mod v009_calendar_sort_order;
+mod v010_calendar_sort_config;
+mod v011_tag_sort_order;
+mod v012_tag_sort_config;
+mod v013_account_sort_order;
+mod v014_account_sort_config;
+mod v015_recurrence_fields;
 
 use tauri_plugin_sql::Migration;
 
@@ -17,6 +24,13 @@ pub use v005_add_show_unstarted::migration as migration_v005;
 pub use v006_remove_subtasks_column::migration as migration_v006;
 pub use v007_task_history::migration as migration_v007;
 pub use v008_task_status::migration as migration_v008;
+pub use v009_calendar_sort_order::migration as migration_v009;
+pub use v010_calendar_sort_config::migration as migration_v010;
+pub use v011_tag_sort_order::migration as migration_v011;
+pub use v012_tag_sort_config::migration as migration_v012;
+pub use v013_account_sort_order::migration as migration_v013;
+pub use v014_account_sort_config::migration as migration_v014;
+pub use v015_recurrence_fields::migration as migration_v015;
 
 /// Returns all database migrations for the application
 pub fn get_migrations() -> Vec<Migration> {
@@ -29,5 +43,12 @@ pub fn get_migrations() -> Vec<Migration> {
         migration_v006(),
         migration_v007(),
         migration_v008(),
+        migration_v009(),
+        migration_v010(),
+        migration_v011(),
+        migration_v012(),
+        migration_v013(),
+        migration_v014(),
+        migration_v015(),
     ]
 }
