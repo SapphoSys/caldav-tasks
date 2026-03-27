@@ -1,7 +1,10 @@
+import { getVersion } from '@tauri-apps/api/app';
 import { useCallback, useEffect, useState } from 'react';
 import { DragOverlay } from '$components/DragOverlay';
 import { Header } from '$components/Header';
 import { AccountModal } from '$components/modals/AccountModal';
+import { CalendarModal } from '$components/modals/CalendarModal';
+import { ChangelogModal } from '$components/modals/ChangelogModal';
 import { CreateCalendarModal } from '$components/modals/CreateCalendarModal';
 import { ExportModal } from '$components/modals/ExportModal';
 import { ImportModal } from '$components/modals/ImportModal';
@@ -18,6 +21,7 @@ import { useSyncQuery } from '$hooks/queries/useSync';
 import { useTasks } from '$hooks/queries/useTasks';
 import { useUIState } from '$hooks/queries/useUIState';
 import { useAppMenu } from '$hooks/useAppMenu';
+import { useChangelog } from '$hooks/useChangelog';
 import { useConfirmQuit } from '$hooks/useConfirmQuit';
 import { useFileDrop } from '$hooks/useFileDrop';
 import { useKeyboardShortcuts } from '$hooks/useKeyboardShortcuts';
@@ -27,11 +31,13 @@ import { useSettingsStore } from '$hooks/useSettingsStore';
 import { useTheme } from '$hooks/useTheme';
 import { useTray } from '$hooks/useTray';
 import { useUpdateChecker } from '$hooks/useUpdateChecker';
+import { getTasksByCalendar } from '$lib/store/tasks';
 import { MAX_EDITOR_WIDTH, MIN_EDITOR_WIDTH } from '$utils/constants';
 import type { CalDAVConfig } from '$utils/mobileconfig';
 
 const App = () => {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const { openChangelog, closeChangelog, changelogData } = useChangelog();
 
   const [preloadedFile, setPreloadedFile] = useState<{
     name: string;
@@ -39,9 +45,14 @@ const App = () => {
   } | null>(null);
   const [preloadedConfig, setPreloadedConfig] = useState<CalDAVConfig | null>(null);
 
-  const { isSyncing, syncingCalendarId, isOffline, lastSyncTime, syncAll } = useSyncQuery();
+  const { isSyncing, syncingCalendarId, isOffline, lastSyncTime, syncAll, syncCalendar } =
+    useSyncQuery();
+
+  // app update checker (hoisted above callbacks that reference updateAvailable)
+  const { updateAvailable, downloadAndInstall, dismissUpdate, isDownloading, downloadProgress } =
+    useUpdateChecker();
   const handleHeaderSync = useCallback(() => {
-    void syncAll({
+    syncAll({
       source: 'header-sync-button',
       reason: 'user clicked sync in header',
       where: 'App Header.onSync',
@@ -49,7 +60,7 @@ const App = () => {
   }, [syncAll]);
 
   const handleTraySync = useCallback(() => {
-    void syncAll({
+    syncAll({
       source: 'tray-sync',
       reason: 'user clicked sync from system tray',
       where: 'useTray tray-sync event',
@@ -57,20 +68,35 @@ const App = () => {
   }, [syncAll]);
 
   const handleKeyboardSync = useCallback(() => {
-    void syncAll({
+    syncAll({
       source: 'keyboard-shortcut',
       reason: 'user pressed keyboard shortcut for sync',
       where: 'useKeyboardShortcuts',
     });
   }, [syncAll]);
 
+  const handleMenuShowChangelog = useCallback(() => {
+    if (updateAvailable?.body) {
+      openChangelog(updateAvailable.version, updateAvailable.body);
+      return;
+    }
+    getVersion().then((version) => openChangelog(version));
+  }, [updateAvailable, openChangelog]);
+
   const handleMenuSync = useCallback(() => {
-    void syncAll({
+    syncAll({
       source: 'app-menu',
       reason: 'user selected Sync from app menu',
       where: 'useMenuEvents MENU_EVENTS.SYNC',
     });
   }, [syncAll]);
+
+  const handleMenuSyncCalendar = useCallback(
+    (calendarId: string) => {
+      syncCalendar(calendarId);
+    },
+    [syncCalendar],
+  );
 
   const { data: accounts = [] } = useAccounts();
   const {
@@ -119,15 +145,16 @@ const App = () => {
     onSyncRequest: handleTraySync,
   });
 
-  // app update checker
-  const { updateAvailable, downloadAndInstall, dismissUpdate, isDownloading, downloadProgress } =
-    useUpdateChecker();
-
   // app menu state synchronization
   useAppMenu(isSyncing || syncingCalendarId !== null);
 
   // menu handlers and modal state
-  const menuHandlers = useMenuHandlers(handleMenuSync);
+  const menuHandlers = useMenuHandlers(
+    handleMenuSync,
+    () => setShowUpdateModal(true),
+    handleMenuShowChangelog,
+    handleMenuSyncCalendar,
+  );
 
   // file drop handling via hook
   const {
@@ -163,7 +190,7 @@ const App = () => {
     onOpenKeyboardShortcuts: () => {
       menuHandlers.setSettingsInitialTab({
         category: 'app',
-        subtab: 'shortcuts',
+        subtab: 'keyboard-shortcuts',
       });
       menuHandlers.setShowSettings((prev: boolean) => !prev);
     },
@@ -275,10 +302,6 @@ const App = () => {
         onFileDrop={clearDragState}
       />
 
-      {menuHandlers.showExport && (
-        <ExportModal tasks={tasks} type="tasks" onClose={() => menuHandlers.setShowExport(false)} />
-      )}
-
       {menuHandlers.showAccountModal && (
         <AccountModal
           account={
@@ -295,18 +318,48 @@ const App = () => {
         />
       )}
 
-      {menuHandlers.showCreateCalendar && accounts.length > 0 && (
+      {menuHandlers.showCreateCalendar && menuHandlers.createCalendarAccountId && (
         <CreateCalendarModal
-          accountId={accounts[0].id}
+          accountId={menuHandlers.createCalendarAccountId}
           onClose={() => menuHandlers.setShowCreateCalendar(false)}
         />
       )}
 
-      {menuHandlers.showCreateCalendar &&
-        accounts.length === 0 &&
+      {menuHandlers.showCalendarModal &&
+        menuHandlers.editingCalendar &&
         (() => {
-          menuHandlers.setShowCreateCalendar(false);
-          return null;
+          const { calendarId, accountId } = menuHandlers.editingCalendar;
+          const account = accounts.find((a) => a.id === accountId);
+          const calendar = account?.calendars.find((c) => c.id === calendarId);
+          return calendar ? (
+            <CalendarModal
+              calendar={calendar}
+              accountId={accountId}
+              onClose={() => {
+                menuHandlers.setShowCalendarModal(false);
+                menuHandlers.setEditingCalendar(null);
+              }}
+            />
+          ) : null;
+        })()}
+
+      {menuHandlers.showExportModal &&
+        menuHandlers.exportCalendarId &&
+        (() => {
+          const calendarId = menuHandlers.exportCalendarId;
+          const calendar = accounts.flatMap((a) => a.calendars).find((c) => c.id === calendarId);
+          return (
+            <ExportModal
+              tasks={getTasksByCalendar(calendarId)}
+              type="single-calendar"
+              calendarName={calendar?.displayName}
+              fileName={calendar?.displayName.replace(/[^a-z0-9]/gi, '-').toLowerCase() ?? 'export'}
+              onClose={() => {
+                menuHandlers.setShowExportModal(false);
+                menuHandlers.setExportCalendarId(null);
+              }}
+            />
+          );
         })()}
 
       {menuHandlers.showTaskActions && menuHandlers.taskActionsId && (
@@ -326,6 +379,14 @@ const App = () => {
           onAddAccount={() => {
             menuHandlers.setShowAccountModal(true);
           }}
+        />
+      )}
+
+      {changelogData && (
+        <ChangelogModal
+          version={changelogData.version}
+          changelog={changelogData.body}
+          onClose={closeChangelog}
         />
       )}
 
