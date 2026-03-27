@@ -79,10 +79,13 @@ export const SubtaskTreeItem = ({
 
   const handleCommitEdit = () => {
     const trimmed = editValue.trim();
-    if (trimmed && trimmed !== task.title) {
+    if (!trimmed) {
+      setIsEditing(false);
+      confirmAndDelete(task.id);
+      return;
+    }
+    if (trimmed !== task.title) {
       updateTask(task.id, { title: trimmed });
-    } else if (!trimmed) {
-      setEditValue(task.title);
     }
     setIsEditing(false);
   };
@@ -112,8 +115,6 @@ export const SubtaskTreeItem = ({
         }`}
         style={{ paddingLeft: `${getPaddingLeft(depth)}px` }}
       >
-        {/* Chevron if has children; spacer if depth > 0 (preserves hierarchy indent);
-            nothing for root-level leaves (no unnecessary extra padding) */}
         {hasChildren ? (
           <button
             type="button"
@@ -129,7 +130,6 @@ export const SubtaskTreeItem = ({
           <div className="flex-shrink-0 w-4 h-4" aria-hidden="true" />
         ) : null}
 
-        {/* Checkbox */}
         <button
           type="button"
           onClick={() => {
@@ -153,7 +153,6 @@ export const SubtaskTreeItem = ({
           )}
         </button>
 
-        {/* Title — click to edit inline */}
         {isEditing ? (
           <input
             ref={inputRef}
@@ -162,7 +161,7 @@ export const SubtaskTreeItem = ({
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleEditKeyDown}
             onBlur={handleCommitEdit}
-            className="flex-1 text-sm bg-transparent outline-none text-surface-700 dark:text-surface-300 min-w-0"
+            className="flex-1 pl-0.5 text-sm bg-transparent outline-none text-surface-700 dark:text-surface-300 min-w-0"
           />
         ) : (
           <button
@@ -180,7 +179,6 @@ export const SubtaskTreeItem = ({
           </button>
         )}
 
-        {/* Delete */}
         {!isEditing && (
           <button
             type="button"
