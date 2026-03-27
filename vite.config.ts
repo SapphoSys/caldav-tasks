@@ -10,8 +10,9 @@ const namedChunks = {
   lucide: ['lucide-react'],
   markdown: ['marked'],
   react: ['react', 'react-dom'],
+  'rrule-temporal': ['rrule-temporal'],
   sonner: ['sonner'],
-  'tanstack-query': ['@tanstack/react-query'],
+  'tanstack-query': ['@tanstack/react-query', '@tanstack/query-core'],
   'tauri-core': ['@tauri-apps/cli', '@tauri-apps/api'],
 };
 
@@ -43,9 +44,9 @@ export default defineConfig({
   },
   envPrefix: ['VITE_', 'TAURI_'],
   build: {
-    minify: !process.env.TAURI_DEBUG ? 'esbuild' : false,
+    minify: !process.env.TAURI_DEBUG,
     sourcemap: !!process.env.TAURI_DEBUG,
-    rollupOptions: {
+    rolldownOptions: {
       output: {
         chunkFileNames: (chunk) =>
           [...Object.keys(namedChunks), 'tauri-plugins'].includes(chunk.name)
