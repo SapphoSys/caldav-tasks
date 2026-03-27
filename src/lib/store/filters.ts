@@ -48,7 +48,8 @@ export const getFilteredTasks = () => {
       // Check task itself
       if (
         task.title.toLowerCase().includes(query) ||
-        task.description.toLowerCase().includes(query)
+        task.description.toLowerCase().includes(query) ||
+        task.url?.toLowerCase().includes(query)
       ) {
         return true;
       }
