@@ -150,12 +150,18 @@ export const useCreateTask = () => {
     mutationFn: async (taskInput: Partial<Task>) => {
       const task = createTask(taskInput);
       await logTaskChange(task.uid, 'created', null, task.title);
+      if (task.parentUid) {
+        await logTaskChange(task.parentUid, 'subtask', null, task.title);
+      }
       return task;
     },
     onSuccess: (newTask) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       if (newTask?.uid) {
         queryClient.invalidateQueries({ queryKey: ['taskHistory', newTask.uid] });
+      }
+      if (newTask?.parentUid) {
+        queryClient.invalidateQueries({ queryKey: ['taskHistory', newTask.parentUid] });
       }
     },
   });
@@ -193,12 +199,19 @@ export const useDeleteTask = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, deleteChildren = true }: { id: string; deleteChildren?: boolean }) => {
+    mutationFn: async ({ id, deleteChildren = true }: { id: string; deleteChildren?: boolean }) => {
+      const task = getTaskById(id);
+      if (task?.parentUid) {
+        await logTaskChange(task.parentUid, 'subtask', task.title, null);
+      }
       deleteTask(id, deleteChildren);
-      return Promise.resolve();
+      return task;
     },
-    onSuccess: () => {
+    onSuccess: (deletedTask) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      if (deletedTask?.parentUid) {
+        queryClient.invalidateQueries({ queryKey: ['taskHistory', deletedTask.parentUid] });
+      }
     },
   });
 };
@@ -240,12 +253,27 @@ export const useSetTaskParent = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ taskId, parentUid }: { taskId: string; parentUid: string | undefined }) => {
+    mutationFn: async ({ taskId, parentUid }: { taskId: string; parentUid: string | undefined }) => {
+      const task = getTaskById(taskId);
+      if (task) {
+        if (task.parentUid) {
+          await logTaskChange(task.parentUid, 'subtask', task.title, null);
+        }
+        if (parentUid) {
+          await logTaskChange(parentUid, 'subtask', null, task.title);
+        }
+      }
       setTaskParent(taskId, parentUid);
-      return Promise.resolve();
+      return { oldParentUid: task?.parentUid, newParentUid: parentUid };
     },
-    onSuccess: () => {
+    onSuccess: ({ oldParentUid, newParentUid }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      if (oldParentUid) {
+        queryClient.invalidateQueries({ queryKey: ['taskHistory', oldParentUid] });
+      }
+      if (newParentUid) {
+        queryClient.invalidateQueries({ queryKey: ['taskHistory', newParentUid] });
+      }
     },
   });
 };
@@ -257,7 +285,7 @@ export const useReorderTasks = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       activeId,
       overId,
       flattenedItems,
@@ -268,11 +296,32 @@ export const useReorderTasks = () => {
       flattenedItems: FlattenedTask[];
       targetIndent?: number;
     }) => {
+      const taskBefore = getTaskById(activeId);
       reorderTasks(activeId, overId, flattenedItems, targetIndent);
-      return Promise.resolve();
+      const taskAfter = getTaskById(activeId);
+
+      const oldParentUid = taskBefore?.parentUid;
+      const newParentUid = taskAfter?.parentUid;
+
+      if (taskBefore && oldParentUid !== newParentUid) {
+        if (oldParentUid) {
+          await logTaskChange(oldParentUid, 'subtask', taskBefore.title, null);
+        }
+        if (newParentUid) {
+          await logTaskChange(newParentUid, 'subtask', null, taskBefore.title);
+        }
+      }
+
+      return { oldParentUid, newParentUid };
     },
-    onSuccess: () => {
+    onSuccess: ({ oldParentUid, newParentUid }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      if (oldParentUid) {
+        queryClient.invalidateQueries({ queryKey: ['taskHistory', oldParentUid] });
+      }
+      if (newParentUid) {
+        queryClient.invalidateQueries({ queryKey: ['taskHistory', newParentUid] });
+      }
     },
   });
 };

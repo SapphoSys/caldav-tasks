@@ -7,19 +7,32 @@ import { useEffect } from 'react';
 import { subscribeToDataChanges } from '$lib/store';
 import {
   getUIState,
+  setAccountSortConfig,
   setActiveAccount,
   setActiveCalendar,
   setActiveTag,
   setAllTasksView,
+  setCalendarSortConfig,
   setEditorOpen,
   setSearchQuery,
   setSelectedTask,
   setShowCompletedTasks,
   setShowUnstartedTasks,
   setSortConfig,
+  setTagSortConfig,
 } from '$lib/store/ui';
-import type { SortConfig } from '$types/index';
-import { DEFAULT_SORT_CONFIG } from '$utils/constants';
+import type {
+  AccountSortConfig,
+  CalendarSortConfig,
+  SortConfig,
+  TagSortConfig,
+} from '$types/index';
+import {
+  DEFAULT_ACCOUNT_SORT_CONFIG,
+  DEFAULT_CALENDAR_SORT_CONFIG,
+  DEFAULT_SORT_CONFIG,
+  DEFAULT_TAG_SORT_CONFIG,
+} from '$utils/constants';
 
 /**
  * Hook to get the full UI state
@@ -94,6 +107,39 @@ export const useSearchQuery = () => {
 export const useSortConfig = () => {
   const { data: uiState } = useUIState();
   return uiState?.sortConfig ?? DEFAULT_SORT_CONFIG;
+};
+
+/**
+ * Hook to get account sort config
+ */
+export const useAccountSortConfig = () => {
+  const { data: uiState } = useUIState();
+  return uiState?.accountSortConfig ?? DEFAULT_ACCOUNT_SORT_CONFIG;
+};
+
+/**
+ * Hook to set account sort config
+ */
+export const useSetAccountSortConfig = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (config: AccountSortConfig) => {
+      setAccountSortConfig(config);
+      return Promise.resolve();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['uiState'] });
+    },
+  });
+};
+
+/**
+ * Hook to get calendar sort config
+ */
+export const useCalendarSortConfig = () => {
+  const { data: uiState } = useUIState();
+  return uiState?.calendarSortConfig ?? DEFAULT_CALENDAR_SORT_CONFIG;
 };
 
 /**
@@ -236,6 +282,48 @@ export const useSetSortConfig = () => {
   return useMutation({
     mutationFn: (config: SortConfig) => {
       setSortConfig(config);
+      return Promise.resolve();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['uiState'] });
+    },
+  });
+};
+
+/**
+ * Hook to set calendar sort config
+ */
+export const useSetCalendarSortConfig = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (config: CalendarSortConfig) => {
+      setCalendarSortConfig(config);
+      return Promise.resolve();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['uiState'] });
+    },
+  });
+};
+
+/**
+ * Hook to get tag sort config
+ */
+export const useTagSortConfig = () => {
+  const { data: uiState } = useUIState();
+  return uiState?.tagSortConfig ?? DEFAULT_TAG_SORT_CONFIG;
+};
+
+/**
+ * Hook to set tag sort config
+ */
+export const useSetTagSortConfig = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (config: TagSortConfig) => {
+      setTagSortConfig(config);
       return Promise.resolve();
     },
     onSuccess: () => {

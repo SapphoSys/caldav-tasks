@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { queryKeys } from '$lib/queryClient';
 import { subscribeToDataChanges } from '$lib/store';
+import { reorderTags } from '$lib/store/reorderTags';
 import { createTag, deleteTag, getAllTags, getTagById, updateTag } from '$lib/store/tags';
 import { getTasksByTag } from '$lib/store/tasks';
 import type { Tag } from '$types/index';
@@ -102,6 +103,23 @@ export const useUpdateTag = () => {
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tags.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.tags.byId(id) });
+    },
+  });
+};
+
+/**
+ * Hook to reorder tags (manual sort mode)
+ */
+export const useReorderTags = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ activeId, overId }: { activeId: string; overId: string }) => {
+      reorderTags(activeId, overId);
+      return Promise.resolve();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.tags.all });
     },
   });
 };

@@ -13,7 +13,9 @@ import {
   getAllAccounts,
   updateAccount,
 } from '$lib/store/accounts';
-import { addCalendar } from '$lib/store/calendars';
+import { addCalendar, deleteCalendar } from '$lib/store/calendars';
+import { reorderAccounts } from '$lib/store/reorderAccounts';
+import { reorderCalendars } from '$lib/store/reorderCalendars';
 import type { Account, Calendar } from '$types/index';
 
 /**
@@ -104,6 +106,66 @@ export const useDeleteAccount = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+    },
+  });
+};
+
+/**
+ * Hook to delete a calendar from an account
+ */
+export const useDeleteCalendar = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ accountId, calendarId }: { accountId: string; calendarId: string }) => {
+      deleteCalendar(accountId, calendarId);
+      return Promise.resolve();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+    },
+  });
+};
+
+/**
+ * Hook to reorder accounts via drag-and-drop
+ */
+export const useReorderAccounts = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ activeId, overId }: { activeId: string; overId: string }) => {
+      reorderAccounts(activeId, overId);
+      return Promise.resolve();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
+    },
+  });
+};
+
+/**
+ * Hook to reorder calendars within an account via drag-and-drop
+ */
+export const useReorderCalendars = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      accountId,
+      activeId,
+      overId,
+    }: {
+      accountId: string;
+      activeId: string;
+      overId: string;
+    }) => {
+      reorderCalendars(accountId, activeId, overId);
+      return Promise.resolve();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
     },
   });
 };
