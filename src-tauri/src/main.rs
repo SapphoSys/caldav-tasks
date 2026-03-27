@@ -6,6 +6,7 @@
 mod app_nap;
 mod data_migration;
 mod logging;
+mod macos_menu;
 mod migrations;
 mod notification_manager;
 mod notifications;
@@ -14,8 +15,17 @@ mod tray;
 mod window_decorations;
 mod window_events;
 
-use tauri::{Manager, RunEvent};
+use tauri::{Emitter, Manager, RunEvent};
 use tauri_plugin_sql::Builder;
+
+/// Exits the process directly via the OS, bypassing Tauri's RunEvent::ExitRequested.
+/// Must be used instead of tauri-plugin-process's exit(), which calls AppHandle::exit()
+/// and re-triggers ExitRequested, causing an infinite prevent/exit loop.
+
+#[tauri::command]
+fn force_quit() {
+    std::process::exit(0);
+}
 
 #[cfg_attr(feature = "cef", tauri::cef_entry_point)]
 fn main() {
@@ -23,13 +33,6 @@ fn main() {
     #[cfg(feature = "cef")]
     {
         let _ = rustls::crypto::aws_lc_rs::default_provider().install_default();
-    }
-
-    // Disable App Nap on macOS to ensure periodic sync and notifications work
-    // when the window is hidden in tray mode
-    #[cfg(target_os = "macos")]
-    {
-        app_nap::disable_app_nap();
     }
 
     let db_migrations = migrations::get_migrations();
@@ -74,9 +77,18 @@ fn main() {
             plist_utils::read_file_bytes,
             notifications::check_notification_permission,
             notifications::request_notification_permission,
-            notification_manager::send_notification_with_actions
+            notification_manager::send_notification_with_actions,
+            macos_menu::apply_macos_menu_fixes,
+            force_quit
         ])
         .setup(|_app| {
+            // Disable App Nap after logging has been initialized so App Nap
+            // messages follow the same format as the rest of the app logs.
+            #[cfg(target_os = "macos")]
+            {
+                app_nap::disable_app_nap();
+            }
+
             // Migrate data from old caldav-tasks app
             data_migration::migrate_from_caldav_tasks(_app);
 
@@ -90,7 +102,8 @@ fn main() {
             #[cfg(target_os = "macos")]
             {
                 let bundle_id = _app.config().identifier.clone();
-                let notification_manager = notification_manager::NotificationManagerState::new(bundle_id);
+                let notification_manager =
+                    notification_manager::NotificationManagerState::new(bundle_id);
                 notification_manager.register_categories_and_handler(_app.handle().clone());
                 _app.manage(notification_manager);
             }
@@ -104,10 +117,19 @@ fn main() {
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
         .run(|app_handle, event| {
-            // handle app reactivation (e.g., from Spotlight, Dock, Cmd+Tab)
-            #[cfg(target_os = "macos")]
-            {
-                if let RunEvent::Reopen { .. } = event {
+            match event {
+                // Intercept all quit requests (Cmd+Q, Dock quit, window close) so the
+                // frontend can apply double-press confirmation when enabled. The frontend
+                // calls exit(0) via tauri-plugin-process, which bypasses this handler.
+                #[cfg(target_os = "macos")]
+                RunEvent::ExitRequested { api, .. } => {
+                    api.prevent_exit();
+                    let _ = app_handle.emit("app:quit-requested", ());
+                }
+
+                // handle app reactivation (e.g., from Spotlight, Dock, Cmd+Tab)
+                #[cfg(target_os = "macos")]
+                RunEvent::Reopen { .. } => {
                     if let Some(window) = app_handle.get_webview_window("main") {
                         let _ = window.show();
                         let _ = window.set_focus();
@@ -116,6 +138,8 @@ fn main() {
                         let _ = app_handle.set_activation_policy(tauri::ActivationPolicy::Regular);
                     }
                 }
+
+                _ => {}
             }
         });
 }
