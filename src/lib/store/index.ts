@@ -5,7 +5,12 @@
 import * as db from '$lib/database';
 import { loggers } from '$lib/logger';
 import type { DataChangeListener, DataStore, UIState } from '$lib/store/types';
-import { DEFAULT_SORT_CONFIG } from '$utils/constants';
+import {
+  DEFAULT_ACCOUNT_SORT_CONFIG,
+  DEFAULT_CALENDAR_SORT_CONFIG,
+  DEFAULT_SORT_CONFIG,
+  DEFAULT_TAG_SORT_CONFIG,
+} from '$utils/constants';
 
 const log = loggers.dataStore;
 
@@ -17,6 +22,9 @@ export const defaultUIState: UIState = {
   selectedTaskId: null,
   searchQuery: '',
   sortConfig: DEFAULT_SORT_CONFIG,
+  accountSortConfig: DEFAULT_ACCOUNT_SORT_CONFIG,
+  calendarSortConfig: DEFAULT_CALENDAR_SORT_CONFIG,
+  tagSortConfig: DEFAULT_TAG_SORT_CONFIG,
   showCompletedTasks: true,
   showUnstartedTasks: true,
   isEditorOpen: false,

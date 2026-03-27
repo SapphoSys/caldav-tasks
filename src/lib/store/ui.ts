@@ -5,12 +5,16 @@
 import * as db from '$lib/database';
 import { loggers } from '$lib/logger';
 import { loadDataStore, saveDataStore } from '$lib/store';
-import type { UIState } from '$lib/store/types';
-import type { SortConfig } from '$types/index';
+import type {
+  AccountSortConfig,
+  CalendarSortConfig,
+  SortConfig,
+  TagSortConfig,
+} from '$types/index';
 
 const log = loggers.dataStore;
 
-export const getUIState = (): UIState => {
+export const getUIState = () => {
   return loadDataStore().ui;
 };
 
@@ -171,6 +175,46 @@ export const setSortConfig = (config: SortConfig) => {
   saveDataStore({
     ...data,
     ui: { ...data.ui, sortConfig: config },
+  });
+};
+
+export const setAccountSortConfig = (config: AccountSortConfig) => {
+  const data = loadDataStore();
+
+  // Persist to SQLite
+  db.setAccountSortConfig(config).catch((e) =>
+    log.error('Failed to persist account sort config:', e),
+  );
+
+  saveDataStore({
+    ...data,
+    ui: { ...data.ui, accountSortConfig: config },
+  });
+};
+
+export const setCalendarSortConfig = (config: CalendarSortConfig) => {
+  const data = loadDataStore();
+
+  // Persist to SQLite
+  db.setCalendarSortConfig(config).catch((e) =>
+    log.error('Failed to persist calendar sort config:', e),
+  );
+
+  saveDataStore({
+    ...data,
+    ui: { ...data.ui, calendarSortConfig: config },
+  });
+};
+
+export const setTagSortConfig = (config: TagSortConfig) => {
+  const data = loadDataStore();
+
+  // Persist to SQLite
+  db.setTagSortConfig(config).catch((e) => log.error('Failed to persist tag sort config:', e));
+
+  saveDataStore({
+    ...data,
+    ui: { ...data.ui, tagSortConfig: config },
   });
 };
 

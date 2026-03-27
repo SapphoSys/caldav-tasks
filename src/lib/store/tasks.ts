@@ -2,21 +2,24 @@
  * Task operations - CRUD and manipulation
  */
 
-import { addDays, setHours, startOfDay, subDays, subHours, subMinutes } from 'date-fns';
+import { addDays, format, setHours, startOfDay, subDays, subHours, subMinutes } from 'date-fns';
 import { settingsStore } from '$context/settingsContext';
+import { toastManager } from '$hooks/useToast';
 import * as db from '$lib/database';
 import { loggers } from '$lib/logger';
 import { getIsInitialized, loadDataStore, saveDataStore } from '$lib/store';
 import type { DefaultDateOffset, DefaultReminderOffset, Reminder, Task } from '$types/index';
 import { toAppleEpoch } from '$utils/ical';
 import { generateUUID } from '$utils/misc';
+import { getNextOccurrence, parseRRule } from '$utils/recurrence';
 
 const resolveReminderOffsets = (
   offsets: DefaultReminderOffset[],
   due: { date: Date; allDay: boolean },
 ): Reminder[] => {
   // Base time: 9am on the due date for all-day, or the exact due datetime otherwise
-  const base = due.allDay ? setHours(startOfDay(due.date), 9) : due.date;
+  const allDayHour = settingsStore.getState().defaultAllDayReminderHour ?? 9;
+  const base = due.allDay ? setHours(startOfDay(due.date), allDayHour) : due.date;
   return offsets.map((offset) => {
     let trigger: Date;
     if (offset === 'at-due') trigger = base;
@@ -25,9 +28,11 @@ const resolveReminderOffsets = (
     else if (offset === '30min-before-due') trigger = subMinutes(base, 30);
     else if (offset === '1hr-before-due') trigger = subHours(base, 1);
     else if (offset === '2hr-before-due') trigger = subHours(base, 2);
-    else if (offset === '1day-before-due') trigger = setHours(subDays(startOfDay(due.date), 1), 9);
-    else if (offset === '2days-before-due') trigger = setHours(subDays(startOfDay(due.date), 2), 9);
-    else trigger = setHours(subDays(startOfDay(due.date), 7), 9); // '1week-before-due'
+    else if (offset === '1day-before-due')
+      trigger = setHours(subDays(startOfDay(due.date), 1), allDayHour);
+    else if (offset === '2days-before-due')
+      trigger = setHours(subDays(startOfDay(due.date), 2), allDayHour);
+    else trigger = setHours(subDays(startOfDay(due.date), 7), allDayHour); // '1week-before-due'
     return { id: generateUUID(), trigger };
   });
 };
@@ -79,7 +84,7 @@ export const getChildTasks = (parentUid: string) => {
   return loadDataStore().tasks.filter((t) => t.parentUid === parentUid);
 };
 
-export const countChildren = (parentUid: string): number => {
+export const countChildren = (parentUid: string) => {
   return loadDataStore().tasks.filter((t) => t.parentUid === parentUid).length;
 };
 
@@ -302,6 +307,75 @@ export const toggleTaskComplete = (id: string) => {
   const task = data.tasks.find((t) => t.id === id);
   if (!task) return;
 
+  const isCompleting = task.status !== 'completed';
+
+  if (isCompleting && task.rrule) {
+    const rruleParts = parseRRule(task.rrule);
+    const count = rruleParts.COUNT ? parseInt(rruleParts.COUNT, 10) : undefined;
+
+    // If COUNT=1 this is the last instance — fall through to normal completion.
+    if (count !== 1) {
+      const now = new Date();
+
+      // Base date for "next occurrence" depends on repeatFrom setting:
+      // 0 (default) = advance from original due date; 1 = advance from today.
+      const baseDate = task.repeatFrom === 1 ? now : task.dueDate ? new Date(task.dueDate) : now;
+
+      const next = getNextOccurrence(
+        task.rrule,
+        baseDate,
+        task.dueDate ? new Date(task.dueDate) : undefined,
+      );
+
+      if (next) {
+        // Build an updated RRULE with COUNT decremented if applicable
+        let updatedRrule = task.rrule;
+        if (count !== undefined && count > 1) {
+          updatedRrule = task.rrule.replace(/COUNT=\d+/, `COUNT=${count - 1}`);
+        }
+
+        const dueDelta = next.getTime() - new Date(task.dueDate ?? next).getTime();
+
+        const advances: Partial<Task> = {
+          dueDate: next,
+          // Preserve all-day flag
+          dueDateAllDay: task.dueDateAllDay,
+          // Advance startDate by the same delta if present
+          startDate: task.startDate
+            ? new Date(new Date(task.startDate).getTime() + dueDelta)
+            : undefined,
+          // Shift reminder triggers by the same delta so they stay relative to the new due date
+          reminders:
+            task.reminders && task.reminders.length > 0
+              ? task.reminders.map((r) => ({
+                  ...r,
+                  trigger: new Date(new Date(r.trigger).getTime() + dueDelta),
+                }))
+              : task.reminders,
+          status: 'needs-action',
+          completed: false,
+          completedAt: undefined,
+          percentComplete: 0,
+          rrule: updatedRrule,
+          modifiedAt: now,
+          synced: false,
+        };
+
+        db.updateTask(id, advances).catch((e) =>
+          log.error('Failed to persist recurring task advance:', e),
+        );
+        const tasks = data.tasks.map((t) => (t.id === id ? { ...t, ...advances } : t));
+        saveDataStore({ ...data, tasks });
+
+        const dateStr = task.dueDateAllDay
+          ? format(next, 'MMM d, yyyy')
+          : format(next, "MMM d, yyyy 'at' h:mm a");
+        toastManager.success('Task rescheduled', dateStr);
+        return;
+      }
+    }
+  }
+
   const newStatus =
     task.status === 'completed'
       ? 'needs-action'
@@ -441,9 +515,7 @@ export const setTaskParent = (taskId: string, parentUid: string | undefined) => 
 };
 
 // Export helpers
-export const exportTaskAndChildren = (
-  taskId: string,
-): { task: Task; descendants: Task[] } | null => {
+export const exportTaskAndChildren = (taskId: string) => {
   const data = loadDataStore();
   const task = data.tasks.find((t) => t.id === taskId);
   if (!task) return null;

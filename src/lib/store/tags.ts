@@ -22,12 +22,15 @@ export const getTagById = (id: string) => {
 export const createTag = (tagData: Partial<Tag>) => {
   const data = loadDataStore();
 
+  const maxExistingOrder = data.tags.reduce((max, t) => Math.max(max, t.sortOrder), 0);
+
   const tag: Tag = {
     id: generateUUID(),
     name: tagData.name ?? 'New Tag',
     color: tagData.color ?? FALLBACK_ITEM_COLOR,
     icon: tagData.icon,
     emoji: tagData.emoji,
+    sortOrder: tagData.sortOrder || maxExistingOrder + 100,
   } satisfies Tag;
 
   // Persist to SQLite
@@ -37,29 +40,57 @@ export const createTag = (tagData: Partial<Tag>) => {
   return tag;
 };
 
-export const updateTag = (id: string, updates: Partial<Tag>) => {
-  const data = loadDataStore();
-  let updatedTag: Tag | undefined;
+interface UpdateTagOptions {
+  markTaskSyncDirty?: boolean;
+}
 
-  const tags = data.tags.map((tag) => {
-    if (tag.id === id) {
-      updatedTag = { ...tag, ...updates } satisfies Tag;
-      return updatedTag;
-    }
-    return tag;
-  });
+export const updateTag = (id: string, updates: Partial<Tag>, options: UpdateTagOptions = {}) => {
+  const data = loadDataStore();
+  const currentTag = data.tags.find((tag) => tag.id === id);
+  if (!currentTag) return undefined;
+
+  const updatedTag = { ...currentTag, ...updates } satisfies Tag;
+
+  const tags = data.tags.map((tag) => (tag.id === id ? updatedTag : tag));
+
+  const shouldMarkTaskSyncDirty =
+    options.markTaskSyncDirty !== false &&
+    updates.color !== undefined &&
+    updates.color !== currentTag.color;
+
+  const now = new Date();
+  const tasksToPersist: typeof data.tasks = [];
+
+  const tasks = shouldMarkTaskSyncDirty
+    ? data.tasks.map((task) => {
+        if (!(task.tags ?? []).includes(id)) return task;
+
+        const updatedTask = {
+          ...task,
+          modifiedAt: now,
+          synced: false,
+        };
+        tasksToPersist.push(updatedTask);
+        return updatedTask;
+      })
+    : data.tasks;
 
   // Persist to SQLite
-  if (updatedTag) {
-    db.updateTag(id, updates).catch((e) => log.error('Failed to persist tag update:', e));
+  db.updateTag(id, updates).catch((e) => log.error('Failed to persist tag update:', e));
+
+  if (tasksToPersist.length > 0) {
+    for (const task of tasksToPersist) {
+      db.updateTask(task.id, task).catch((e) => log.error('Failed to persist task update:', e));
+    }
   }
 
-  saveDataStore({ ...data, tags });
+  saveDataStore({ ...data, tags, tasks });
   return updatedTag;
 };
 
 export const deleteTag = (id: string) => {
   const data = loadDataStore();
+  const now = new Date();
 
   // Persist to SQLite
   db.deleteTag(id).catch((e) => log.error('Failed to persist tag deletion:', e));
@@ -67,10 +98,18 @@ export const deleteTag = (id: string) => {
   saveDataStore({
     ...data,
     tags: data.tags.filter((tag) => tag.id !== id),
-    tasks: data.tasks.map((task) => ({
-      ...task,
-      tags: (task.tags ?? []).filter((t) => t !== id),
-    })),
+    tasks: data.tasks.map((task) => {
+      if (!(task.tags ?? []).includes(id)) {
+        return task;
+      }
+
+      return {
+        ...task,
+        tags: (task.tags ?? []).filter((t) => t !== id),
+        modifiedAt: now,
+        synced: false,
+      };
+    }),
     ui: {
       ...data.ui,
       activeTagId: data.ui.activeTagId === id ? null : data.ui.activeTagId,

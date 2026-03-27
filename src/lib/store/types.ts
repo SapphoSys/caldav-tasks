@@ -1,4 +1,12 @@
-import type { Account, SortConfig, Tag, Task } from '$types/index';
+import type {
+  Account,
+  AccountSortConfig,
+  CalendarSortConfig,
+  SortConfig,
+  Tag,
+  TagSortConfig,
+  Task,
+} from '$types/index';
 
 // Pending deletion interface
 export interface PendingDeletion {
@@ -16,6 +24,9 @@ export interface UIState {
   selectedTaskId: string | null;
   searchQuery: string;
   sortConfig: SortConfig;
+  accountSortConfig: AccountSortConfig;
+  calendarSortConfig: CalendarSortConfig;
+  tagSortConfig: TagSortConfig;
   showCompletedTasks: boolean;
   showUnstartedTasks: boolean;
   isEditorOpen: boolean;

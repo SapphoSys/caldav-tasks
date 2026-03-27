@@ -13,12 +13,18 @@ const log = loggers.dataStore;
 export const addCalendar = (accountId: string, calendarData: Partial<Calendar>) => {
   const data = loadDataStore();
 
+  // Compute sortOrder: use provided value, or place after all existing calendars in this account
+  const existingCalendars = data.accounts.find((a) => a.id === accountId)?.calendars ?? [];
+  const maxExistingOrder = existingCalendars.reduce((max, c) => Math.max(max, c.sortOrder), 0);
+  const sortOrder = calendarData.sortOrder || maxExistingOrder + 100;
+
   const calendar: Calendar = {
     ...calendarData,
     id: calendarData.id ?? generateUUID(),
     displayName: calendarData.displayName ?? 'Tasks',
     url: calendarData.url ?? '',
     accountId,
+    sortOrder,
   } satisfies Calendar;
 
   log.info(`Adding calendar: ${calendar.displayName} with ID: ${calendar.id}`);

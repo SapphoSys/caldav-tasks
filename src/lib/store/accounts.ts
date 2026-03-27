@@ -28,12 +28,13 @@ export const createAccount = (accountData: Partial<Account>) => {
   const username = accountData.username ?? '';
   const duplicate = data.accounts.find(
     (a) =>
-      a.serverUrl.replace(/\/$/, '') === serverUrl.replace(/\/$/, '') &&
-      a.username === username,
+      a.serverUrl.replace(/\/$/, '') === serverUrl.replace(/\/$/, '') && a.username === username,
   );
   if (duplicate) {
     throw new Error(`An account with the same credentials already exists: ${duplicate.name}.`);
   }
+
+  const maxExistingOrder = data.accounts.reduce((max, a) => Math.max(max, a.sortOrder), 0);
 
   const account: Account = {
     id: accountData.id ?? generateUUID(),
@@ -44,6 +45,7 @@ export const createAccount = (accountData: Partial<Account>) => {
     serverType: accountData.serverType,
     calendars: [],
     isActive: true,
+    sortOrder: accountData.sortOrder || maxExistingOrder + 100,
   } satisfies Account;
 
   // Persist to SQLite
