@@ -3,7 +3,16 @@
     "enableGTKAppId": true,
     "windows": [
       {
-        "dragDropEnabled": true
+        "fullscreen": false,
+        "resizable": true,
+        "title": "Chiri",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
+        "dragDropEnabled": false,
+        "backgroundColor": "#18181B",
+        "visible": false
       }
     ]
   },
