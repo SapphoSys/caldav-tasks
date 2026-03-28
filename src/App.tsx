@@ -265,7 +265,7 @@ const App = () => {
 
           {isEditorOpen && selectedTask && (
             <div
-              className="relative hidden lg:block flex-shrink-0 border-l border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 overflow-hidden"
+              className="relative flex-1 lg:flex-none lg:border-l border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 overflow-hidden"
               style={{ width: taskEditorWidth }}
             >
               {/* biome-ignore lint/a11y/noStaticElementInteractions: Resize handle requires mouse events for drag functionality */}
