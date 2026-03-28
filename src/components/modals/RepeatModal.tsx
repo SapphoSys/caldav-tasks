@@ -135,13 +135,13 @@ const buildFromUIState = (state: RepeatUIState) => {
 };
 
 const inputCls =
-  'h-8 px-3 py-2 text-sm bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-lg ' +
+  'h-9 px-3 py-2 text-sm bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-lg ' +
   'focus:outline-none focus:border-primary-300 dark:focus:border-primary-400 ' +
   'focus:bg-white dark:focus:bg-primary-900/30 transition-colors ' +
   'text-surface-800 dark:text-surface-200';
 
 const selectCls =
-  'h-8 text-sm border border-surface-200 dark:border-surface-600 bg-surface-100 dark:bg-surface-700 ' +
+  'h-9 text-sm border border-surface-200 dark:border-surface-600 bg-surface-100 dark:bg-surface-700 ' +
   'text-surface-800 dark:text-surface-200 rounded-lg focus:outline-none ' +
   'focus:border-primary-300 dark:focus:border-primary-400 ' +
   'focus:bg-white dark:focus:bg-primary-900/30 transition-colors';
@@ -203,6 +203,7 @@ export const RepeatModal = ({
   };
 
   const isRecurring = ui.freq !== 'none';
+  const isDoneDisabled = ui.endMode === 'until' && !ui.until;
 
   const periodLabels = PRESET_PERIOD_LABEL[ui.freq];
   const periodLabel = periodLabels
@@ -216,10 +217,21 @@ export const RepeatModal = ({
   const showInterval = isRecurring && ui.freq !== 'weekdays';
 
   // Reorder weekdays to respect the user's week start preference
-  const orderedWeekdays =
-    startOfWeek === 'sunday'
-      ? [...WEEKDAY_OPTIONS.slice(-1), ...WEEKDAY_OPTIONS.slice(0, -1)] // SU first
-      : WEEKDAY_OPTIONS; // MO first (default)
+  // WEEKDAY_OPTIONS is MO-first (index 0=MO, ..., 6=SU)
+  const WEEK_START_TO_RRULE_IDX: Record<string, number> = {
+    monday: 0,
+    tuesday: 1,
+    wednesday: 2,
+    thursday: 3,
+    friday: 4,
+    saturday: 5,
+    sunday: 6,
+  };
+  const weekdayStartIdx = WEEK_START_TO_RRULE_IDX[startOfWeek] ?? 0;
+  const orderedWeekdays = [
+    ...WEEKDAY_OPTIONS.slice(weekdayStartIdx),
+    ...WEEKDAY_OPTIONS.slice(0, weekdayStartIdx),
+  ];
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: Modal backdrop does not require keyboard handler; ESC key closes modal via useModalEscapeKey hook
@@ -389,7 +401,7 @@ export const RepeatModal = ({
                     <button
                       type="button"
                       onClick={() => setShowUntilPicker(true)}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left bg-surface-100 dark:bg-surface-700 border border-transparent rounded-lg hover:border-surface-300 dark:hover:border-surface-500 focus:outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors"
+                      className="w-full flex items-center gap-2 h-9 px-3 py-2 text-sm text-left bg-surface-100 dark:bg-surface-700 border border-transparent rounded-lg hover:border-surface-300 dark:hover:border-surface-500 focus:outline-none focus:border-primary-300 dark:focus:border-primary-400 focus:bg-white dark:focus:bg-primary-900/30 transition-colors"
                     >
                       {untilDate ? (
                         <Calendar className="w-4 h-4 text-surface-400 flex-shrink-0" />
@@ -444,7 +456,8 @@ export const RepeatModal = ({
           <button
             type="button"
             onClick={handleDone}
-            className="px-4 py-2 text-sm font-medium text-primary-contrast bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-inset"
+            disabled={isDoneDisabled}
+            className="px-4 py-2 text-sm font-medium text-primary-contrast bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-inset disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-primary-600"
           >
             Done
           </button>
