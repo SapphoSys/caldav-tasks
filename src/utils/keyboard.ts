@@ -17,6 +17,15 @@ export const getModifierJoiner = () => {
   return isMacPlatform() ? '' : '+';
 };
 
+const KEY_DISPLAY_NAMES: Record<string, string> = {
+  ' ': 'Space',
+  ArrowUp: '↑',
+  ArrowDown: '↓',
+  ArrowLeft: '←',
+  ArrowRight: '→',
+  Escape: 'Esc',
+};
+
 export const formatShortcut = (shortcut: KeyboardShortcut | Partial<KeyboardShortcut>) => {
   const parts: string[] = [];
   if (shortcut.meta) parts.push(getMetaKeyLabel());
@@ -25,11 +34,8 @@ export const formatShortcut = (shortcut: KeyboardShortcut | Partial<KeyboardShor
   if (shortcut.alt) parts.push(getAltKeyLabel());
   if (shortcut.key) {
     const keyDisplay =
-      shortcut.key === ' '
-        ? 'Space'
-        : shortcut.key.length === 1
-          ? shortcut.key.toUpperCase()
-          : shortcut.key;
+      KEY_DISPLAY_NAMES[shortcut.key] ??
+      (shortcut.key.length === 1 ? shortcut.key.toUpperCase() : shortcut.key);
     parts.push(keyDisplay);
   }
   return parts.join(' + ') ?? 'Press keys...';

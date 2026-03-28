@@ -110,14 +110,14 @@ export const ShortcutsSettings = ({
                           {formatShortcut(shortcut)
                             .split(' + ')
                             .map((key, keyIndex, arr) => (
-                              <span key={`${key}-${shortcut.id}`} className="flex items-center">
-                                <kbd className="px-2 py-1 bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded text-xs font-mono text-surface-700 dark:text-surface-300">
+                              <>
+                                <kbd key={`kbd-${key}-${shortcut.id}`} className="inline-flex items-center px-2 py-1 bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded text-xs font-mono leading-none text-surface-700 dark:text-surface-300">
                                   {key}
                                 </kbd>
                                 {keyIndex < arr.length - 1 && !isMacPlatform() && (
-                                  <span className="text-surface-400 mx-1.5">+</span>
+                                  <span key={`sep-${keyIndex}-${shortcut.id}`} className="text-xs text-surface-400">+</span>
                                 )}
-                              </span>
+                              </>
                             ))}
                         </div>
                         <button
