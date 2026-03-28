@@ -26,7 +26,7 @@ import { DataSettings } from '$components/settings/DataSettings';
 import { EditorSettings } from '$components/settings/EditorSettings';
 import { LookAndFeelSettings } from '$components/settings/LookAndFeelSettings';
 import { NotificationSettings } from '$components/settings/NotificationSettings';
-import { RegionSettings } from '$components/settings/RegionSettings';
+import { RegionAndTimeSettings } from '$components/settings/RegionAndTimeSettings';
 import { ShortcutsSettings } from '$components/settings/ShortcutsSettings';
 import { SyncSettings } from '$components/settings/SyncSettings';
 import { SystemSettings } from '$components/settings/SystemSettings';
@@ -88,7 +88,7 @@ export const SettingsModal = ({ onClose, initialCategory, initialSubtab }: Setti
         },
         { id: 'look-and-feel', label: 'Look & feel', icon: <Palette className="w-4 h-4" /> },
         { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
-        { id: 'region', label: 'Region', icon: <Globe className="w-4 h-4" /> },
+        { id: 'region-and-time', label: 'Region & time', icon: <Globe className="w-4 h-4" /> },
         { id: 'system', label: 'System', icon: <Cpu className="w-4 h-4" /> },
       ],
     },
@@ -207,7 +207,7 @@ export const SettingsModal = ({ onClose, initialCategory, initialSubtab }: Setti
                 )}
                 {currentSubtab === 'look-and-feel' && <LookAndFeelSettings />}
                 {currentSubtab === 'notifications' && <NotificationSettings />}
-                {currentSubtab === 'region' && <RegionSettings />}
+                {currentSubtab === 'region-and-time' && <RegionAndTimeSettings />}
                 {currentSubtab === 'system' && <SystemSettings />}
               </>
             )}

@@ -181,7 +181,7 @@ export type SettingsSubtab =
   | 'badges'
   | 'look-and-feel'
   | 'notifications'
-  | 'region'
+  | 'region-and-time'
   | 'keyboard-shortcuts'
   | 'system'
   | 'connections'
