@@ -1,4 +1,5 @@
 import RefreshCw from 'lucide-react/icons/refresh-cw';
+import { useSettingsStore } from '$hooks/useSettingsStore';
 import type { Task } from '$types/index';
 import { rruleToText } from '$utils/recurrence';
 
@@ -8,7 +9,8 @@ interface TaskEditorRepeatProps {
 }
 
 export const TaskEditorRepeat = ({ task, onOpen }: TaskEditorRepeatProps) => {
-  const summary = task.rrule ? rruleToText(task.rrule) : null;
+  const { dateFormat } = useSettingsStore();
+  const summary = task.rrule ? rruleToText(task.rrule, task.repeatFrom, dateFormat) : null;
 
   return (
     <div>

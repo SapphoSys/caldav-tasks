@@ -6,6 +6,8 @@
  */
 
 import { RRuleTemporal } from 'rrule-temporal';
+import type { DateFormat } from '$types/index';
+import { formatDate } from '$utils/date';
 
 /** Format a JS Date as a UTC iCal datetime string (YYYYMMDDTHHMMSSZ). */
 const toICalUTC = (date: Date) => {
@@ -113,8 +115,11 @@ export const buildRRule = (parts: Record<string, string>) => {
 /**
  * Return a short human-readable summary of a RRULE value string.
  * e.g. "FREQ=WEEKLY;BYDAY=MO,WE,FR" → "Weekly on Mon, Wed, Fri"
+ *
+ * @param repeatFrom  0 = advance from due date (default), 1 = advance from completion date
+ * @param dateFormat  User's preferred date format for the UNTIL date display
  */
-export const rruleToText = (rruleValue: string) => {
+export const rruleToText = (rruleValue: string, repeatFrom?: number, dateFormat?: DateFormat) => {
   try {
     const parts = parseRRule(rruleValue);
     const freq = parts.FREQ ?? '';
@@ -173,10 +178,17 @@ export const rruleToText = (rruleValue: string) => {
       label += `, ${count} ${count === 1 ? 'time' : 'times'}`;
     } else if (until) {
       // UNTIL format: YYYYMMDD or YYYYMMDDTHHMMSSZ
-      const y = until.slice(0, 4);
-      const m = until.slice(4, 6);
-      const d = until.slice(6, 8);
-      label += ` until ${y}-${m}-${d}`;
+      const y = parseInt(until.slice(0, 4), 10);
+      const m = parseInt(until.slice(4, 6), 10) - 1;
+      const d = parseInt(until.slice(6, 8), 10);
+      const untilDate = new Date(y, m, d);
+      label += ` until ${formatDate(untilDate, true, dateFormat)}`;
+    }
+
+    if (repeatFrom === 1) {
+      label += ' · from completion';
+    } else if (repeatFrom === 0) {
+      label += ' · from due date';
     }
 
     return label;
