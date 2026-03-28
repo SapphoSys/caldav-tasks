@@ -535,7 +535,6 @@ export const SidebarAccountsList = ({
 
   return (
     <div>
-      {/* Relative wrapper so the dropdown positions against the full header width */}
       <div className="relative">
         {/* biome-ignore lint/a11y/useSemanticElements: Section header toggle div contains icon+text layout that button element can't replicate */}
         <div
