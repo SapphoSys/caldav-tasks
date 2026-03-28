@@ -47,6 +47,13 @@ export interface TaskBadgeVisibility {
   subtasks: boolean;
 }
 
+export interface QuickTimePresets {
+  morning: number;
+  afternoon: number;
+  evening: number;
+  night: number;
+}
+
 interface SettingsState {
   theme: Theme;
   accentColor: AccentColor;
@@ -104,6 +111,8 @@ interface SettingsState {
   editorFieldVisibility: EditorFieldVisibility;
   // Badges
   taskBadgeVisibility: TaskBadgeVisibility;
+  // Date picker
+  quickTimePresets: QuickTimePresets;
 }
 
 interface SettingsActions {
@@ -164,6 +173,7 @@ interface SettingsActions {
   setQuietHoursEnd: (hour: number) => void;
   setEditorFieldVisibility: (visibility: EditorFieldVisibility) => void;
   setTaskBadgeVisibility: (visibility: TaskBadgeVisibility) => void;
+  setQuickTimePresets: (presets: QuickTimePresets) => void;
   exportSettings: () => string;
   importSettings: (json: string) => boolean;
   resetSettings: () => void;
@@ -244,6 +254,8 @@ const defaultState: SettingsState = {
     status: true,
     subtasks: true,
   },
+  // 9:00, 12:00, 17:00, 21:00 (minutes from midnight)
+  quickTimePresets: { morning: 540, afternoon: 720, evening: 1020, night: 1260 },
 };
 
 /**
@@ -267,6 +279,11 @@ const loadFromStorage = (): { state: SettingsState; migrated: boolean } => {
     if (stored) {
       const parsed = JSON.parse(stored);
       const loadedState = { ...defaultState, ...parsed.state };
+
+      // Migrate old number[] quickTimePresets to object format
+      if (Array.isArray(loadedState.quickTimePresets)) {
+        loadedState.quickTimePresets = defaultState.quickTimePresets;
+      }
 
       // Merge keyboard shortcuts to include any new defaults
       let migrated = false;
@@ -461,6 +478,7 @@ export const settingsStore = {
     setState({ editorFieldVisibility }),
   setTaskBadgeVisibility: (taskBadgeVisibility: TaskBadgeVisibility) =>
     setState({ taskBadgeVisibility }),
+  setQuickTimePresets: (quickTimePresets: QuickTimePresets) => setState({ quickTimePresets }),
 
   exportSettings: () => {
     const exportData = {
@@ -545,6 +563,10 @@ export const settingsStore = {
         taskBadgeVisibility: data.taskBadgeVisibility
           ? { ...defaultState.taskBadgeVisibility, ...data.taskBadgeVisibility }
           : defaultState.taskBadgeVisibility,
+        quickTimePresets:
+          data.quickTimePresets && !Array.isArray(data.quickTimePresets)
+            ? { ...defaultState.quickTimePresets, ...data.quickTimePresets }
+            : defaultState.quickTimePresets,
       });
       return true;
     } catch (e) {

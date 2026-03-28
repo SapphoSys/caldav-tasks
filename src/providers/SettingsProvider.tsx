@@ -1,5 +1,5 @@
 import { type ReactNode, useCallback, useSyncExternalStore } from 'react';
-import type { TaskListDensity } from '$context/settingsContext';
+import type { QuickTimePresets, TaskListDensity } from '$context/settingsContext';
 import {
   type EditorFieldVisibility,
   SettingsContext,
@@ -232,6 +232,10 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     (visibility: TaskBadgeVisibility) => settingsStore.setTaskBadgeVisibility(visibility),
     [],
   );
+  const setQuickTimePresets = useCallback(
+    (presets: QuickTimePresets) => settingsStore.setQuickTimePresets(presets),
+    [],
+  );
   const exportSettings = useCallback(() => settingsStore.exportSettings(), []);
   const importSettings = useCallback((json: string) => settingsStore.importSettings(json), []);
   const resetSettings = useCallback(() => settingsStore.resetSettings(), []);
@@ -295,6 +299,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     setQuietHoursEnd,
     setEditorFieldVisibility,
     setTaskBadgeVisibility,
+    setQuickTimePresets,
     exportSettings,
     importSettings,
     resetSettings,
