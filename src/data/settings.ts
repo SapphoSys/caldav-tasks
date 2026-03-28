@@ -21,6 +21,11 @@ export const DATE_FORMAT_OPTIONS: Array<{ value: DateFormat; label: string; exam
 export const WEEK_START_OPTIONS: Array<{ value: StartOfWeek; label: string }> = [
   { value: 'sunday', label: 'Sunday' },
   { value: 'monday', label: 'Monday' },
+  { value: 'tuesday', label: 'Tuesday' },
+  { value: 'wednesday', label: 'Wednesday' },
+  { value: 'thursday', label: 'Thursday' },
+  { value: 'friday', label: 'Friday' },
+  { value: 'saturday', label: 'Saturday' },
 ];
 
 /**

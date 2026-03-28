@@ -1,39 +1,44 @@
-export type WeekStartDay = 0 | 1; // 0 = Sunday, 1 = Monday
+export type WeekStartDay = 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
 
 export const DAYS_OF_WEEK_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] as const;
 
+const WEEK_START_MAP: Record<string, WeekStartDay> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+};
+
 /**
- * Convert week start setting to numeric value
- * @param setting - 'sunday' or 'monday'
- * @returns 0 for Sunday, 1 for Monday
+ * Convert week start setting to numeric value (0=Sun, 1=Mon, ..., 6=Sat)
  */
-export const getWeekStartValue = (setting: 'sunday' | 'monday'): WeekStartDay => {
-  return setting === 'monday' ? 1 : 0;
+export const getWeekStartValue = (setting: string): WeekStartDay => {
+  return WEEK_START_MAP[setting] ?? 1;
 };
 
 /**
  * Get days of week labels based on week start setting
- * @param weekStartsOn - 0 for Sunday, 1 for Monday
+ * @param weekStartsOn - 0–6 where 0=Sunday
  * @returns Array of day labels properly ordered
  */
 export const getDaysOfWeekLabels = (weekStartsOn: WeekStartDay): readonly string[] => {
-  if (weekStartsOn === 1) {
-    return [...DAYS_OF_WEEK_LABELS.slice(1), DAYS_OF_WEEK_LABELS[0]];
-  }
-  return DAYS_OF_WEEK_LABELS;
+  return [
+    ...DAYS_OF_WEEK_LABELS.slice(weekStartsOn),
+    ...DAYS_OF_WEEK_LABELS.slice(0, weekStartsOn),
+  ];
 };
 
 /**
  * Calculate padding needed at start of month grid based on first day of month
  * @param firstDayOfMonth - Day of week (0-6, where 0 is Sunday)
- * @param weekStartsOn - 0 for Sunday, 1 for Monday
+ * @param weekStartsOn - 0–6 where 0=Sunday
  * @returns Number of empty cells needed at start of grid
  */
 export const getMonthStartPadding = (firstDayOfMonth: number, weekStartsOn: WeekStartDay) => {
-  if (weekStartsOn === 1) {
-    return firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
-  }
-  return firstDayOfMonth;
+  return (firstDayOfMonth - weekStartsOn + 7) % 7;
 };
 
 /**
