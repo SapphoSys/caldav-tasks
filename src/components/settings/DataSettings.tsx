@@ -2,6 +2,7 @@ import { appLogDir } from '@tauri-apps/api/path';
 import { openPath } from '@tauri-apps/plugin-opener';
 import Download from 'lucide-react/icons/download';
 import FileText from 'lucide-react/icons/file-text';
+import RotateCcw from 'lucide-react/icons/rotate-ccw';
 import Upload from 'lucide-react/icons/upload';
 import { useConfirmDialog } from '$hooks/useConfirmDialog';
 import { useSettingsStore } from '$hooks/useSettingsStore';
@@ -139,8 +140,9 @@ export const DataSettings = () => {
           <button
             type="button"
             onClick={handleResetPreferences}
-            className="px-3 py-1.5 text-sm bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-300 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-300 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset shrink-0"
           >
+            <RotateCcw className="w-3.5 h-3.5" />
             Reset
           </button>
         </div>
@@ -157,8 +159,9 @@ export const DataSettings = () => {
           <button
             type="button"
             onClick={handleResetDatabase}
-            className="px-3 py-1.5 text-sm bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-inset shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-inset shrink-0"
           >
+            <RotateCcw className="w-3.5 h-3.5" />
             Reset
           </button>
         </div>
