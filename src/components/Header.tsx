@@ -9,6 +9,7 @@ import SlidersHorizontal from 'lucide-react/icons/sliders-horizontal';
 import { useEffect, useRef, useState } from 'react';
 import { ComposedInput } from '$components/ComposedInput';
 import { Tooltip } from '$components/Tooltip';
+import { DEFAULT_SORT_CONFIG, JUST_NOW_SYNC_TEXT_MS_THRESHOLD, SORT_OPTIONS } from '$constants';
 import { useModalState } from '$context/modalStateContext';
 import { useCreateTask } from '$hooks/queries/useTasks';
 import {
@@ -19,12 +20,7 @@ import {
   useSetSortConfig,
   useUIState,
 } from '$hooks/queries/useUIState';
-import type { SortDirection, SortMode } from '$types/index';
-import {
-  DEFAULT_SORT_CONFIG,
-  JUST_NOW_SYNC_TEXT_MS_THRESHOLD,
-  SORT_OPTIONS,
-} from '$utils/constants';
+import type { SortDirection, SortMode } from '$types';
 import { getMetaKeyLabel, getModifierJoiner } from '$utils/keyboard';
 
 interface HeaderProps {

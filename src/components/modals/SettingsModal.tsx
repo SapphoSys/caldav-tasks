@@ -35,7 +35,7 @@ import { UpdateSettings } from '$components/settings/UpdateSettings';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
-import type { SettingsCategory, SettingsSubtab } from '$types/index';
+import type { SettingsCategory, SettingsSubtab } from '$types';
 
 interface SettingsModalProps {
   onClose: () => void;

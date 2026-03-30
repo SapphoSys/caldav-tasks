@@ -6,15 +6,68 @@ import Copy from 'lucide-react/icons/copy';
 import Download from 'lucide-react/icons/download';
 import X from 'lucide-react/icons/x';
 import { useState } from 'react';
-import { EXPORT_FORMATS } from '$data/export';
+import { EXPORT_FORMATS } from '$constants/export';
 import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
+import {
+  exportTasksAsCsv,
+  exportTasksAsIcs,
+  exportTasksAsJson,
+  exportTasksAsMarkdown,
+} from '$lib/ical';
 import { loggers } from '$lib/logger';
-import type { Calendar, ExportFormat, ExportType, Task } from '$types/index';
-import { getExportContent, getExportDescription, getExportTitle } from '$utils/export';
-import { downloadFile } from '$utils/file';
+import type { Calendar, ExportFormat, ExportType, Task } from '$types';
+import { downloadFile, pluralize } from '$utils/misc';
 
 const log = loggers.export;
+
+const getExportTitle = (type: ExportType) => {
+  switch (type) {
+    case 'all-calendars':
+      return 'Export all calendars';
+    case 'single-calendar':
+      return 'Export calendar';
+    case 'tasks':
+      return 'Export tasks';
+  }
+};
+
+const getExportDescription = (
+  type: ExportType,
+  tasks: Task[],
+  calendars: Calendar[],
+  calendarName?: string,
+) => {
+  switch (type) {
+    case 'all-calendars':
+      return `${calendars.length} ${pluralize(calendars.length, 'calendar')}, ${tasks.length} ${pluralize(tasks.length, 'task')}`;
+    case 'single-calendar':
+      return `${tasks.length} ${pluralize(tasks.length, 'task')} in ${calendarName || 'Calendar'}`;
+    case 'tasks': {
+      const subtaskCount = tasks.filter((t) => t.parentUid).length;
+      const parentTaskCount = tasks.length - subtaskCount;
+      if (subtaskCount > 0) {
+        return `${parentTaskCount} ${pluralize(parentTaskCount, 'task')} + ${subtaskCount} ${pluralize(subtaskCount, 'subtask')}`;
+      }
+      return `${tasks.length} ${pluralize(tasks.length, 'task')}`;
+    }
+  }
+};
+
+const getExportContent = (format: ExportFormat, tasks: Task[]) => {
+  switch (format) {
+    case 'ics':
+      return exportTasksAsIcs(tasks);
+    case 'json':
+      return exportTasksAsJson(tasks);
+    case 'markdown':
+      return exportTasksAsMarkdown(tasks);
+    case 'csv':
+      return exportTasksAsCsv(tasks);
+    default:
+      return '';
+  }
+};
 
 interface ExportModalProps {
   tasks: Task[];

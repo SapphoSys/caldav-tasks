@@ -4,7 +4,7 @@
 
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
-import { downloadFile } from '$utils/file';
+import { downloadFile } from '$utils/misc';
 
 /**
  * Export settings to a file

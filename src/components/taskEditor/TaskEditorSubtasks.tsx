@@ -8,7 +8,7 @@ import { useChildTasks, useCreateTask, useTasks } from '$hooks/queries/useTasks'
 import { truncateName, useSortableDrag } from '$hooks/useSortableDrag';
 import { getSortedTasks } from '$lib/store/filters';
 import { countChildren } from '$lib/store/tasks';
-import type { Task } from '$types/index';
+import type { Task } from '$types';
 import type { FlattenedTask } from '$utils/tree';
 
 interface SubtasksProps {

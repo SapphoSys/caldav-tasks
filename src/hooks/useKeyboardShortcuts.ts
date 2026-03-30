@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
+import { DEFAULT_SORT_CONFIG } from '$constants';
 import { useModalState } from '$context/modalStateContext';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useTags } from '$hooks/queries/useTags';
@@ -20,8 +21,7 @@ import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
 import { useSettingsStore } from '$hooks/useSettingsStore';
 import { getSortedTasks } from '$lib/store/filters';
 import { getChildTasks } from '$lib/store/tasks';
-import type { KeyboardShortcut } from '$types/index';
-import { DEFAULT_SORT_CONFIG } from '$utils/constants';
+import type { KeyboardShortcut } from '$types';
 import {
   getAltKeyLabel,
   getMetaKeyLabel,

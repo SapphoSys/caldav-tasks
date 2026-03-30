@@ -4,6 +4,12 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import {
+  DEFAULT_ACCOUNT_SORT_CONFIG,
+  DEFAULT_CALENDAR_SORT_CONFIG,
+  DEFAULT_SORT_CONFIG,
+  DEFAULT_TAG_SORT_CONFIG,
+} from '$constants';
 import { subscribeToDataChanges } from '$lib/store';
 import {
   getUIState,
@@ -21,18 +27,7 @@ import {
   setSortConfig,
   setTagSortConfig,
 } from '$lib/store/ui';
-import type {
-  AccountSortConfig,
-  CalendarSortConfig,
-  SortConfig,
-  TagSortConfig,
-} from '$types/index';
-import {
-  DEFAULT_ACCOUNT_SORT_CONFIG,
-  DEFAULT_CALENDAR_SORT_CONFIG,
-  DEFAULT_SORT_CONFIG,
-  DEFAULT_TAG_SORT_CONFIG,
-} from '$utils/constants';
+import type { AccountSortConfig, CalendarSortConfig, SortConfig, TagSortConfig } from '$types';
 
 /**
  * Hook to get the full UI state

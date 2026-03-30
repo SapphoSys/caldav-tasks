@@ -2,11 +2,11 @@
  * Tag operations
  */
 
+import { FALLBACK_ITEM_COLOR } from '$constants';
 import * as db from '$lib/database';
 import { loggers } from '$lib/logger';
 import { loadDataStore, saveDataStore } from '$lib/store';
-import type { Tag } from '$types/index';
-import { FALLBACK_ITEM_COLOR } from '$utils/constants';
+import type { Tag } from '$types';
 import { generateUUID } from '$utils/misc';
 
 const log = loggers.dataStore;

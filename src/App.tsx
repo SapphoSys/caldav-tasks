@@ -15,6 +15,7 @@ import { OfflineBanner } from '$components/OfflineBanner';
 import { Sidebar } from '$components/sidebar/Sidebar';
 import { TaskList } from '$components/TaskList';
 import { TaskEditor } from '$components/taskEditor/TaskEditor';
+import { MAX_EDITOR_WIDTH, MIN_EDITOR_WIDTH } from '$constants';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useSyncQuery } from '$hooks/queries/useSync';
 import { useTasks } from '$hooks/queries/useTasks';
@@ -31,7 +32,6 @@ import { useTheme } from '$hooks/useTheme';
 import { useTray } from '$hooks/useTray';
 import { useUpdateChecker } from '$hooks/useUpdateChecker';
 import { getTasksByCalendar } from '$lib/store/tasks';
-import { MAX_EDITOR_WIDTH, MIN_EDITOR_WIDTH } from '$utils/constants';
 import type { CalDAVConfig } from '$utils/mobileconfig';
 
 const App = () => {

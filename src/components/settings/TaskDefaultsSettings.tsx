@@ -9,14 +9,14 @@ import { useState } from 'react';
 import { AppSelect } from '$components/AppSelect';
 import { TagModal } from '$components/modals/TagModal';
 import { TagPickerModal } from '$components/modals/TagPickerModal';
-import { getIconByName } from '$data/icons';
+import { getIconByName } from '$constants/icons';
+import { PRIORITIES } from '$constants/priority';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useTags } from '$hooks/queries/useTags';
 import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import { useSettingsStore } from '$hooks/useSettingsStore';
-import type { DefaultReminderOffset, TaskStatus } from '$types/index';
-import { PRIORITIES } from '$utils/priority';
+import type { DefaultReminderOffset, TaskStatus } from '$types';
 
 const REMINDER_OPTIONS: { value: DefaultReminderOffset; label: string }[] = [
   { value: 'at-due', label: 'At due time' },

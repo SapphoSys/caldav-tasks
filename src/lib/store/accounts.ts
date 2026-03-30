@@ -6,7 +6,7 @@ import * as db from '$lib/database';
 import { loggers } from '$lib/logger';
 import { deleteAppPassword as deleteNextcloudAppPassword } from '$lib/nextcloud-auth';
 import { loadDataStore, saveDataStore } from '$lib/store';
-import type { Account } from '$types/index';
+import type { Account } from '$types';
 import { generateUUID } from '$utils/misc';
 
 const log = loggers.dataStore;

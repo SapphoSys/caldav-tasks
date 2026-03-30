@@ -2,12 +2,12 @@ import X from 'lucide-react/icons/x';
 import { useState } from 'react';
 import { ComposedInput } from '$components/ComposedInput';
 import { IconEmojiPicker } from '$components/IconEmojiPicker';
-import { getIconByName } from '$data/icons';
+import { COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '$constants';
+import { getIconByName } from '$constants/icons';
 import { useCreateTag, useTags, useUpdateTag } from '$hooks/queries/useTags';
 import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import { useSettingsStore } from '$hooks/useSettingsStore';
-import { COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '$utils/constants';
 
 interface TagModalProps {
   tagId: string | null;

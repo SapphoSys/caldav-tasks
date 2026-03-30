@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useDeleteTask, useTasks } from '$hooks/queries/useTasks';
 import { useConfirmDialog } from '$hooks/useConfirmDialog';
 import { useSettingsStore } from '$hooks/useSettingsStore';
-import { pluralize } from '$utils/format';
+import { pluralize } from '$utils/misc';
 
 export const useConfirmTaskDelete = () => {
   const { confirmBeforeDeletion, confirmBeforeDelete, deleteSubtasksWithParent } =

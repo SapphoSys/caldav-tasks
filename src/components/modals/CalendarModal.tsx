@@ -3,14 +3,14 @@ import X from 'lucide-react/icons/x';
 import { useState } from 'react';
 import { ComposedInput } from '$components/ComposedInput';
 import { IconEmojiPicker } from '$components/IconEmojiPicker';
-import { getIconByName } from '$data/icons';
+import { COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '$constants';
+import { getIconByName } from '$constants/icons';
 import { useAccounts, useAddCalendar, useUpdateAccount } from '$hooks/queries/useAccounts';
 import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import { useSettingsStore } from '$hooks/useSettingsStore';
 import { caldavService } from '$lib/caldav';
-import type { Calendar } from '$types/index';
-import { COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '$utils/constants';
+import type { Calendar } from '$types';
 
 interface CalendarModalProps {
   calendar?: Calendar;
@@ -108,7 +108,9 @@ export const CalendarModal = ({ calendar, accountId, onClose }: CalendarModalPro
 
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : `Failed to ${calendar ? 'update' : 'create'} calendar`);
+      setError(
+        err instanceof Error ? err.message : `Failed to ${calendar ? 'update' : 'create'} calendar`,
+      );
     } finally {
       setIsLoading(false);
     }

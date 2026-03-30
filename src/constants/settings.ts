@@ -1,8 +1,7 @@
-/**
- * Settings data and configuration options
- */
+import type { DateFormat, ServerType, StartOfWeek } from '$types';
+import type { ServerTypeGroup, ServerTypeOption } from '$types/settings';
 
-import type { DateFormat, ServerType, StartOfWeek } from '$types/index';
+export type { ServerTypeGroup, ServerTypeOption };
 
 /**
  * Date format options
@@ -38,20 +37,6 @@ export const SYNC_INTERVAL_OPTIONS: Array<{ value: number; label: string }> = [
   { value: 30, label: 'Every 30 minutes' },
   { value: 60, label: 'Every hour' },
 ];
-
-/**
- * Server type options with descriptions
- */
-export interface ServerTypeOption {
-  value: ServerType;
-  label: string;
-  description: string;
-}
-
-export interface ServerTypeGroup {
-  label: string;
-  options: ServerTypeOption[];
-}
 
 export const SERVER_TYPE_GROUPS: ServerTypeGroup[] = [
   {
@@ -106,7 +91,7 @@ export const SERVER_TYPE_GROUPS: ServerTypeGroup[] = [
   },
 ];
 
-// Flat list for backward compatibility
+// Flat list for convenience
 export const SERVER_TYPE_OPTIONS: ServerTypeOption[] = SERVER_TYPE_GROUPS.flatMap(
   (group) => group.options,
 );

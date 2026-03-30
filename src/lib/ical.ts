@@ -5,7 +5,7 @@
 
 import { loggers } from '$lib/logger';
 import { getAllTags } from '$lib/store/tags';
-import type { Priority, Reminder, Task, TaskStatus } from '$types/index';
+import type { Priority, Reminder, Task, TaskStatus } from '$types';
 import { formatDate } from '$utils/date';
 import { generateUUID } from '$utils/misc';
 

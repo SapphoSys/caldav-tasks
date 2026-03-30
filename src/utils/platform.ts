@@ -1,20 +1,13 @@
-/**
- * Platform detection utilities
- */
-
 let isCefRuntime: boolean | null = null;
 
 /**
  * Detect if running under CEF (Chromium Embedded Framework) runtime
- * CEF has IPC limitations that require some features to be disabled
  */
 export const isCEF = () => {
   if (isCefRuntime !== null) {
     return isCefRuntime;
   }
 
-  // Detect CEF from user agent
-  // CEF uses Chromium but doesn't include Safari/WebKit like Wry does
   const ua = navigator.userAgent;
 
   // Wry on macOS: "Mozilla/5.0 ... AppleWebKit/... Version/... Safari/..."

@@ -3,7 +3,7 @@ import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
 import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
-import type { KeyboardShortcut } from '$types/index';
+import type { KeyboardShortcut } from '$types';
 import { formatShortcut } from '$utils/keyboard';
 
 interface KeyboardShortcutModalProps {

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { DatePickerModal } from '$components/modals/DatePickerModal';
-import { RepeatModal } from '$components/modals/RepeatModal';
 import { ReminderPickerModal } from '$components/modals/ReminderPickerModal';
+import { RepeatModal } from '$components/modals/RepeatModal';
 import { TagModal } from '$components/modals/TagModal';
 import { TagPickerModal } from '$components/modals/TagPickerModal';
 import { TaskEditorCalendar } from '$components/taskEditor/TaskEditorCalendar';
@@ -31,7 +31,7 @@ import { useSetEditorOpen } from '$hooks/queries/useUIState';
 import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import { useSettingsStore } from '$hooks/useSettingsStore';
-import type { Task, TaskStatus } from '$types/index';
+import type { Task, TaskStatus } from '$types';
 import { getContrastTextColor } from '$utils/color';
 import { hasOpenModalElements } from '$utils/misc';
 
@@ -368,7 +368,11 @@ export const TaskEditor = ({ task, onOpenNotificationSettings }: TaskEditorProps
           value={editReminderDate}
           onSave={(date) => {
             if (editingReminderId) {
-              updateReminderMutation.mutate({ taskId: task.id, reminderId: editingReminderId, trigger: date });
+              updateReminderMutation.mutate({
+                taskId: task.id,
+                reminderId: editingReminderId,
+                trigger: date,
+              });
               setEditingReminderId(null);
               setEditReminderDate(undefined);
             }

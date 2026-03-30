@@ -14,13 +14,13 @@ import { useEffect, useRef, useState } from 'react';
 import { ExportModal } from '$components/modals/ExportModal';
 import { MoveToCalendarModal } from '$components/modals/MoveToCalendarModal';
 import { SubtaskModal } from '$components/modals/SubtaskModal';
+import { PRIORITIES } from '$constants/priority';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useCreateTask, useUpdateTask } from '$hooks/queries/useTasks';
 import { useSetSelectedTask } from '$hooks/queries/useUIState';
 import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
 import { exportTaskAndChildren } from '$lib/store/tasks';
-import type { Priority, Task, TaskStatus } from '$types/index';
-import { PRIORITIES } from '$utils/priority';
+import type { Priority, Task, TaskStatus } from '$types';
 
 interface TaskContextMenuProps {
   task: Task;

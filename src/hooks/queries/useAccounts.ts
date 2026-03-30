@@ -16,7 +16,7 @@ import {
 import { addCalendar, deleteCalendar } from '$lib/store/calendars';
 import { reorderAccounts } from '$lib/store/reorderAccounts';
 import { reorderCalendars } from '$lib/store/reorderCalendars';
-import type { Account, Calendar } from '$types/index';
+import type { Account, Calendar } from '$types';
 
 /**
  * Hook to get all accounts

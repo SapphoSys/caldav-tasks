@@ -2,7 +2,7 @@ import { CalendarPlus } from 'lucide-react';
 import Calendar from 'lucide-react/icons/calendar';
 import CalendarClock from 'lucide-react/icons/calendar-clock';
 import CalendarFold from 'lucide-react/icons/calendar-fold';
-import type { Task, TimeFormat } from '$types/index';
+import type { Task, TimeFormat } from '$types';
 import { formatDate, formatTime } from '$utils/date';
 
 interface TaskEditorDatesProps {
@@ -72,9 +72,7 @@ export const TaskEditorDates = ({
             <CalendarPlus className="w-4 h-4 text-surface-400 flex-shrink-0" />
           )}
           <span
-            className={
-              task.dueDate ? 'text-surface-700 dark:text-surface-300' : 'text-surface-400'
-            }
+            className={task.dueDate ? 'text-surface-700 dark:text-surface-300' : 'text-surface-400'}
           >
             {task.dueDate
               ? task.dueDateAllDay

@@ -2,7 +2,7 @@
  * Utility functions for parsing Apple Configuration Profile (.mobileconfig) files
  */
 
-import type { ServerType } from '$types/index';
+import type { ServerType } from '$types';
 
 export interface CalDAVConfig {
   accountName?: string;

@@ -11,11 +11,10 @@ import { useAccounts } from '$hooks/queries/useAccounts';
 import { useCreateTask } from '$hooks/queries/useTasks';
 import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
+import { parseIcsFile, parseJsonTasksFile } from '$lib/ical';
 import { loggers } from '$lib/logger';
-import type { Calendar, Task } from '$types/index';
-import { pluralize } from '$utils/format';
-import { parseIcsFile, parseJsonTasksFile } from '$utils/ical';
-import { generateUUID } from '$utils/misc';
+import type { Calendar, Task } from '$types';
+import { generateUUID, pluralize } from '$utils/misc';
 
 const log = loggers.import;
 

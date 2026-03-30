@@ -13,7 +13,7 @@ import {
   getPredefinedServerUrl,
   getServerTypeDescription,
   SERVER_TYPE_GROUPS,
-} from '$data/settings';
+} from '$constants/settings';
 import { useAddCalendar, useCreateAccount, useUpdateAccount } from '$hooks/queries/useAccounts';
 import { useConfirmDialog } from '$hooks/useConfirmDialog';
 import { useFocusTrap } from '$hooks/useFocusTrap';
@@ -22,9 +22,8 @@ import { caldavService } from '$lib/caldav';
 import { loggers } from '$lib/logger';
 import { ensureTagExists } from '$lib/store/sync';
 import { createTask } from '$lib/store/tasks';
-import type { Account, Calendar, ServerType } from '$types/index';
-import { pluralize } from '$utils/format';
-import { generateUUID, isVikunjaServer } from '$utils/misc';
+import type { Account, Calendar, ServerType } from '$types';
+import { generateUUID, isVikunjaServer, pluralize } from '$utils/misc';
 import type { CalDAVConfig } from '$utils/mobileconfig';
 
 const log = loggers.account;

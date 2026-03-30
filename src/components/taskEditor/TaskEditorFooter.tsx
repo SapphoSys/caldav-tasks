@@ -2,7 +2,7 @@ import History from 'lucide-react/icons/history';
 import { useState } from 'react';
 import { TaskHistoryModal } from '$components/modals/TaskHistoryModal';
 import { Tooltip } from '$components/Tooltip';
-import type { Task, TimeFormat } from '$types/index';
+import type { Task, TimeFormat } from '$types';
 import { formatDate, formatTime } from '$utils/date';
 
 interface TaskEditorFooterProps {

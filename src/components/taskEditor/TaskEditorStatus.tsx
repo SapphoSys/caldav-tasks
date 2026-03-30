@@ -4,7 +4,7 @@ import Check from 'lucide-react/icons/check';
 import Loader from 'lucide-react/icons/loader';
 import RotateCcw from 'lucide-react/icons/rotate-ccw';
 import { useState } from 'react';
-import type { Task, TaskStatus } from '$types/index';
+import type { Task, TaskStatus } from '$types';
 
 interface TaskEditorStatusProps {
   task: Task;

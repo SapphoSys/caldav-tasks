@@ -18,7 +18,7 @@ import {
   removeTaskFromServer,
   syncCalendarTasks,
 } from '$lib/store/sync';
-import type { Task } from '$types/index';
+import type { Task } from '$types';
 
 const log = loggers.sync;
 

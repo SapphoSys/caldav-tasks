@@ -6,9 +6,9 @@ import Plus from 'lucide-react/icons/plus';
 import RefreshCw from 'lucide-react/icons/refresh-cw';
 import Share2 from 'lucide-react/icons/share-2';
 import Trash2 from 'lucide-react/icons/trash-2';
+import { MENU_EVENTS } from '$constants/menu';
 import { toastManager } from '$hooks/useToast';
-import type { Account } from '$types/index';
-import { MENU_EVENTS } from '$utils/menu';
+import type { Account } from '$types';
 
 interface ContextMenuState {
   type: 'account' | 'calendar' | 'tag' | 'accounts-section';

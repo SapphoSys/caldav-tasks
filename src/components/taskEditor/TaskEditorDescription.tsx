@@ -2,8 +2,8 @@ import AlignLeft from 'lucide-react/icons/align-left';
 import { useRef } from 'react';
 import { ComposedTextarea } from '$components/ComposedTextarea';
 import { useDebouncedTaskUpdate } from '$hooks/useDebouncedTaskUpdate';
-import type { Task } from '$types/index';
-import { filterCalDavDescription } from '$utils/ical';
+import { filterCalDavDescription } from '$lib/ical';
+import type { Task } from '$types';
 
 interface DescriptionProps {
   task: Task;

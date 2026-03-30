@@ -1,4 +1,5 @@
 import { connectionStore } from '$context/connectionContext';
+import { taskToVTodo, vtodoToTask } from '$lib/ical';
 import { loggers } from '$lib/logger';
 import {
   type CalDAVCredentials,
@@ -11,9 +12,8 @@ import {
   put,
   report,
 } from '$lib/tauri-http';
-import type { Account, Calendar, ServerType, Task } from '$types/index';
+import type { Account, Calendar, ServerType, Task } from '$types';
 import { normalizeHexColor } from '$utils/color';
-import { taskToVTodo, vtodoToTask } from '$utils/ical';
 
 const log = loggers.caldav;
 

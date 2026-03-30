@@ -11,7 +11,7 @@ import { useSettingsStore } from '$hooks/useSettingsStore';
 import { caldavService } from '$lib/caldav';
 import { loggers } from '$lib/logger';
 import { deleteCalendar } from '$lib/store/calendars';
-import type { Account, Tag } from '$types/index';
+import type { Account, Tag } from '$types';
 
 const log = loggers.deleteHandlers;
 

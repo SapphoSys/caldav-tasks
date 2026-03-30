@@ -7,7 +7,7 @@ import {
   isTomorrow,
 } from 'date-fns';
 import { settingsStore } from '$context/settingsContext';
-import type { DateFormat, TimeFormat } from '$types/index';
+import type { DateFormat, TimeFormat } from '$types';
 
 /**
  * Standard date format strings for consistent formatting across the app
@@ -82,8 +82,10 @@ export const formatDueDate = (date: Date, timeFormat?: TimeFormat) => {
   const isOverdue = d.getTime() < now.getTime();
   const dayDiff = differenceInCalendarDays(d, now);
 
-  const overdue = 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300';
-  const neutral = 'border-surface-300 dark:border-surface-600 bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-400';
+  const overdue =
+    'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300';
+  const neutral =
+    'border-surface-300 dark:border-surface-600 bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-400';
 
   if (isToday(d)) {
     return {

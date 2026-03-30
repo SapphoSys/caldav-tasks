@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { MAX_SIDEBAR_WIDTH, MIN_SIDEBAR_WIDTH } from '$utils/constants';
+import { MAX_SIDEBAR_WIDTH, MIN_SIDEBAR_WIDTH } from '$constants';
 
 export const useSidebarResize = (onWidthChange: (width: number) => void) => {
   const [isResizing, setIsResizing] = useState(false);

@@ -2,10 +2,10 @@ import Plus from 'lucide-react/icons/plus';
 import Search from 'lucide-react/icons/search';
 import X from 'lucide-react/icons/x';
 import { useMemo, useState } from 'react';
-import { getIconByName } from '$data/icons';
+import { getIconByName } from '$constants/icons';
 import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
-import type { Tag } from '$types/index';
+import type { Tag } from '$types';
 
 interface TagPickerModalProps {
   isOpen: boolean;

@@ -3,7 +3,7 @@ import RotateCcw from 'lucide-react/icons/rotate-ccw';
 import { useEffect, useState } from 'react';
 import { KeyboardShortcutModal } from '$components/modals/KeyboardShortcutModal';
 import { useSettingsStore } from '$hooks/useSettingsStore';
-import type { KeyboardShortcut } from '$types/index';
+import type { KeyboardShortcut } from '$types';
 import { formatShortcut } from '$utils/keyboard';
 import { isMacPlatform } from '$utils/platform';
 
@@ -111,11 +111,19 @@ export const ShortcutsSettings = ({
                             .split(' + ')
                             .map((key, keyIndex, arr) => (
                               <>
-                                <kbd key={`kbd-${key}-${shortcut.id}`} className="inline-flex items-center px-2 py-1 bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded text-xs font-mono leading-none text-surface-700 dark:text-surface-300">
+                                <kbd
+                                  key={`kbd-${key}-${shortcut.id}`}
+                                  className="inline-flex items-center px-2 py-1 bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded text-xs font-mono leading-none text-surface-700 dark:text-surface-300"
+                                >
                                   {key}
                                 </kbd>
                                 {keyIndex < arr.length - 1 && !isMacPlatform() && (
-                                  <span key={`sep-${keyIndex}-${shortcut.id}`} className="text-xs text-surface-400">+</span>
+                                  <span
+                                    key={`sep-${keyIndex}-${shortcut.id}`}
+                                    className="text-xs text-surface-400"
+                                  >
+                                    +
+                                  </span>
                                 )}
                               </>
                             ))}

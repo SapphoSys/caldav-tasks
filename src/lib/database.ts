@@ -4,43 +4,45 @@
  */
 
 import Database from '@tauri-apps/plugin-sql';
-import { settingsStore } from '$context/settingsContext';
-import { loggers } from '$lib/logger';
-import type {
-  Account,
-  AccountRow,
-  AccountSortConfig,
-  AccountSortMode,
-  Calendar,
-  CalendarRow,
-  CalendarSortConfig,
-  CalendarSortMode,
-  PendingDeletionRow,
-  Priority,
-  ReminderRow,
-  ServerType,
-  SortConfig,
-  SortDirection,
-  SortMode,
-  Tag,
-  TagRow,
-  TagSortConfig,
-  TagSortMode,
-  Task,
-  TaskHistoryEntry,
-  TaskHistoryRow,
-  TaskRow,
-  TaskStatus,
-  UIStateRow,
-} from '$types/index';
 import {
   DEFAULT_ACCOUNT_SORT_CONFIG,
   DEFAULT_CALENDAR_SORT_CONFIG,
   DEFAULT_SORT_CONFIG,
   DEFAULT_TAG_SORT_CONFIG,
   FALLBACK_ITEM_COLOR,
-} from '$utils/constants';
-import { toAppleEpoch } from '$utils/ical';
+} from '$constants';
+import { settingsStore } from '$context/settingsContext';
+import { toAppleEpoch } from '$lib/ical';
+import { loggers } from '$lib/logger';
+import type {
+  Account,
+  AccountSortConfig,
+  AccountSortMode,
+  Calendar,
+  CalendarSortConfig,
+  CalendarSortMode,
+  Priority,
+  ServerType,
+  SortConfig,
+  SortDirection,
+  SortMode,
+  Tag,
+  TagSortConfig,
+  TagSortMode,
+  Task,
+  TaskStatus,
+} from '$types';
+import type {
+  AccountRow,
+  CalendarRow,
+  PendingDeletionRow,
+  ReminderRow,
+  TagRow,
+  TaskHistoryEntry,
+  TaskHistoryRow,
+  TaskRow,
+  UIStateRow,
+} from '$types/database';
 import { generateUUID } from '$utils/misc';
 
 const log = loggers.database;

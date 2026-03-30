@@ -5,10 +5,10 @@ import Palette from 'lucide-react/icons/palette';
 import Wand2 from 'lucide-react/icons/wand-2';
 import { useState } from 'react';
 import { ComposedInput } from '$components/ComposedInput';
+import { ACCENT_COLORS, COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '$constants';
+import { THEME_OPTIONS } from '$constants/theme';
 import type { TaskListDensity } from '$context/settingsContext';
-import { THEME_OPTIONS } from '$data/theme';
 import { useSettingsStore } from '$hooks/useSettingsStore';
-import { ACCENT_COLORS, COLOR_PRESETS, FALLBACK_ITEM_COLOR } from '$utils/constants';
 
 const DENSITY_OPTIONS: { value: TaskListDensity; label: string; icon: React.ReactNode }[] = [
   { value: 'comfortable', label: 'Comfortable', icon: <LayoutList className="w-4 h-4" /> },

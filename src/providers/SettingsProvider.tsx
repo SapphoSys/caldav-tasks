@@ -19,7 +19,7 @@ import type {
   TaskStatus,
   Theme,
   TimeFormat,
-} from '$types/index';
+} from '$types';
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const currentState = useSyncExternalStore(

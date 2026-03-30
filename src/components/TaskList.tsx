@@ -4,12 +4,12 @@ import ListTodo from 'lucide-react/icons/list-todo';
 import Plus from 'lucide-react/icons/plus';
 import { useCallback, useMemo } from 'react';
 import { TaskItem } from '$components/TaskItem';
+import { DEFAULT_SORT_CONFIG } from '$constants';
 import { useCreateTask, useFilteredTasks } from '$hooks/queries/useTasks';
 import { useSetSelectedTask, useUIState } from '$hooks/queries/useUIState';
 import { truncateName, useSortableDrag } from '$hooks/useSortableDrag';
 import { getSortedTasks } from '$lib/store/filters';
 import { getChildTasks } from '$lib/store/tasks';
-import { DEFAULT_SORT_CONFIG } from '$utils/constants';
 import { getMetaKeyLabel, getModifierJoiner } from '$utils/keyboard';
 import { flattenTasks } from '$utils/tree';
 

@@ -1,4 +1,4 @@
-import type { Task } from '$types/index';
+import type { Task } from '$types';
 
 /**
  * extended task type with ancestor information for flat list rendering

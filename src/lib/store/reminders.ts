@@ -3,7 +3,7 @@
  */
 
 import { loadDataStore, saveDataStore } from '$lib/store';
-import type { Reminder } from '$types/index';
+import type { Reminder } from '$types';
 import { generateUUID } from '$utils/misc';
 
 export const addReminder = (taskId: string, trigger: Date) => {

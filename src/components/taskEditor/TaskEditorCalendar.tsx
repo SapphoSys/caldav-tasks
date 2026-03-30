@@ -1,6 +1,6 @@
 import FolderSync from 'lucide-react/icons/folder-sync';
 import { AppSelect } from '$components/AppSelect';
-import type { Account, Task } from '$types/index';
+import type { Account, Task } from '$types';
 
 interface TaskEditorCalendarProps {
   task: Task;

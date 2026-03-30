@@ -7,15 +7,15 @@ import Trash2 from 'lucide-react/icons/trash-2';
 import User from 'lucide-react/icons/user';
 import { useMemo, useState } from 'react';
 import { Tooltip } from '$components/Tooltip';
+import { MENU_EVENTS } from '$constants/menu';
 import { useDeleteAccount } from '$hooks/queries/useAccounts';
 import { useTasks } from '$hooks/queries/useTasks';
 import { useConfirmDialog } from '$hooks/useConfirmDialog';
 import { useConnectionStore } from '$hooks/useConnectionStore';
 import { useSettingsStore } from '$hooks/useSettingsStore';
 import { caldavService } from '$lib/caldav';
-import type { Account } from '$types/index';
-import { pluralize } from '$utils/format';
-import { MENU_EVENTS } from '$utils/menu';
+import type { Account } from '$types';
+import { pluralize } from '$utils/misc';
 
 interface ConnectionsSettingsProps {
   accounts: Account[];

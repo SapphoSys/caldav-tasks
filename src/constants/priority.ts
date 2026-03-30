@@ -1,4 +1,4 @@
-import type { Priority } from '$types/index';
+import type { Priority } from '$types';
 
 /**
  * Priority configuration with labels and styling

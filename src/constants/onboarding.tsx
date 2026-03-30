@@ -1,17 +1,10 @@
 import ArrowRight from 'lucide-react/icons/arrow-right';
 import Calendar from 'lucide-react/icons/calendar';
-import CheckCircle2 from 'lucide-react/icons/check-circle-2';
+import Check from 'lucide-react/icons/check';
 import Settings from 'lucide-react/icons/settings';
-import Sparkles from 'lucide-react/icons/sparkles';
 import User from 'lucide-react/icons/user';
 import AppIcon from '$components/Icon';
-
-export interface OnboardingStep {
-  title: string;
-  description: React.ReactNode;
-  icon: React.ReactNode;
-  illustration?: React.ReactNode;
-}
+import type { OnboardingStep } from '$types/settings';
 
 export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
@@ -65,13 +58,13 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     ),
   },
   {
-    title: "You're All Set!",
+    title: "You're all set!",
     description: 'Start adding tasks and stay productive.',
-    icon: <CheckCircle2 className="w-12 h-12 text-primary-500" />,
+    icon: <Check className="w-12 h-12 text-primary-500" />,
     illustration: (
       <div className="flex items-center justify-center py-8">
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center animate-pulse">
-          <Sparkles className="w-10 h-10 text-primary-contrast" />
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+          <Check className="w-10 h-10 text-primary-contrast" />
         </div>
       </div>
     ),

@@ -2,15 +2,15 @@
  * Core data store, cache management, and listeners
  */
 
-import * as db from '$lib/database';
-import { loggers } from '$lib/logger';
-import type { DataChangeListener, DataStore, UIState } from '$lib/store/types';
 import {
   DEFAULT_ACCOUNT_SORT_CONFIG,
   DEFAULT_CALENDAR_SORT_CONFIG,
   DEFAULT_SORT_CONFIG,
   DEFAULT_TAG_SORT_CONFIG,
-} from '$utils/constants';
+} from '$constants';
+import * as db from '$lib/database';
+import { loggers } from '$lib/logger';
+import type { DataChangeListener, DataStore, UIState } from '$lib/store/types';
 
 const log = loggers.dataStore;
 

@@ -1,11 +1,11 @@
 import Search from 'lucide-react/icons/search';
 import X from 'lucide-react/icons/x';
 import { useMemo, useState } from 'react';
-import { getIconByName } from '$data/icons';
+import { FALLBACK_ITEM_COLOR } from '$constants';
+import { getIconByName } from '$constants/icons';
 import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
-import type { Account, Task } from '$types/index';
-import { FALLBACK_ITEM_COLOR } from '$utils/constants';
+import type { Account, Task } from '$types';
 
 type CalendarEntry = Account['calendars'][number] & { accountName: string };
 

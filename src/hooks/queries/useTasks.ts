@@ -32,7 +32,7 @@ import {
   toggleTaskComplete,
   updateTask,
 } from '$lib/store/tasks';
-import type { SortConfig, Task } from '$types/index';
+import type { SortConfig, Task } from '$types';
 import type { FlattenedTask } from '$utils/tree';
 
 /**

@@ -2,10 +2,10 @@ import Download from 'lucide-react/icons/download';
 import Inbox from 'lucide-react/icons/inbox';
 import Settings from 'lucide-react/icons/settings';
 import { Tooltip } from '$components/Tooltip';
-import { getIconByName } from '$data/icons';
-import type { Account, Tag } from '$types/index';
+import { FALLBACK_ITEM_COLOR } from '$constants';
+import { getIconByName } from '$constants/icons';
+import type { Account, Tag } from '$types';
 import { getContrastTextColor } from '$utils/color';
-import { FALLBACK_ITEM_COLOR } from '$utils/constants';
 
 interface SidebarCollapsedViewProps {
   accounts: Account[];

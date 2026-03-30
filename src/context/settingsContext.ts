@@ -1,4 +1,11 @@
 import { createContext } from 'react';
+import {
+  DEFAULT_COLOR,
+  DEFAULT_DAY_OF_WEEK,
+  DEFAULT_EDITOR_WIDTH,
+  DEFAULT_SHORTCUTS,
+  DEFAULT_SIDEBAR_WIDTH,
+} from '$constants';
 import { loggers } from '$lib/logger';
 import type {
   AccentColor,
@@ -12,49 +19,16 @@ import type {
   TaskStatus,
   Theme,
   TimeFormat,
-} from '$types/index';
+} from '$types';
+import type {
+  EditorFieldVisibility,
+  QuickTimePresets,
+  TaskBadgeVisibility,
+  TaskListDensity,
+} from '$types/settings';
 import { applyAccentColor, applyTheme } from '$utils/color';
-import {
-  DEFAULT_COLOR,
-  DEFAULT_DAY_OF_WEEK,
-  DEFAULT_EDITOR_WIDTH,
-  DEFAULT_SHORTCUTS,
-  DEFAULT_SIDEBAR_WIDTH,
-} from '$utils/constants';
 
 const log = loggers.settings;
-
-export type TaskListDensity = 'comfortable' | 'compact';
-
-export interface EditorFieldVisibility {
-  status: boolean;
-  description: boolean;
-  url: boolean;
-  dates: boolean;
-  priority: boolean;
-  calendar: boolean;
-  tags: boolean;
-  reminders: boolean;
-  subtasks: boolean;
-}
-
-export interface TaskBadgeVisibility {
-  startDate: boolean;
-  dueDate: boolean;
-  tags: boolean;
-  calendar: boolean;
-  url: boolean;
-  status: boolean;
-  repeat: boolean;
-  subtasks: boolean;
-}
-
-export interface QuickTimePresets {
-  morning: number;
-  afternoon: number;
-  evening: number;
-  night: number;
-}
 
 interface SettingsState {
   theme: Theme;
@@ -581,3 +555,11 @@ export const settingsStore = {
 
 // Context for React components
 export const SettingsContext = createContext<SettingsStore | null>(null);
+
+// Re-export settings-specific types for consumers that import from this module
+export type {
+  EditorFieldVisibility,
+  QuickTimePresets,
+  TaskBadgeVisibility,
+  TaskListDensity,
+} from '$types/settings';

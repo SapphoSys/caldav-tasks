@@ -1,9 +1,9 @@
 import Plus from 'lucide-react/icons/plus';
 import TagIcon from 'lucide-react/icons/tag';
 import X from 'lucide-react/icons/x';
-import { getIconByName } from '$data/icons';
+import { getIconByName } from '$constants/icons';
 import { getAllTags } from '$lib/store/tags';
-import type { Tag, Task } from '$types/index';
+import type { Tag, Task } from '$types';
 
 interface TagsProps {
   task: Task;

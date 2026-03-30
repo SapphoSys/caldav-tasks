@@ -6,7 +6,7 @@
  */
 
 import { RRuleTemporal } from 'rrule-temporal';
-import type { DateFormat } from '$types/index';
+import type { DateFormat } from '$types';
 import { formatDate } from '$utils/date';
 
 /** Format a JS Date as a UTC iCal datetime string (YYYYMMDDTHHMMSSZ). */

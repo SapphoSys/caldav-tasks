@@ -17,7 +17,7 @@ import { useConfirmDialog } from '$hooks/useConfirmDialog';
 import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
 import { useMenuEvents } from '$hooks/useMenuEvents';
 import { useSettingsStore } from '$hooks/useSettingsStore';
-import type { SettingsCategory, SettingsSubtab, SortDirection, SortMode } from '$types/index';
+import type { SettingsCategory, SettingsSubtab, SortDirection, SortMode } from '$types';
 
 export const useMenuHandlers = (
   onSync?: () => void,

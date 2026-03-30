@@ -3,7 +3,7 @@
  */
 
 import { loadDataStore } from '$lib/store';
-import type { Priority, SortConfig, Task } from '$types/index';
+import type { Priority, SortConfig, Task } from '$types';
 
 const priorityOrder: Record<Priority, number> = {
   high: 0,

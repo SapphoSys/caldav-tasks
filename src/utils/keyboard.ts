@@ -1,4 +1,4 @@
-import type { KeyboardShortcut } from '$types/index';
+import type { KeyboardShortcut } from '$types';
 import { isMacPlatform } from '$utils/platform';
 
 export const getMetaKeyLabel = () => {

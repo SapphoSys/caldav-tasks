@@ -1,7 +1,7 @@
 import { EmojiPicker } from 'frimousse';
 import { useEffect, useRef, useState } from 'react';
-import { CALENDAR_ICONS, getIconByName } from '$data/icons';
-import { FALLBACK_ITEM_COLOR } from '$utils/constants';
+import { FALLBACK_ITEM_COLOR } from '$constants';
+import { CALENDAR_ICONS, getIconByName } from '$constants/icons';
 
 interface IconEmojiPickerProps {
   iconValue: string;

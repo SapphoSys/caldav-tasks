@@ -6,10 +6,10 @@ import { addDays, format, setHours, startOfDay, subDays, subHours, subMinutes } 
 import { settingsStore } from '$context/settingsContext';
 import { toastManager } from '$hooks/useToast';
 import * as db from '$lib/database';
+import { toAppleEpoch } from '$lib/ical';
 import { loggers } from '$lib/logger';
 import { getIsInitialized, loadDataStore, saveDataStore } from '$lib/store';
-import type { DefaultDateOffset, DefaultReminderOffset, Reminder, Task } from '$types/index';
-import { toAppleEpoch } from '$utils/ical';
+import type { DefaultDateOffset, DefaultReminderOffset, Reminder, Task } from '$types';
 import { generateUUID } from '$utils/misc';
 import { getNextOccurrence, parseRRule } from '$utils/recurrence';
 

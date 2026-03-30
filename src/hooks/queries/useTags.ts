@@ -9,7 +9,7 @@ import { subscribeToDataChanges } from '$lib/store';
 import { reorderTags } from '$lib/store/reorderTags';
 import { createTag, deleteTag, getAllTags, getTagById, updateTag } from '$lib/store/tags';
 import { getTasksByTag } from '$lib/store/tasks';
-import type { Tag } from '$types/index';
+import type { Tag } from '$types';
 
 /**
  * Hook to get all tags

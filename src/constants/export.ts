@@ -1,4 +1,4 @@
-import type { ExportFormat } from '$types/index';
+import type { ExportFormat } from '$types';
 
 /**
  * Export format options with descriptions and file extensions

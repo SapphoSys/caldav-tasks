@@ -5,6 +5,7 @@
 
 import type { QueryClient } from '@tanstack/react-query';
 import { emit } from '@tauri-apps/api/event';
+import { MENU_EVENTS } from '$constants/menu';
 import { toastManager } from '$hooks/useToast';
 import { caldavService } from '$lib/caldav';
 import * as db from '$lib/database';
@@ -16,9 +17,8 @@ import { addCalendar, updateCalendar } from '$lib/store/calendars';
 import { createTag, getAllTags, updateTag } from '$lib/store/tags';
 import { createTask, deleteTask, getTasksByCalendar, updateTask } from '$lib/store/tasks';
 import { getUIState, setAllTasksView } from '$lib/store/ui';
-import type { Calendar, Task } from '$types/index';
+import type { Calendar, Task } from '$types';
 import { generateTagColor } from '$utils/color';
-import { MENU_EVENTS } from '$utils/menu';
 
 const log = loggers.dataStore;
 const syncLog = loggers.sync;

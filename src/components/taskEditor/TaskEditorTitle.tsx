@@ -6,7 +6,7 @@ import { useEffect, useRef } from 'react';
 import { ComposedTextarea } from '$components/ComposedTextarea';
 import { useToggleTaskComplete } from '$hooks/queries/useTasks';
 import { useDebouncedTaskUpdate } from '$hooks/useDebouncedTaskUpdate';
-import type { Task } from '$types/index';
+import type { Task } from '$types';
 
 interface TaskEditorTitleProps {
   task: Task;

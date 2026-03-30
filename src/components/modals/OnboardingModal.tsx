@@ -11,14 +11,14 @@ import { useEffect, useRef, useState } from 'react';
 import { AppSelect } from '$components/AppSelect';
 import { MacNotificationPermissionCard } from '$components/MacNotificationPermissionCard';
 import { ModalWrapper } from '$components/ModalWrapper';
-import { ONBOARDING_STEPS } from '$data/onboarding';
-import { SYNC_INTERVAL_OPTIONS } from '$data/settings';
-import { THEME_OPTIONS } from '$data/theme';
+import { ACCENT_COLORS } from '$constants';
+import { ONBOARDING_STEPS } from '$constants/onboarding';
+import { SYNC_INTERVAL_OPTIONS } from '$constants/settings';
+import { THEME_OPTIONS } from '$constants/theme';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useNotificationContext } from '$hooks/useNotificationContext';
 import { usePlatform } from '$hooks/usePlatform';
 import { useSettingsStore } from '$hooks/useSettingsStore';
-import { ACCENT_COLORS } from '$utils/constants';
 import { isMacPlatform } from '$utils/platform';
 
 interface OnboardingModalProps {

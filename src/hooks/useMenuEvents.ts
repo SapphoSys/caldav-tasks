@@ -1,10 +1,10 @@
 import { listen } from '@tauri-apps/api/event';
 import { useEffect } from 'react';
+import { DEFAULT_SORT_CONFIG } from '$constants';
+import { MENU_EVENTS } from '$constants/menu';
 import { useUIState } from '$hooks/queries/useUIState';
 import { loggers } from '$lib/logger';
-import type { SortDirection, SortMode } from '$types/index';
-import { DEFAULT_SORT_CONFIG } from '$utils/constants';
-import { MENU_EVENTS } from '$utils/menu';
+import type { SortDirection, SortMode } from '$types';
 import { isCEF } from '$utils/platform';
 
 const log = loggers.menu;

@@ -8,47 +8,12 @@ import {
   PredefinedMenuItem,
   Submenu,
 } from '@tauri-apps/api/menu';
+import { MENU_EVENTS } from '$constants/menu';
 import { loggers } from '$lib/logger';
-import type { KeyboardShortcut, SortMode } from '$types/index';
+import type { KeyboardShortcut, SortMode } from '$types';
 import { isMacPlatform } from '$utils/platform';
 
 const log = loggers.menu;
-
-export const MENU_EVENTS = {
-  ABOUT: 'menu:about',
-  QUIT: 'menu:quit',
-  QUIT_MENU: 'menu:quit-menu',
-  NEW_TASK: 'menu:new-task',
-  SYNC: 'menu:sync',
-  PREFERENCES: 'menu:preferences',
-  ADD_ACCOUNT: 'menu:add-account',
-  EDIT_ACCOUNT: 'menu:edit-account',
-  ADD_CALENDAR: 'menu:add-calendar',
-  IMPORT_TASKS: 'menu:import-tasks',
-  SEARCH: 'menu:search',
-  SHOW_KEYBOARD_SHORTCUTS: 'menu:show-keyboard-shortcuts',
-  TOGGLE_COMPLETED: 'menu:toggle-completed',
-  TOGGLE_UNSTARTED: 'menu:toggle-unstarted',
-  SORT_MANUAL: 'menu:sort-manual',
-  SORT_SMART: 'menu:sort-smart',
-  SORT_START_DATE: 'menu:sort-start-date',
-  SORT_DUE_DATE: 'menu:sort-due-date',
-  SORT_PRIORITY: 'menu:sort-priority',
-  SORT_TITLE: 'menu:sort-title',
-  SORT_CREATED: 'menu:sort-created',
-  SORT_MODIFIED: 'menu:sort-modified',
-  TOGGLE_SIDEBAR: 'menu:toggle-sidebar',
-  DELETE_TASK: 'menu:delete-task',
-  NAV_PREV_LIST: 'menu:nav-prev-list',
-  NAV_NEXT_LIST: 'menu:nav-next-list',
-  CHECK_FOR_UPDATES: 'menu:check-for-updates',
-  SHOW_CHANGELOG: 'menu:show-changelog',
-  REMOVE_ACCOUNT: 'menu:remove-account',
-  SYNC_CALENDAR: 'menu:sync-calendar',
-  EDIT_CALENDAR: 'menu:edit-calendar',
-  EXPORT_CALENDAR: 'menu:export-calendar',
-  DELETE_CALENDAR: 'menu:delete-calendar',
-} as const;
 
 // store menu item references for updates
 const menuItemRefs: {

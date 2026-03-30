@@ -5,12 +5,7 @@
 import * as db from '$lib/database';
 import { loggers } from '$lib/logger';
 import { loadDataStore, saveDataStore } from '$lib/store';
-import type {
-  AccountSortConfig,
-  CalendarSortConfig,
-  SortConfig,
-  TagSortConfig,
-} from '$types/index';
+import type { AccountSortConfig, CalendarSortConfig, SortConfig, TagSortConfig } from '$types';
 
 const log = loggers.dataStore;
 

@@ -18,7 +18,8 @@ import Plus from 'lucide-react/icons/plus';
 import User from 'lucide-react/icons/user';
 import { useEffect, useState } from 'react';
 import { Tooltip } from '$components/Tooltip';
-import { getIconByName } from '$data/icons';
+import { ACCOUNT_SORT_OPTIONS, CALENDAR_SORT_OPTIONS, FALLBACK_ITEM_COLOR } from '$constants';
+import { getIconByName } from '$constants/icons';
 import { useReorderAccounts, useReorderCalendars } from '$hooks/queries/useAccounts';
 import {
   useAccountSortConfig,
@@ -26,9 +27,8 @@ import {
   useSetAccountSortConfig,
   useSetCalendarSortConfig,
 } from '$hooks/queries/useUIState';
-import type { Account, AccountSortConfig, Calendar, CalendarSortConfig, Task } from '$types/index';
+import type { Account, AccountSortConfig, Calendar, CalendarSortConfig, Task } from '$types';
 import { getContrastTextColor } from '$utils/color';
-import { ACCOUNT_SORT_OPTIONS, CALENDAR_SORT_OPTIONS, FALLBACK_ITEM_COLOR } from '$utils/constants';
 
 interface SidebarAccountsListProps {
   accounts: Account[];

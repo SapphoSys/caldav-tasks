@@ -1,5 +1,5 @@
-import type { Theme } from '$types/index';
-import { COLOR_PRESETS } from '$utils/constants';
+import { COLOR_PRESETS } from '$constants';
+import type { Theme } from '$types';
 
 /**
  * parse any valid CSS color string to [r, g, b] using a canvas element.

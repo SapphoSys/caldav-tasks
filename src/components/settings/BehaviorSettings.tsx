@@ -1,7 +1,7 @@
 import { relaunch } from '@tauri-apps/plugin-process';
 import { AppSelect } from '$components/AppSelect';
 import { useSettingsStore } from '$hooks/useSettingsStore';
-import type { SubtaskDeletionBehavior } from '$types/index';
+import type { SubtaskDeletionBehavior } from '$types';
 import { isMacPlatform } from '$utils/platform';
 
 export const BehaviorSettings = () => {

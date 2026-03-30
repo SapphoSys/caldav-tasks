@@ -13,7 +13,9 @@ import RefreshCw from 'lucide-react/icons/refresh-cw';
 import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
 import { TaskContextMenu } from '$components/TaskContextMenu';
-import { getIconByName } from '$data/icons';
+import { FALLBACK_ITEM_COLOR } from '$constants';
+import { getIconByName } from '$constants/icons';
+import { getPriorityColor, getPriorityRingColor } from '$constants/priority';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useToggleTaskComplete } from '$hooks/queries/useTasks';
 import {
@@ -26,15 +28,13 @@ import {
 } from '$hooks/queries/useUIState';
 import { useContextMenu } from '$hooks/useContextMenu';
 import { useSettingsStore } from '$hooks/useSettingsStore';
+import { filterCalDavDescription } from '$lib/ical';
 import { getAllTags } from '$lib/store/tags';
 import { countChildren, getChildTasks, toggleTaskCollapsed } from '$lib/store/tasks';
-import type { Account, Task } from '$types/index';
+import type { Account, Task } from '$types';
 import { getContrastTextColor } from '$utils/color';
-import { FALLBACK_ITEM_COLOR } from '$utils/constants';
 import { formatDueDate, formatStartDate } from '$utils/date';
-import { pluralize } from '$utils/format';
-import { filterCalDavDescription } from '$utils/ical';
-import { getPriorityColor, getPriorityRingColor } from '$utils/priority';
+import { pluralize } from '$utils/misc';
 
 // Moved outside component — does not close over any component state
 const animateLayoutChanges: AnimateLayoutChanges = (args) => {

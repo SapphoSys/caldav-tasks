@@ -15,12 +15,12 @@ import ChevronRight from 'lucide-react/icons/chevron-right';
 import Plus from 'lucide-react/icons/plus';
 import { useEffect, useState } from 'react';
 import { Tooltip } from '$components/Tooltip';
-import { getIconByName } from '$data/icons';
+import { FALLBACK_ITEM_COLOR, TAG_SORT_OPTIONS } from '$constants';
+import { getIconByName } from '$constants/icons';
 import { useReorderTags } from '$hooks/queries/useTags';
 import { useSetTagSortConfig, useTagSortConfig } from '$hooks/queries/useUIState';
-import type { Tag, TagSortConfig, Task } from '$types/index';
+import type { Tag, TagSortConfig, Task } from '$types';
 import { getContrastTextColor } from '$utils/color';
-import { FALLBACK_ITEM_COLOR, TAG_SORT_OPTIONS } from '$utils/constants';
 
 interface SidebarTagsListProps {
   tags: Tag[];

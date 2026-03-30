@@ -28,9 +28,9 @@ import { useGlobalContextMenuClose } from '$hooks/useGlobalContextMenu';
 import { useSettingsStore } from '$hooks/useSettingsStore';
 import { useSidebarResize } from '$hooks/useSidebarResize';
 import { getTasksByCalendar } from '$lib/store/tasks';
-import type { Account, Calendar as CalendarType } from '$types/index';
+import type { Account, Calendar as CalendarType } from '$types';
 import { getMetaKeyLabel, getModifierJoiner } from '$utils/keyboard';
-import { clampToViewport } from '$utils/position';
+import { clampToViewport } from '$utils/misc';
 import { getAppInfo } from '$utils/version';
 
 interface SidebarProps {

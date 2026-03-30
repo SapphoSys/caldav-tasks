@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import Activity from 'lucide-react/icons/activity';
 import AlignLeft from 'lucide-react/icons/align-left';
@@ -20,11 +19,12 @@ import Sparkles from 'lucide-react/icons/sparkles';
 import Tag from 'lucide-react/icons/tag';
 import Type from 'lucide-react/icons/type';
 import X from 'lucide-react/icons/x';
+import type { ReactNode } from 'react';
 import { useTaskHistory } from '$hooks/queries/useTaskHistory';
 import { useFocusTrap } from '$hooks/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/useModalEscapeKey';
 import { useSettingsStore } from '$hooks/useSettingsStore';
-import type { TaskHistoryEntry } from '$types/index';
+import type { TaskHistoryEntry } from '$types/database';
 import { formatDate, formatTime } from '$utils/date';
 import { rruleToText } from '$utils/recurrence';
 

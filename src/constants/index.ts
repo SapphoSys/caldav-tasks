@@ -5,7 +5,7 @@ import type {
   SortDirection,
   SortMode,
   TagSortMode,
-} from '$types/index';
+} from '$types';
 
 // color presets for calendars, tags, etc
 export const COLOR_PRESETS = [

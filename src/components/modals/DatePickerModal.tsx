@@ -24,6 +24,7 @@ import Sunset from 'lucide-react/icons/sunset';
 import X from 'lucide-react/icons/x';
 import { useState } from 'react';
 import { AppSelect } from '$components/AppSelect';
+import { DEFAULT_TIME } from '$constants';
 import type { QuickTimePresets } from '$context/settingsContext';
 import { settingsStore } from '$context/settingsContext';
 import { useFocusTrap } from '$hooks/useFocusTrap';
@@ -36,7 +37,6 @@ import {
   getWeekStartValue,
   setDateTime,
 } from '$utils/calendar';
-import { DEFAULT_TIME } from '$utils/constants';
 import { formatDate, formatMonthYear, formatTime } from '$utils/date';
 
 const DEFAULT_QUICK_TIME_PRESETS: QuickTimePresets = {

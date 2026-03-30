@@ -8,7 +8,7 @@ import {
   updateTask as dbUpdateTask,
   getTaskById,
 } from '$lib/database';
-import type { Task } from '$types/index';
+import type { Task } from '$types';
 import { generateUUID } from '$utils/misc';
 
 /**

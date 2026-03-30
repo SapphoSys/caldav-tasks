@@ -5,7 +5,7 @@
 import * as db from '$lib/database';
 import { loggers } from '$lib/logger';
 import { loadDataStore, saveDataStore } from '$lib/store';
-import type { Calendar, Task } from '$types/index';
+import type { Calendar, Task } from '$types';
 import { generateUUID } from '$utils/misc';
 
 const log = loggers.dataStore;

@@ -5,7 +5,7 @@ import ChevronRight from 'lucide-react/icons/chevron-right';
 import X from 'lucide-react/icons/x';
 import { useRef, useState } from 'react';
 import { useChildTasks } from '$hooks/queries/useTasks';
-import type { Task } from '$types/index';
+import type { Task } from '$types';
 
 const animateLayoutChanges: AnimateLayoutChanges = (args) =>
   defaultAnimateLayoutChanges({ ...args, wasDragging: true });
