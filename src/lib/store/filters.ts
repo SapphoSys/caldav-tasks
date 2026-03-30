@@ -1,7 +1,3 @@
-/**
- * Filtering and sorting helpers
- */
-
 import { loadDataStore } from '$lib/store';
 import type { Priority, SortConfig, Task } from '$types';
 

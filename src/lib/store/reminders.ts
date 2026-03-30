@@ -1,7 +1,3 @@
-/**
- * Reminder operations
- */
-
 import { loadDataStore, saveDataStore } from '$lib/store';
 import type { Reminder } from '$types';
 import { generateUUID } from '$utils/misc';

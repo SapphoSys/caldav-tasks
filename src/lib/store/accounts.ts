@@ -1,8 +1,8 @@
-/**
- * Account operations
- */
-
-import * as db from '$lib/database';
+import {
+  createAccount as dbCreateAccount,
+  deleteAccount as dbDeleteAccount,
+  updateAccount as dbUpdateAccount,
+} from '$lib/database/accounts';
 import { loggers } from '$lib/logger';
 import { deleteAppPassword as deleteNextcloudAppPassword } from '$lib/nextcloud-auth';
 import { loadDataStore, saveDataStore } from '$lib/store';
@@ -11,7 +11,6 @@ import { generateUUID } from '$utils/misc';
 
 const log = loggers.dataStore;
 
-// Account operations
 export const getAllAccounts = () => {
   return loadDataStore().accounts;
 };
@@ -23,7 +22,6 @@ export const getAccountById = (id: string) => {
 export const createAccount = (accountData: Partial<Account>) => {
   const data = loadDataStore();
 
-  // Check for duplicate accounts (same server URL and username)
   const serverUrl = accountData.serverUrl ?? '';
   const username = accountData.username ?? '';
   const duplicate = data.accounts.find(
@@ -48,8 +46,7 @@ export const createAccount = (accountData: Partial<Account>) => {
     sortOrder: accountData.sortOrder || maxExistingOrder + 100,
   } satisfies Account;
 
-  // Persist to SQLite
-  db.createAccount(account).catch((e) => log.error('Failed to persist account:', e));
+  dbCreateAccount(account).catch((e) => log.error('Failed to persist account:', e));
 
   saveDataStore({
     ...data,
@@ -71,9 +68,8 @@ export const updateAccount = (id: string, updates: Partial<Account>) => {
     return acc;
   });
 
-  // Persist to SQLite
   if (updatedAccount) {
-    db.updateAccount(id, updates).catch((e) => log.error('Failed to persist account update:', e));
+    dbUpdateAccount(id, updates).catch((e) => log.error('Failed to persist account update:', e));
   }
 
   saveDataStore({ ...data, accounts });
@@ -86,7 +82,7 @@ export const deleteAccount = (id: string) => {
   const deletedAccount = data.accounts.find((acc) => acc.id === id);
   const deletedCalendarIds = deletedAccount?.calendars.map((c) => c.id) ?? [];
 
-  // Delete the app password on the server (for supported server types)
+  // Delete the app password on the server (only Nextcloud for now)
   if (deletedAccount?.serverType === 'nextcloud') {
     deleteNextcloudAppPassword(
       deletedAccount.serverUrl,
@@ -97,7 +93,7 @@ export const deleteAccount = (id: string) => {
       .catch((e) => log.warn('Failed to delete Nextcloud app password:', e));
   }
 
-  db.deleteAccount(id).catch((e) => log.error('Failed to persist account deletion:', e));
+  dbDeleteAccount(id).catch((e) => log.error('Failed to persist account deletion:', e));
 
   // check if the active calendar belongs to the deleted account
   const isActiveCalendarDeleted = deletedCalendarIds.includes(data.ui.activeCalendarId ?? '');

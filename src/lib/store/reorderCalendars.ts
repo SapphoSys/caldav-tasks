@@ -1,8 +1,4 @@
-/**
- * Calendar reordering operations
- */
-
-import * as db from '$lib/database';
+import { updateCalendar } from '$lib/database/calendars';
 import { loggers } from '$lib/logger';
 import { loadDataStore, saveDataStore } from '$lib/store';
 
@@ -36,7 +32,7 @@ export const reorderCalendars = (accountId: string, activeId: string, overId: st
     const original = account.calendars.find((c) => c.id === cal.id);
     if (original?.sortOrder !== cal.sortOrder) {
       log.info(`Updating sort_order for calendar "${cal.displayName}": ${cal.sortOrder}`);
-      db.updateCalendar(cal.id, { sortOrder: cal.sortOrder }).catch((e) =>
+      updateCalendar(cal.id, { sortOrder: cal.sortOrder }).catch((e) =>
         log.error('Failed to persist calendar sort order:', e),
       );
     }

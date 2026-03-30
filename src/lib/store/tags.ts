@@ -1,9 +1,10 @@
-/**
- * Tag operations
- */
-
 import { FALLBACK_ITEM_COLOR } from '$constants';
-import * as db from '$lib/database';
+import {
+  createTag as dbCreateTag,
+  deleteTag as dbDeleteTag,
+  updateTag as dbUpdateTag,
+} from '$lib/database/tags';
+import { updateTask as dbUpdateTask } from '$lib/database/tasks';
 import { loggers } from '$lib/logger';
 import { loadDataStore, saveDataStore } from '$lib/store';
 import type { Tag } from '$types';
@@ -33,8 +34,7 @@ export const createTag = (tagData: Partial<Tag>) => {
     sortOrder: tagData.sortOrder || maxExistingOrder + 100,
   } satisfies Tag;
 
-  // Persist to SQLite
-  db.createTag(tag).catch((e) => log.error('Failed to persist tag:', e));
+  dbCreateTag(tag).catch((e) => log.error('Failed to persist tag:', e));
 
   saveDataStore({ ...data, tags: [...data.tags, tag] });
   return tag;
@@ -75,12 +75,11 @@ export const updateTag = (id: string, updates: Partial<Tag>, options: UpdateTagO
       })
     : data.tasks;
 
-  // Persist to SQLite
-  db.updateTag(id, updates).catch((e) => log.error('Failed to persist tag update:', e));
+  dbUpdateTag(id, updates).catch((e) => log.error('Failed to persist tag update:', e));
 
   if (tasksToPersist.length > 0) {
     for (const task of tasksToPersist) {
-      db.updateTask(task.id, task).catch((e) => log.error('Failed to persist task update:', e));
+      dbUpdateTask(task.id, task).catch((e) => log.error('Failed to persist task update:', e));
     }
   }
 
@@ -92,8 +91,7 @@ export const deleteTag = (id: string) => {
   const data = loadDataStore();
   const now = new Date();
 
-  // Persist to SQLite
-  db.deleteTag(id).catch((e) => log.error('Failed to persist tag deletion:', e));
+  dbDeleteTag(id).catch((e) => log.error('Failed to persist tag deletion:', e));
 
   saveDataStore({
     ...data,

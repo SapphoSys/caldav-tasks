@@ -1,8 +1,4 @@
-/**
- * Account reordering operations
- */
-
-import * as db from '$lib/database';
+import { updateAccount } from '$lib/database/accounts';
 import { loggers } from '$lib/logger';
 import { loadDataStore, saveDataStore } from '$lib/store';
 
@@ -33,7 +29,7 @@ export const reorderAccounts = (activeId: string, overId: string) => {
     const original = data.accounts.find((a) => a.id === acc.id);
     if (original?.sortOrder !== acc.sortOrder) {
       log.info(`Updating sort_order for account "${acc.name}": ${acc.sortOrder}`);
-      db.updateAccount(acc.id, { sortOrder: acc.sortOrder }).catch((e) =>
+      updateAccount(acc.id, { sortOrder: acc.sortOrder }).catch((e) =>
         log.error('Failed to persist account sort order:', e),
       );
     }

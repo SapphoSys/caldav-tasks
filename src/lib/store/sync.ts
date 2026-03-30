@@ -1,14 +1,9 @@
-/**
- * Sync-related operations
- * Handles pending deletions, account reconnection, calendar/task sync, and server push/delete
- */
-
 import type { QueryClient } from '@tanstack/react-query';
 import { emit } from '@tauri-apps/api/event';
 import { MENU_EVENTS } from '$constants/menu';
 import { toastManager } from '$hooks/useToast';
 import { caldavService } from '$lib/caldav';
-import * as db from '$lib/database';
+import { clearPendingDeletion as dbClearPendingDeletion } from '$lib/database/pendingDeletions';
 import { loggers } from '$lib/logger';
 import { queryKeys } from '$lib/queryClient';
 import { loadDataStore, saveDataStore } from '$lib/store';
@@ -30,8 +25,7 @@ export const getPendingDeletions = () => {
 export const clearPendingDeletion = (uid: string) => {
   const data = loadDataStore();
 
-  // Persist to SQLite
-  db.clearPendingDeletion(uid).catch((e) =>
+  dbClearPendingDeletion(uid).catch((e) =>
     log.error('Failed to persist pending deletion clear:', e),
   );
 
@@ -41,9 +35,6 @@ export const clearPendingDeletion = (uid: string) => {
   });
 };
 
-/**
- * Reconnect all accounts on app startup
- */
 export const reconnectAccounts = async () => {
   const accounts = getAllAccounts();
   for (const account of accounts) {
@@ -70,9 +61,6 @@ export const reconnectAccounts = async () => {
   }
 };
 
-/**
- * Ensure a tag exists by name, returns the tag ID
- */
 export const ensureTagExists = (tagName: string) => {
   const currentTags = getAllTags();
   const existing = currentTags.find((t) => t.name.toLowerCase() === tagName.toLowerCase());
@@ -124,9 +112,6 @@ const applyRemoteTagColors = (remoteTask: Task, categoryNames: string[]) => {
   }
 };
 
-/**
- * Sync calendars for an account - add new, remove deleted, update properties
- */
 export const syncCalendarsForAccount = async (accountId: string, queryClient: QueryClient) => {
   const accounts = getAllAccounts();
   const account = accounts.find((a) => a.id === accountId);
@@ -259,9 +244,6 @@ export const syncCalendarsForAccount = async (accountId: string, queryClient: Qu
   return updatedCalendars;
 };
 
-/**
- * Sync a specific calendar's tasks - push local changes, then fetch from server
- */
 export const syncCalendarTasks = async (
   calendarId: string,
   queryClient: QueryClient,
@@ -447,9 +429,6 @@ export const syncCalendarTasks = async (
   }
 };
 
-/**
- * Sync all calendars for all accounts
- */
 export const performFullSync = async (
   queryClient: QueryClient,
   setSyncingCalendarId: (id: string | null) => void,
@@ -507,9 +486,6 @@ export const performFullSync = async (
   }
 };
 
-/**
- * Push a task to the server
- */
 export const pushTaskToServer = async (task: Task, queryClient: QueryClient) => {
   const accounts = getAllAccounts();
   const account = accounts.find((a) => a.id === task.accountId);
@@ -539,9 +515,6 @@ export const pushTaskToServer = async (task: Task, queryClient: QueryClient) => 
   queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
 };
 
-/**
- * Delete a task from the server
- */
 export const removeTaskFromServer = async (task: Task) => {
   if (!task.href) return true; // Not on server yet
 

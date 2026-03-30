@@ -1,10 +1,6 @@
-/**
- * Task reordering operations
- */
-
 import { loadDataStore, saveDataStore } from '$lib/store';
 import { getSortedTasks } from '$lib/store/filters';
-import type { FlattenedTask } from '$lib/store/types';
+import type { FlattenedTask } from '$types/store';
 
 export const reorderTasks = (
   activeId: string,

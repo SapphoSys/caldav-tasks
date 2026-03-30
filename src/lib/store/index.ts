@@ -1,20 +1,19 @@
-/**
- * Core data store, cache management, and listeners
- */
-
 import {
   DEFAULT_ACCOUNT_SORT_CONFIG,
   DEFAULT_CALENDAR_SORT_CONFIG,
   DEFAULT_SORT_CONFIG,
   DEFAULT_TAG_SORT_CONFIG,
 } from '$constants';
-import * as db from '$lib/database';
+import {
+  subscribeToDataChanges as dbSubscribeToDataChanges,
+  initDatabase,
+} from '$lib/database/connection';
+import { getDataSnapshot as dbGetDataSnapshot } from '$lib/database/snapshot';
 import { loggers } from '$lib/logger';
-import type { DataChangeListener, DataStore, UIState } from '$lib/store/types';
+import type { DataChangeListener, DataStore, UIState } from '$types/store';
 
 const log = loggers.dataStore;
 
-// Default UI state
 export const defaultUIState: UIState = {
   activeAccountId: null,
   activeCalendarId: null,
@@ -30,7 +29,6 @@ export const defaultUIState: UIState = {
   isEditorOpen: false,
 };
 
-// Default data store
 export const defaultDataStore: DataStore = {
   tasks: [],
   tags: [],
@@ -50,7 +48,7 @@ const listeners: Set<DataChangeListener> = new Set();
 export const subscribeToDataChanges = (listener: DataChangeListener) => {
   listeners.add(listener);
   // Also subscribe to database changes
-  db.subscribeToDataChanges(listener);
+  dbSubscribeToDataChanges(listener);
   return () => {
     listeners.delete(listener);
   };
@@ -62,13 +60,12 @@ export const notifyListeners = () => {
   });
 };
 
-// Initialize the database and load data into cache
 export const initializeDataStore = async () => {
   if (isInitialized) return;
   if (initPromise) return initPromise;
 
   initPromise = (async () => {
-    await db.initDatabase();
+    await initDatabase();
     await refreshCache();
     isInitialized = true;
     log.info('Data store initialized with SQLite');
@@ -77,16 +74,14 @@ export const initializeDataStore = async () => {
   return initPromise;
 };
 
-// Refresh cache from database
 export const refreshCache = async () => {
   try {
-    dataStoreCache = await db.getDataSnapshot();
+    dataStoreCache = await dbGetDataSnapshot();
   } catch (error) {
     log.error('Failed to refresh cache:', error);
   }
 };
 
-// Load data from cache (must be initialized first)
 export const loadDataStore = () => {
   if (!dataStoreCache) {
     log.warn('Data store not initialized, returning defaults');
@@ -95,19 +90,15 @@ export const loadDataStore = () => {
   return dataStoreCache;
 };
 
-// Save data to cache and notify listeners
-// Note: Individual operations must call db.* functions to persist to SQLite
 export const saveDataStore = (data: DataStore) => {
   dataStoreCache = data;
   notifyListeners();
 };
 
-// Get a snapshot of the current data
 export const getDataSnapshot = () => {
   return loadDataStore();
 };
 
-// Check if the data store is initialized
 export const getIsInitialized = () => {
   return isInitialized;
 };

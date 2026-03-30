@@ -1,11 +1,11 @@
-/**
- * Task operations - CRUD and manipulation
- */
-
 import { addDays, format, setHours, startOfDay, subDays, subHours, subMinutes } from 'date-fns';
 import { settingsStore } from '$context/settingsContext';
 import { toastManager } from '$hooks/useToast';
-import * as db from '$lib/database';
+import {
+  createTask as dbCreateTask,
+  deleteTask as dbDeleteTask,
+  updateTask as dbUpdateTask,
+} from '$lib/database/tasks';
 import { toAppleEpoch } from '$lib/ical';
 import { loggers } from '$lib/logger';
 import { getIsInitialized, loadDataStore, saveDataStore } from '$lib/store';
@@ -208,9 +208,9 @@ export const createTask = (taskData: Partial<Task>) => {
     tasks: [...data.tasks, task],
   });
 
-  // Persist to SQLite (including local-only tasks)
+  // Persist to SQLite including local-only tasks
   if (getIsInitialized()) {
-    db.createTask(task).catch((e) => log.error('Failed to sync task to database:', e));
+    dbCreateTask(task).catch((e) => log.error('Failed to sync task to database:', e));
   }
 
   return task;
@@ -236,9 +236,8 @@ export const updateTask = (id: string, updates: Partial<Task>) => {
     return task;
   });
 
-  // Persist to SQLite
   if (updatedTask) {
-    db.updateTask(id, updatedTask).catch((e) => log.error('Failed to persist task update:', e));
+    dbUpdateTask(id, updatedTask).catch((e) => log.error('Failed to persist task update:', e));
   }
 
   saveDataStore({ ...data, tasks });
@@ -251,8 +250,7 @@ export const deleteTask = (id: string, deleteChildren: boolean = true) => {
   const task = data.tasks.find((t) => t.id === id);
   if (!task) return;
 
-  // Persist to SQLite
-  db.deleteTask(id, deleteChildren).catch((e) => log.error('Failed to persist task deletion:', e));
+  dbDeleteTask(id, deleteChildren).catch((e) => log.error('Failed to persist task deletion:', e));
 
   // Get all descendants recursively
   const getAllDescendantIds = (parentUid: string): string[] => {
@@ -361,7 +359,7 @@ export const toggleTaskComplete = (id: string) => {
           synced: false,
         };
 
-        db.updateTask(id, advances).catch((e) =>
+        dbUpdateTask(id, advances).catch((e) =>
           log.error('Failed to persist recurring task advance:', e),
         );
         const tasks = data.tasks.map((t) => (t.id === id ? { ...t, ...advances } : t));
@@ -391,8 +389,7 @@ export const toggleTaskComplete = (id: string) => {
     synced: false,
   };
 
-  // Persist to SQLite
-  db.updateTask(id, updates).catch((e) => log.error('Failed to persist task toggle:', e));
+  dbUpdateTask(id, updates).catch((e) => log.error('Failed to persist task toggle:', e));
 
   const tasks = data.tasks.map((t) => (t.id === id ? { ...t, ...updates } : t));
   saveDataStore({ ...data, tasks });
@@ -407,8 +404,7 @@ export const toggleTaskCollapsed = (id: string) => {
     isCollapsed: !task.isCollapsed,
   };
 
-  // Persist to SQLite
-  db.updateTask(id, updates).catch((e) => log.error('Failed to persist task collapse:', e));
+  dbUpdateTask(id, updates).catch((e) => log.error('Failed to persist task collapse:', e));
 
   const tasks = data.tasks.map((t) => (t.id === id ? { ...t, ...updates } : t));
   saveDataStore({ ...data, tasks });

@@ -4,7 +4,7 @@ import { BaseDirectory, remove } from '@tauri-apps/plugin-fs';
 import { platform } from '@tauri-apps/plugin-os';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { settingsStore } from '$context/settingsContext';
-import { getUIState } from '$lib/database';
+import { getUIState } from '$lib/database/ui';
 import { createBootstrapErrorUI } from '$lib/errorUI';
 import { initLogger, loggers } from '$lib/logger';
 import { initializeDataStore } from '$lib/store';

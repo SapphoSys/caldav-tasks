@@ -1,8 +1,9 @@
-/**
- * Calendar operations
- */
-
-import * as db from '$lib/database';
+import {
+  addCalendar as dbAddCalendar,
+  deleteCalendar as dbDeleteCalendar,
+  updateCalendar as dbUpdateCalendar,
+} from '$lib/database/calendars';
+import { updateTask as dbUpdateTask } from '$lib/database/tasks';
 import { loggers } from '$lib/logger';
 import { loadDataStore, saveDataStore } from '$lib/store';
 import type { Calendar, Task } from '$types';
@@ -29,8 +30,7 @@ export const addCalendar = (accountId: string, calendarData: Partial<Calendar>) 
 
   log.info(`Adding calendar: ${calendar.displayName} with ID: ${calendar.id}`);
 
-  // Persist to SQLite
-  db.addCalendar(accountId, calendar).catch((e) => log.error('Failed to persist calendar:', e));
+  dbAddCalendar(accountId, calendar).catch((e) => log.error('Failed to persist calendar:', e));
 
   // Check if this is the first calendar being added
   const allCalendars = data.accounts.flatMap((acc) => acc.calendars);
@@ -52,7 +52,7 @@ export const addCalendar = (accountId: string, calendarData: Partial<Calendar>) 
           modifiedAt: new Date(),
         } satisfies Task;
 
-        db.updateTask(task.id, {
+        dbUpdateTask(task.id, {
           calendarId: calendar.id,
           accountId: accountId,
           localOnly: false,
@@ -83,8 +83,7 @@ export const updateCalendar = (
 ) => {
   const data = loadDataStore();
 
-  // Persist to SQLite
-  db.updateCalendar(calendarId, updates).catch((e) =>
+  dbUpdateCalendar(calendarId, updates).catch((e) =>
     log.error('Failed to persist calendar update:', e),
   );
 
@@ -107,8 +106,7 @@ export const updateCalendar = (
 export const deleteCalendar = (accountId: string, calendarId: string) => {
   const data = loadDataStore();
 
-  // Persist to SQLite
-  db.deleteCalendar(accountId, calendarId).catch((e) =>
+  dbDeleteCalendar(accountId, calendarId).catch((e) =>
     log.error('Failed to persist calendar deletion:', e),
   );
 

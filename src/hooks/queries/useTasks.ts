@@ -4,7 +4,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { logHistoryForTaskUpdate, logTaskChange } from '$lib/database';
+import { logHistoryForTaskUpdate, logTaskChange } from '$lib/database/history';
 import { queryKeys } from '$lib/queryClient';
 import { subscribeToDataChanges } from '$lib/store';
 import { getFilteredTasks, getSortedTasks } from '$lib/store/filters';

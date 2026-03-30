@@ -1,13 +1,9 @@
-/**
- * Subtask operations
- */
-
 import {
   createTask as dbCreateTask,
   deleteTask as dbDeleteTask,
   updateTask as dbUpdateTask,
   getTaskById,
-} from '$lib/database';
+} from '$lib/database/tasks';
 import type { Task } from '$types';
 import { generateUUID } from '$utils/misc';
 

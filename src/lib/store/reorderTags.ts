@@ -1,8 +1,4 @@
-/**
- * Tag reordering operations
- */
-
-import * as db from '$lib/database';
+import { updateTag } from '$lib/database/tags';
 import { loggers } from '$lib/logger';
 import { loadDataStore, saveDataStore } from '$lib/store';
 
@@ -33,7 +29,7 @@ export const reorderTags = (activeId: string, overId: string) => {
     const original = data.tags.find((t) => t.id === tag.id);
     if (original?.sortOrder !== tag.sortOrder) {
       log.info(`Updating sort_order for tag "${tag.name}": ${tag.sortOrder}`);
-      db.updateTag(tag.id, { sortOrder: tag.sortOrder }).catch((e) =>
+      updateTag(tag.id, { sortOrder: tag.sortOrder }).catch((e) =>
         log.error('Failed to persist tag sort order:', e),
       );
     }

@@ -2,7 +2,21 @@
  * UI state operations
  */
 
-import * as db from '$lib/database';
+import {
+  setAccountSortConfig as dbSetAccountSortConfig,
+  setActiveAccount as dbSetActiveAccount,
+  setActiveCalendar as dbSetActiveCalendar,
+  setActiveTag as dbSetActiveTag,
+  setAllTasksView as dbSetAllTasksView,
+  setCalendarSortConfig as dbSetCalendarSortConfig,
+  setEditorOpen as dbSetEditorOpen,
+  setSearchQuery as dbSetSearchQuery,
+  setSelectedTask as dbSetSelectedTask,
+  setShowCompletedTasks as dbSetShowCompletedTasks,
+  setShowUnstartedTasks as dbSetShowUnstartedTasks,
+  setSortConfig as dbSetSortConfig,
+  setTagSortConfig as dbSetTagSortConfig,
+} from '$lib/database/ui';
 import { loggers } from '$lib/logger';
 import { loadDataStore, saveDataStore } from '$lib/store';
 import type { AccountSortConfig, CalendarSortConfig, SortConfig, TagSortConfig } from '$types';
@@ -25,8 +39,7 @@ export const setActiveAccount = (id: string | null) => {
     }
   }
 
-  // Persist to SQLite
-  db.setActiveAccount(id).catch((e) => log.error('Failed to persist active account:', e));
+  dbSetActiveAccount(id).catch((e) => log.error('Failed to persist active account:', e));
 
   saveDataStore({
     ...data,
@@ -48,8 +61,7 @@ export const setActiveCalendar = (id: string | null) => {
     }
   }
 
-  // Persist to SQLite
-  db.setActiveCalendar(id).catch((e) => log.error('Failed to persist active calendar:', e));
+  dbSetActiveCalendar(id).catch((e) => log.error('Failed to persist active calendar:', e));
 
   saveDataStore({
     ...data,
@@ -75,8 +87,7 @@ export const setActiveTag = (id: string | null) => {
     }
   }
 
-  // Persist to SQLite
-  db.setActiveTag(id).catch((e) => log.error('Failed to persist active tag:', e));
+  dbSetActiveTag(id).catch((e) => log.error('Failed to persist active tag:', e));
 
   saveDataStore({
     ...data,
@@ -93,8 +104,7 @@ export const setActiveTag = (id: string | null) => {
 export const setAllTasksView = () => {
   const data = loadDataStore();
 
-  // Persist to SQLite
-  db.setAllTasksView().catch((e) => log.error('Failed to persist all tasks view:', e));
+  dbSetAllTasksView().catch((e) => log.error('Failed to persist all tasks view:', e));
 
   saveDataStore({
     ...data,
@@ -120,8 +130,7 @@ export const setSelectedTask = (id: string | null) => {
     }
   }
 
-  // Persist to SQLite
-  db.setSelectedTask(id).catch((e) => log.error('Failed to persist selected task:', e));
+  dbSetSelectedTask(id).catch((e) => log.error('Failed to persist selected task:', e));
 
   saveDataStore({
     ...data,
@@ -136,8 +145,7 @@ export const setSelectedTask = (id: string | null) => {
 export const setEditorOpen = (open: boolean) => {
   const data = loadDataStore();
 
-  // Persist to SQLite
-  db.setEditorOpen(open).catch((e) => log.error('Failed to persist editor open:', e));
+  dbSetEditorOpen(open).catch((e) => log.error('Failed to persist editor open:', e));
 
   saveDataStore({
     ...data,
@@ -152,8 +160,7 @@ export const setEditorOpen = (open: boolean) => {
 export const setSearchQuery = (query: string) => {
   const data = loadDataStore();
 
-  // Persist to SQLite
-  db.setSearchQuery(query).catch((e) => log.error('Failed to persist search query:', e));
+  dbSetSearchQuery(query).catch((e) => log.error('Failed to persist search query:', e));
 
   saveDataStore({
     ...data,
@@ -164,8 +171,7 @@ export const setSearchQuery = (query: string) => {
 export const setSortConfig = (config: SortConfig) => {
   const data = loadDataStore();
 
-  // Persist to SQLite
-  db.setSortConfig(config).catch((e) => log.error('Failed to persist sort config:', e));
+  dbSetSortConfig(config).catch((e) => log.error('Failed to persist sort config:', e));
 
   saveDataStore({
     ...data,
@@ -176,8 +182,7 @@ export const setSortConfig = (config: SortConfig) => {
 export const setAccountSortConfig = (config: AccountSortConfig) => {
   const data = loadDataStore();
 
-  // Persist to SQLite
-  db.setAccountSortConfig(config).catch((e) =>
+  dbSetAccountSortConfig(config).catch((e) =>
     log.error('Failed to persist account sort config:', e),
   );
 
@@ -190,8 +195,7 @@ export const setAccountSortConfig = (config: AccountSortConfig) => {
 export const setCalendarSortConfig = (config: CalendarSortConfig) => {
   const data = loadDataStore();
 
-  // Persist to SQLite
-  db.setCalendarSortConfig(config).catch((e) =>
+  dbSetCalendarSortConfig(config).catch((e) =>
     log.error('Failed to persist calendar sort config:', e),
   );
 
@@ -204,8 +208,7 @@ export const setCalendarSortConfig = (config: CalendarSortConfig) => {
 export const setTagSortConfig = (config: TagSortConfig) => {
   const data = loadDataStore();
 
-  // Persist to SQLite
-  db.setTagSortConfig(config).catch((e) => log.error('Failed to persist tag sort config:', e));
+  dbSetTagSortConfig(config).catch((e) => log.error('Failed to persist tag sort config:', e));
 
   saveDataStore({
     ...data,
@@ -216,8 +219,7 @@ export const setTagSortConfig = (config: TagSortConfig) => {
 export const setShowCompletedTasks = (show: boolean) => {
   const data = loadDataStore();
 
-  // Persist to SQLite
-  db.setShowCompletedTasks(show).catch((e) => log.error('Failed to persist show completed:', e));
+  dbSetShowCompletedTasks(show).catch((e) => log.error('Failed to persist show completed:', e));
 
   saveDataStore({
     ...data,
@@ -228,8 +230,7 @@ export const setShowCompletedTasks = (show: boolean) => {
 export const setShowUnstartedTasks = (show: boolean) => {
   const data = loadDataStore();
 
-  // Persist to SQLite
-  db.setShowUnstartedTasks(show).catch((e) => log.error('Failed to persist show unstarted:', e));
+  dbSetShowUnstartedTasks(show).catch((e) => log.error('Failed to persist show unstarted:', e));
 
   saveDataStore({
     ...data,
