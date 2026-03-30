@@ -187,10 +187,6 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     (enabled: boolean) => settingsStore.setCheckForUpdatesAutomatically(enabled),
     [],
   );
-  const setEnableToasts = useCallback(
-    (enabled: boolean) => settingsStore.setEnableToasts(enabled),
-    [],
-  );
   const setConfirmBeforeQuit = useCallback(
     (confirm: boolean) => settingsStore.setConfirmBeforeQuit(confirm),
     [],
@@ -287,7 +283,6 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     setSystemTrayRestartNeeded,
     setSystemTrayAppliedValue,
     setCheckForUpdatesAutomatically,
-    setEnableToasts,
     setConfirmBeforeQuit,
     setConfirmBeforeQuitAppliedValue,
     setDefaultAllDayReminderHour,

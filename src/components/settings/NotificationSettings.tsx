@@ -20,8 +20,6 @@ export const NotificationSettings = () => {
     setNotifyReminders,
     notifyOverdue,
     setNotifyOverdue,
-    enableToasts,
-    setEnableToasts,
     quietHoursEnabled,
     setQuietHoursEnabled,
     quietHoursStart,
@@ -119,22 +117,6 @@ export const NotificationSettings = () => {
           </div>
         )}
 
-        <div className="border-t border-surface-200 dark:border-surface-700" />
-
-        <label className="flex items-center justify-between p-4">
-          <div>
-            <p className="text-sm text-surface-700 dark:text-surface-300">Enable toasts</p>
-            <p className="text-xs text-surface-500 dark:text-surface-400">
-              Show brief pop-up messages for sync status and errors
-            </p>
-          </div>
-          <input
-            type="checkbox"
-            checked={enableToasts}
-            onChange={(e) => setEnableToasts(e.target.checked)}
-            className="rounded border-surface-300 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 outline-none"
-          />
-        </label>
       </div>
 
       <div className="rounded-lg border border-surface-200 dark:border-surface-700 overflow-hidden bg-white dark:bg-surface-800">
