@@ -1,46 +1,47 @@
-// import { useEffect, useState } from 'react';
-// import { getInstallType, type InstallType } from '$utils/platform';
+import { useEffect, useState } from 'react';
+import { getInstallType, type InstallType } from '$utils/platform';
 
-// // Cache the installation type at module level to avoid re-fetching
-// let cachedInstallType: InstallType | null = null;
-// let fetchPromise: Promise<InstallType> | null = null;
+// Cache the installation type at module level to avoid re-fetching.
+let cachedInstallType: InstallType | null = null;
+let fetchPromise: Promise<InstallType> | null = null;
 
-// /**
-//  * Hook to detect if the app is running under a managed installation
-//  * (Nix, AUR) where updates are handled externally
-//  */
-// export const useManagedInstallation = () => {
-//   const [installType, setInstallType] = useState<InstallType | null>(cachedInstallType);
+/**
+ * Hook to detect if the app is running under a managed installation
+ * where updates are handled externally.
+ */
+export const useManagedInstallation = () => {
+  const [installType, setInstallType] = useState<InstallType | null>(cachedInstallType);
 
-//   useEffect(() => {
-//     // If we already have a cached value, we're done
-//     if (cachedInstallType !== null) {
-//       return;
-//     }
+  useEffect(() => {
+    let mounted = true;
 
-//     // If there's already a fetch in progress, wait for it
-//     if (fetchPromise) {
-//       fetchPromise.then((type) => {
-//         cachedInstallType = type;
-//         setInstallType(type);
-//       });
-//       return;
-//     }
+    if (cachedInstallType !== null) {
+      return;
+    }
 
-//     // Start a new fetch
-//     fetchPromise = getInstallType();
-//     fetchPromise.then((type) => {
-//       cachedInstallType = type;
-//       setInstallType(type);
-//       fetchPromise = null;
-//     });
-//   }, []);
+    if (!fetchPromise) {
+      fetchPromise = getInstallType().finally(() => {
+        fetchPromise = null;
+      });
+    }
 
-//   const isManagedInstall = installType !== null && installType !== 'standard';
+    fetchPromise.then((type) => {
+      cachedInstallType = type;
+      if (mounted) {
+        setInstallType(type);
+      }
+    });
 
-//   return {
-//     isManagedInstall,
-//     installType,
-//     isLoading: installType === null,
-//   };
-// };
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const isManagedInstall = installType !== null && installType !== 'standard';
+
+  return {
+    isManagedInstall,
+    installType,
+    isLoading: installType === null,
+  };
+};

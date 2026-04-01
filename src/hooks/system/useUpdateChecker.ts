@@ -4,6 +4,7 @@ import { check } from '@tauri-apps/plugin-updater';
 import { useCallback, useEffect, useState } from 'react';
 import { settingsStore } from '$context/settingsContext';
 import { loggers } from '$lib/logger';
+import { shouldDisableUpdates } from '$utils/platform';
 import { fetchReleaseNotes } from '$utils/version';
 
 const log = loggers.updater;
@@ -161,6 +162,17 @@ export const useUpdateChecker = (): UseUpdateCheckerResult => {
     setError(null);
 
     try {
+      const disableUpdates = await shouldDisableUpdates();
+      if (disableUpdates) {
+        log.info('Update check skipped for managed installation', {
+          trigger,
+        });
+        sharedUpdateState = null;
+        setUpdateAvailable(null);
+        notifyListeners();
+        return;
+      }
+
       const currentVersion = await getVersion();
       log.info(`Starting update check... (Current version: ${currentVersion})`, {
         trigger,
@@ -212,6 +224,18 @@ export const useUpdateChecker = (): UseUpdateCheckerResult => {
 
   const downloadAndInstall = useCallback(async () => {
     if (!updateAvailable) {
+      return;
+    }
+
+    const disableUpdates = await shouldDisableUpdates();
+    if (disableUpdates) {
+      log.warn('Update download blocked for managed installation');
+      setError({
+        kind: 'download',
+        title: 'Updates are managed by your package manager',
+        description:
+          'This installation is managed externally. Please update Chiri through your system package manager.',
+      });
       return;
     }
 

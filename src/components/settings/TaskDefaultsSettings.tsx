@@ -3,20 +3,23 @@ import BellRing from 'lucide-react/icons/bell-ring';
 import Check from 'lucide-react/icons/check';
 import Loader from 'lucide-react/icons/loader';
 import Plus from 'lucide-react/icons/plus';
+import Repeat from 'lucide-react/icons/repeat';
 import RotateCcw from 'lucide-react/icons/rotate-ccw';
 import X from 'lucide-react/icons/x';
 import { useState } from 'react';
 import { AppSelect } from '$components/AppSelect';
+import { RepeatModal } from '$components/modals/RepeatModal';
 import { TagModal } from '$components/modals/TagModal';
 import { TagPickerModal } from '$components/modals/TagPickerModal';
 import { getIconByName } from '$constants/icons';
 import { PRIORITIES } from '$constants/priority';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useTags } from '$hooks/queries/useTags';
+import { useSettingsStore } from '$hooks/store/useSettingsStore';
 import { useFocusTrap } from '$hooks/ui/useFocusTrap';
 import { useModalEscapeKey } from '$hooks/ui/useModalEscapeKey';
-import { useSettingsStore } from '$hooks/store/useSettingsStore';
 import type { DefaultReminderOffset, TaskStatus } from '$types';
+import { rruleToText } from '$utils/recurrence';
 
 const REMINDER_OPTIONS: { value: DefaultReminderOffset; label: string }[] = [
   { value: 'at-due', label: 'At due time' },
@@ -145,6 +148,11 @@ export const TaskDefaultsSettings = () => {
     setDefaultDueDate,
     defaultReminders,
     setDefaultReminders,
+    defaultRrule,
+    setDefaultRrule,
+    defaultRepeatFrom,
+    setDefaultRepeatFrom,
+    dateFormat,
   } = useSettingsStore();
   const { data: accounts = [] } = useAccounts();
   const { data: tags = [] } = useTags();
@@ -155,6 +163,7 @@ export const TaskDefaultsSettings = () => {
   const [editingReminderOffset, setEditingReminderOffset] = useState<DefaultReminderOffset | null>(
     null,
   );
+  const [showRepeatModal, setShowRepeatModal] = useState(false);
 
   const availableReminderOptions = REMINDER_OPTIONS.filter(
     (o) => !defaultReminders.includes(o.value),
@@ -267,30 +276,6 @@ export const TaskDefaultsSettings = () => {
         <div className="border-t border-surface-200 dark:border-surface-700" />
 
         <div className="p-4">
-          <p className="text-xs font-medium text-surface-500 dark:text-surface-400 mb-2">
-            Priority
-          </p>
-          <div className="flex gap-2">
-            {PRIORITIES.map((p) => (
-              <button
-                type="button"
-                key={p.value}
-                onClick={() => setDefaultPriority(p.value)}
-                className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500 ${
-                  defaultPriority === p.value
-                    ? `${p.borderColor} ${p.bgColor}`
-                    : 'border-surface-200 dark:border-surface-600 hover:border-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700 text-surface-600 dark:text-surface-400'
-                }`}
-              >
-                <span className={p.color}>{p.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="border-t border-surface-200 dark:border-surface-700" />
-
-        <div className="p-4">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-medium text-surface-500 dark:text-surface-400">Progress</p>
             <span className="text-xs font-medium text-surface-600 dark:text-surface-400">
@@ -309,6 +294,31 @@ export const TaskDefaultsSettings = () => {
           <div className="flex justify-between mt-1">
             <span className="text-xs text-surface-400">0%</span>
             <span className="text-xs text-surface-400">100%</span>
+          </div>
+        </div>
+
+        <div className="border-t border-surface-200 dark:border-surface-700" />
+
+
+                <div className="p-4">
+          <p className="text-xs font-medium text-surface-500 dark:text-surface-400 mb-2">
+            Priority
+          </p>
+          <div className="flex gap-2">
+            {PRIORITIES.map((p) => (
+              <button
+                type="button"
+                key={p.value}
+                onClick={() => setDefaultPriority(p.value)}
+                className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500 ${
+                  defaultPriority === p.value
+                    ? `${p.borderColor} ${p.bgColor}`
+                    : 'border-surface-200 dark:border-surface-600 hover:border-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700 text-surface-600 dark:text-surface-400'
+                }`}
+              >
+                <span className={p.color}>{p.label}</span>
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -486,6 +496,24 @@ export const TaskDefaultsSettings = () => {
             </button>
           )}
         </div>
+
+        <div className="border-t border-surface-200 dark:border-surface-700" />
+
+        <div className="p-4">
+          <p className="text-xs font-medium text-surface-500 dark:text-surface-400 mb-2">Repeat</p>
+          <button
+            type="button"
+            onClick={() => setShowRepeatModal(true)}
+            className="flex items-center gap-2 px-3 py-2 w-full bg-surface-100 dark:bg-surface-700 rounded-lg hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
+          >
+            <Repeat className="w-4 h-4 text-surface-400 flex-shrink-0" />
+            <span className="flex-1 text-left text-sm text-surface-700 dark:text-surface-300">
+              {defaultRrule
+                ? rruleToText(defaultRrule, defaultRepeatFrom, dateFormat)
+                : 'Does not repeat'}
+            </span>
+          </button>
+        </div>
       </div>
 
       {showTagPicker && (
@@ -522,6 +550,20 @@ export const TaskDefaultsSettings = () => {
           onSelect={handleSelectReminder}
           onClose={handleCloseReminderPicker}
           editing={editingReminderOffset ?? undefined}
+        />
+      )}
+
+      {showRepeatModal && (
+        <RepeatModal
+          isOpen={showRepeatModal}
+          onClose={() => setShowRepeatModal(false)}
+          rrule={defaultRrule}
+          repeatFrom={defaultRepeatFrom}
+          dueDate={undefined}
+          onSave={(rrule, repeatFrom) => {
+            setDefaultRrule(rrule);
+            setDefaultRepeatFrom(repeatFrom);
+          }}
         />
       )}
     </div>

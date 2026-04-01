@@ -1,17 +1,24 @@
 import CheckCircle from 'lucide-react/icons/check-circle';
 import Download from 'lucide-react/icons/download';
 import FileText from 'lucide-react/icons/file-text';
+import Info from 'lucide-react/icons/info';
 import Loader from 'lucide-react/icons/loader-circle';
 import RefreshCw from 'lucide-react/icons/refresh-cw';
 import { useState } from 'react';
 import { ChangelogModal } from '$components/modals/ChangelogModal';
 import { useSettingsStore } from '$hooks/store/useSettingsStore';
+import { useManagedInstallation } from '$hooks/system/useManagedInstallation';
 import { useUpdateChecker } from '$hooks/system/useUpdateChecker';
 import { getAppInfo } from '$utils/version';
 
 export const UpdateSettings = () => {
   const { version } = getAppInfo();
   const { checkForUpdatesAutomatically, setCheckForUpdatesAutomatically } = useSettingsStore();
+  const {
+    isManagedInstall,
+    installType,
+    isLoading: isManagedInstallLoading,
+  } = useManagedInstallation();
   const {
     updateAvailable,
     isChecking,
@@ -29,8 +36,23 @@ export const UpdateSettings = () => {
     await checkForUpdates('settings-manual');
   };
 
-  const showError = !isChecking && error && (hasManuallyChecked || error.kind === 'download');
-  const showUpToDate = hasManuallyChecked && !isChecking && !updateAvailable && !error;
+  const showError =
+    !isManagedInstall && !isChecking && error && (hasManuallyChecked || error.kind === 'download');
+  const showUpToDate =
+    !isManagedInstall && hasManuallyChecked && !isChecking && !updateAvailable && !error;
+
+  const getPackageManagerName = () => {
+    switch (installType) {
+      case 'nix':
+        return 'Nix';
+      case 'aur':
+        return 'AUR (Arch User Repository)';
+      case 'flatpak':
+        return 'Flatpak';
+      default:
+        return 'your package manager';
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -46,51 +68,68 @@ export const UpdateSettings = () => {
 
         <div className="border-t border-surface-200 dark:border-surface-700" />
 
-        <label className="flex items-center justify-between p-4">
-          <div>
-            <p className="text-sm text-surface-700 dark:text-surface-300">
-              Check for updates automatically
-            </p>
-            <p className="text-xs text-surface-500 dark:text-surface-400">
-              Check for new releases on startup
-            </p>
+        {!isManagedInstallLoading && isManagedInstall && (
+          <div className="flex items-start gap-2 px-4 py-3 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
+            <div>
+              <p className="text-sm font-medium">Updates managed by {getPackageManagerName()}</p>
+              <p className="mt-0.5 text-xs text-blue-600 dark:text-blue-400">
+                This installation is managed by {getPackageManagerName()}. Update Chiri through your
+                system's update mechanism.
+              </p>
+            </div>
           </div>
-          <input
-            type="checkbox"
-            checked={checkForUpdatesAutomatically}
-            onChange={(e) => setCheckForUpdatesAutomatically(e.target.checked)}
-            className="rounded border-surface-300 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 outline-none"
-          />
-        </label>
+        )}
 
-        <div className="border-t border-surface-200 dark:border-surface-700" />
+        {!isManagedInstallLoading && !isManagedInstall && (
+          <>
+            <label className="flex items-center justify-between p-4">
+              <div>
+                <p className="text-sm text-surface-700 dark:text-surface-300">
+                  Check for updates automatically
+                </p>
+                <p className="text-xs text-surface-500 dark:text-surface-400">
+                  Check for new releases on startup
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={checkForUpdatesAutomatically}
+                onChange={(e) => setCheckForUpdatesAutomatically(e.target.checked)}
+                className="rounded border-surface-300 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 outline-none"
+              />
+            </label>
 
-        <div className="flex items-center justify-between gap-4 p-4">
-          <div>
-            <p className="text-sm text-surface-700 dark:text-surface-300">Check for updates</p>
-            <p className="text-xs text-surface-500 dark:text-surface-400">
-              Look for new releases now
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleManualCheck}
-            disabled={isChecking}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 disabled:opacity-50 disabled:cursor-not-allowed text-surface-700 dark:text-surface-300 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset shrink-0"
-          >
-            {isChecking ? (
-              <>
-                <Loader className="w-4 h-4 animate-spin" />
-                Checking...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="w-4 h-4" />
-                Check now
-              </>
-            )}
-          </button>
-        </div>
+            <div className="border-t border-surface-200 dark:border-surface-700" />
+
+            <div className="flex items-center justify-between gap-4 p-4">
+              <div>
+                <p className="text-sm text-surface-700 dark:text-surface-300">Check for updates</p>
+                <p className="text-xs text-surface-500 dark:text-surface-400">
+                  Look for new releases now
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleManualCheck}
+                disabled={isChecking}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 disabled:opacity-50 disabled:cursor-not-allowed text-surface-700 dark:text-surface-300 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset shrink-0"
+              >
+                {isChecking ? (
+                  <>
+                    <Loader className="w-4 h-4 animate-spin" />
+                    Checking...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4" />
+                    Check now
+                  </>
+                )}
+              </button>
+            </div>
+          </>
+        )}
 
         {showError && (
           <>
@@ -113,7 +152,7 @@ export const UpdateSettings = () => {
         )}
       </div>
 
-      {updateAvailable && (
+      {!isManagedInstallLoading && !isManagedInstall && updateAvailable && (
         <div className="rounded-lg border border-surface-200 dark:border-surface-700 overflow-hidden bg-white dark:bg-surface-800">
           <div className="flex items-start gap-3 p-4">
             <Download className="w-5 h-5 mt-0.5 shrink-0 text-primary-600 dark:text-primary-400" />
