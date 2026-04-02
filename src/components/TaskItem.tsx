@@ -26,8 +26,8 @@ import {
   useSetSelectedTask,
   useUIState,
 } from '$hooks/queries/useUIState';
-import { useContextMenu } from '$hooks/ui/useContextMenu';
 import { useSettingsStore } from '$hooks/store/useSettingsStore';
+import { useContextMenu } from '$hooks/ui/useContextMenu';
 import { filterCalDavDescription } from '$lib/ical/vtodo';
 import { getAllTags } from '$lib/store/tags';
 import { countChildren, getChildTasks, toggleTaskCollapsed } from '$lib/store/tasks';

@@ -299,8 +299,7 @@ export const TaskDefaultsSettings = () => {
 
         <div className="border-t border-surface-200 dark:border-surface-700" />
 
-
-                <div className="p-4">
+        <div className="p-4">
           <p className="text-xs font-medium text-surface-500 dark:text-surface-400 mb-2">
             Priority
           </p>

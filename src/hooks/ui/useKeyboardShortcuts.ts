@@ -17,8 +17,8 @@ import {
   useUIState,
 } from '$hooks/queries/useUIState';
 import { useConfirmDialog } from '$hooks/store/useConfirmDialog';
-import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
 import { useSettingsStore } from '$hooks/store/useSettingsStore';
+import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
 import { getSortedTasks } from '$lib/store/filters';
 import { getChildTasks } from '$lib/store/tasks';
 import type { KeyboardShortcut } from '$types';

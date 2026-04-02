@@ -195,7 +195,13 @@ export const reorderTasks = (
   if (overItem.ancestorIds.includes(activeId)) return;
 
   const effectiveIndent = targetIndent ?? overItem.depth;
-  const newParentUid = findNewParentUid(flattenedItems, activeId, activeIndex, overIndex, effectiveIndent);
+  const newParentUid = findNewParentUid(
+    flattenedItems,
+    activeId,
+    activeIndex,
+    overIndex,
+    effectiveIndent,
+  );
   const descendantIds = getDescendantIds(flattenedItems, activeId);
 
   const siblings = tasks.filter(
@@ -204,15 +210,29 @@ export const reorderTasks = (
   const sortedSiblings = getSortedTasks(siblings, data.ui.sortConfig);
 
   const insertIndex = findInsertIndex(
-    flattenedItems, activeId, activeIndex, overIndex,
-    newParentUid, sortedSiblings, descendantIds, activeItem, activeId === overId,
+    flattenedItems,
+    activeId,
+    activeIndex,
+    overIndex,
+    newParentUid,
+    sortedSiblings,
+    descendantIds,
+    activeItem,
+    activeId === overId,
   );
 
   const newOrder = [...sortedSiblings];
   newOrder.splice(Math.min(insertIndex, newOrder.length), 0, activeTask);
 
   const inheritance = getCalendarInheritance(tasks, newParentUid, activeTask);
-  const updates = buildSortOrderUpdates(tasks, newOrder, activeId, activeTask.uid, newParentUid, inheritance);
+  const updates = buildSortOrderUpdates(
+    tasks,
+    newOrder,
+    activeId,
+    activeTask.uid,
+    newParentUid,
+    inheritance,
+  );
 
   dataStore.save({ ...data, tasks: applyUpdates(tasks, updates) });
 };

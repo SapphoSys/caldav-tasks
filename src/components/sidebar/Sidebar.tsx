@@ -23,10 +23,10 @@ import {
   useSetAllTasksView,
   useUIState,
 } from '$hooks/queries/useUIState';
-import { useDeleteHandlers } from '$hooks/useDeleteHandlers';
-import { useGlobalContextMenuClose } from '$hooks/ui/useGlobalContextMenu';
 import { useSettingsStore } from '$hooks/store/useSettingsStore';
+import { useGlobalContextMenuClose } from '$hooks/ui/useGlobalContextMenu';
 import { useSidebarResize } from '$hooks/ui/useSidebarResize';
+import { useDeleteHandlers } from '$hooks/useDeleteHandlers';
 import { getTasksByCalendar } from '$lib/store/tasks';
 import type { Account, Calendar as CalendarType } from '$types';
 import { getMetaKeyLabel, getModifierJoiner } from '$utils/keyboard';
