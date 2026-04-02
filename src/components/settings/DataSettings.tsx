@@ -7,9 +7,14 @@ import Upload from 'lucide-react/icons/upload';
 import { useConfirmDialog } from '$hooks/store/useConfirmDialog';
 import { useSettingsStore } from '$hooks/store/useSettingsStore';
 import { deleteDatabase } from '$lib/bootstrap';
+import { setEditorOpen } from '$lib/store/ui';
 import { exportSettingsToFile, importSettingsFromFile } from '$utils/settings';
 
-export const DataSettings = () => {
+interface DataSettingsProps {
+  onClose: () => void;
+}
+
+export const DataSettings = ({ onClose }: DataSettingsProps) => {
   const { exportSettings, importSettings, resetSettings } = useSettingsStore();
   const { confirm } = useConfirmDialog();
 
@@ -26,7 +31,14 @@ export const DataSettings = () => {
       destructive: true,
     });
 
-    if (confirmed) resetSettings();
+    if (confirmed) {
+      // Close the task editor if open
+      setEditorOpen(false);
+      // Reset settings
+      resetSettings();
+      // Close the settings modal (and any other modals)
+      onClose();
+    }
   };
 
   const handleResetDatabase = async () => {

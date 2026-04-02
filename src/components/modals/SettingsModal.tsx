@@ -201,7 +201,7 @@ export const SettingsModal = ({ onClose, initialCategory, initialSubtab }: Setti
             {activeCategory === 'app' && (
               <>
                 {currentSubtab === 'behavior' && <BehaviorSettings />}
-                {currentSubtab === 'data' && <DataSettings />}
+                {currentSubtab === 'data' && <DataSettings onClose={onClose} />}
                 {currentSubtab === 'keyboard-shortcuts' && (
                   <ShortcutsSettings onEditingShortcutChange={setIsChildModalOpen} />
                 )}
