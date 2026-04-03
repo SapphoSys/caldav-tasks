@@ -36,14 +36,7 @@ pub fn disable_app_nap() {
         "{}",
         logging::scoped_message(
             "AppNap",
-            "Activity assertion started (NSActivityUserInitiated)"
-        )
-    );
-    log::info!(
-        "{}",
-        logging::scoped_message(
-            "AppNap",
-            "Periodic sync and notifications will continue when window is hidden",
+            "App Nap has been disabled to periodically sync and serve notifications in the background."
         )
     );
 }
