@@ -11,7 +11,7 @@ edition = "2021"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["tray-icon", "image-png"] }
+tauri = { version = "2", default-features = false, features = ["tray-icon", "image-png"] }
 tauri-plugin-http = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
@@ -42,8 +42,9 @@ objc2-app-kit = { version = "0.2", features = ["NSApplication", "NSMenu", "NSMen
 gtk = "0.18"
 
 [features]
-default = []
+default = ["wry"]
 custom-protocol = ["tauri/custom-protocol"]
+wry = ["tauri/wry"]
 cef = ["tauri/cef", "dep:rustls"]
 
 [dependencies.rustls]
