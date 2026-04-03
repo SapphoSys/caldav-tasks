@@ -1,5 +1,8 @@
 <div align="center">
-  <h1>Chiri</h1>
+  <div style="display:flex;flex-direction:column;gap:15px;align-items:center;">
+    <img src="./public/icon.png" width="100" />
+    <h1>Chiri</h1>
+  </div>
 
   <p>🗄️ A (work in progress) cross-platform CalDAV compatible task management app.</p>
 
