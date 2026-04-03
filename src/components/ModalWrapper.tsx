@@ -1,7 +1,9 @@
 import X from 'lucide-react/icons/x';
 import type { ReactNode } from 'react';
+import { ModalBackdrop } from '$components/ModalBackdrop';
 import { MODAL_SIZE_CLASSES } from '$constants';
 import { useFocusTrap } from '$hooks/ui/useFocusTrap';
+import { useModalEscapeKey } from '$hooks/ui/useModalEscapeKey';
 
 interface ModalWrapperProps {
   isOpen?: boolean;
@@ -26,33 +28,21 @@ export const ModalWrapper = ({
 }: ModalWrapperProps) => {
   const focusTrapRef = useFocusTrap(isOpen);
 
+  // Handle ESC key to close modal
+  useModalEscapeKey(onClose, { enabled: isOpen && !preventClose });
+
   if (!isOpen) return null;
 
-  const handleBackdropClick = () => {
-    if (!preventClose) {
-      onClose();
-    }
-  };
-
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in cursor-default"
-      onClick={handleBackdropClick}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') handleBackdropClick();
-      }}
-    >
+    <ModalBackdrop className="p-4 cursor-default">
       <div
         ref={focusTrapRef}
-        role="document"
-        className={`bg-white dark:bg-surface-800 rounded-xl shadow-xl ${MODAL_SIZE_CLASSES[size]} w-full max-h-[90vh] flex flex-col animate-scale-in`}
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        className={`relative bg-white dark:bg-surface-800 rounded-xl shadow-xl ${MODAL_SIZE_CLASSES[size]} w-full max-h-[90vh] flex flex-col animate-scale-in`}
       >
         {title && (
-          <div className="bg-white dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 p-6 flex-shrink-0 flex items-start justify-between rounded-t-xl">
+          <div className="bg-white dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 p-4 flex-shrink-0 flex items-center justify-between rounded-t-xl">
             <div>
               <h2 className="text-lg font-semibold text-surface-900 dark:text-surface-100">
                 {title}
@@ -65,7 +55,7 @@ export const ModalWrapper = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-shrink-0 text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-200 transition-colors"
+                className="flex-shrink-0 p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />
@@ -74,16 +64,16 @@ export const ModalWrapper = ({
           </div>
         )}
 
-        <div className={`p-6 space-y-4 overflow-y-auto flex-1 ${!title ? 'rounded-t-xl' : ''}`}>
+        <div className={`p-4 space-y-4 overflow-y-auto flex-1 ${!title ? 'rounded-t-xl' : ''}`}>
           {children}
         </div>
 
         {footer && (
-          <div className="border-t border-surface-200 dark:border-surface-700 p-6 flex gap-3 flex-shrink-0 bg-white dark:bg-surface-800 rounded-b-xl">
+          <div className="border-t border-surface-200 dark:border-surface-700 p-4 flex gap-3 flex-shrink-0 bg-white dark:bg-surface-800 rounded-b-xl">
             {footer}
           </div>
         )}
       </div>
-    </div>
+    </ModalBackdrop>
   );
 };
