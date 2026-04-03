@@ -17,10 +17,10 @@ interface ChangelogModalProps {
  * Remove download footer from changelog
  */
 const cleanChangelog = (text: string) => {
-  // Remove the "Download the appropriate installer..." line and everything after
+  // Remove the "## 📥 Downloads" section and everything after
   return text
-    .replace(/---\s*\n+📥.*$/s, '')
-    .replace(/\n+📥.*$/s, '')
+    .replace(/---\s*\n+##\s*📥\s*Downloads.*$/s, '')
+    .replace(/\n+##\s*📥\s*Downloads.*$/s, '')
     .trim();
 };
 

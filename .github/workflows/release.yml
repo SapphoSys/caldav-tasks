@@ -88,8 +88,21 @@ jobs:
             CHANGELOG="No notable changes in this release."
           fi
 
-          # Add download instructions
-          CHANGELOG="${CHANGELOG}---"$'\n\n'"📥 **Download the appropriate installer for your platform from the assets below.**"
+          # Add download instructions with platform-specific links
+          REPO="${{ github.repository }}"
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="app-v${VERSION}"
+
+          CHANGELOG="${CHANGELOG}---"$'\n\n'"## 📥 Downloads"$'\n\n'
+          CHANGELOG="${CHANGELOG}### Windows"$'\n'
+          CHANGELOG="${CHANGELOG}- [Installer (.msi)](https://github.com/${REPO}/releases/download/${TAG}/chiri-${VERSION}-windows-x64.msi)"$'\n\n'
+          CHANGELOG="${CHANGELOG}### macOS"$'\n'
+          CHANGELOG="${CHANGELOG}- [Apple Silicon (M1/M2/M3)](https://github.com/${REPO}/releases/download/${TAG}/chiri-${VERSION}-macos-aarch64.dmg)"$'\n'
+          CHANGELOG="${CHANGELOG}- [Intel](https://github.com/${REPO}/releases/download/${TAG}/chiri-${VERSION}-macos-x64.dmg)"$'\n\n'
+          CHANGELOG="${CHANGELOG}### Linux"$'\n'
+          CHANGELOG="${CHANGELOG}- [Debian/Ubuntu (.deb)](https://github.com/${REPO}/releases/download/${TAG}/chiri-${VERSION}-linux-amd64.deb)"$'\n'
+          CHANGELOG="${CHANGELOG}- [Fedora/RHEL (.rpm)](https://github.com/${REPO}/releases/download/${TAG}/chiri-${VERSION}-linux-x64.rpm)"$'\n\n'
+          CHANGELOG="${CHANGELOG}*See the assets below for additional formats and architectures.*"
 
           # Use heredoc syntax for multiline output
           {
@@ -182,6 +195,10 @@ jobs:
           # use existing release created by prepare-release job
           releaseId: ${{ needs.prepare-release.outputs.release_id }}
           args: ${{ matrix.args }}
+          # Consistent naming pattern for release assets
+          releaseAssetNamePattern: 'chiri-[version]-[platform]-[arch][ext]'
+          # Keep signatures for secure auto-updates
+          uploadUpdaterSignatures: true
 
   # third job: Update README with new version
   update-readme:
