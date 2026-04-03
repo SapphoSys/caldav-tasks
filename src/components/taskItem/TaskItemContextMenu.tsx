@@ -22,19 +22,19 @@ import { useConfirmTaskDelete } from '$hooks/useConfirmTaskDelete';
 import { exportTaskAndChildren } from '$lib/store/tasks';
 import type { Priority, Task, TaskStatus } from '$types';
 
-interface TaskContextMenuProps {
+interface TaskItemContextMenuProps {
   task: Task;
   contextMenu: { x: number; y: number };
   onClose: () => void;
   setContextMenu: (val: null) => void;
 }
 
-export const TaskContextMenu = ({
+export const TaskItemContextMenu = ({
   task,
   contextMenu,
   onClose,
   setContextMenu,
-}: TaskContextMenuProps) => {
+}: TaskItemContextMenuProps) => {
   const { data: accounts = [] } = useAccounts();
   const updateTaskMutation = useUpdateTask();
   const createTaskMutation = useCreateTask();

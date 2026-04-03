@@ -6,8 +6,8 @@ import Clock from 'lucide-react/icons/clock';
 import Loader from 'lucide-react/icons/loader';
 import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
-import { TaskContextMenu } from '$components/TaskContextMenu';
 import { TaskItemBadges } from '$components/taskItem/TaskItemBadges';
+import { TaskItemContextMenu } from '$components/taskItem/TaskItemContextMenu';
 import { getPriorityColor, getPriorityRingColor } from '$constants/priority';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useToggleTaskComplete } from '$hooks/queries/useTasks';
@@ -325,7 +325,7 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
       </div>
 
       {contextMenu && (
-        <TaskContextMenu
+        <TaskItemContextMenu
           task={task}
           contextMenu={contextMenu}
           onClose={handleCloseContextMenu}
