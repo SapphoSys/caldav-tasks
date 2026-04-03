@@ -178,19 +178,37 @@ jobs:
       - name: install frontend dependencies
         run: pnpm install
 
-      # for macOS CI builds, temporarily add ad-hoc signing to prevent "damaged" error
-      # we can't add signingIdentity to our config file by default
-      # because our app will just refuse to launch. ☹️
-      - name: Enable ad-hoc signing for macOS CI builds
+      - name: Load signing secrets from 1Password
+        uses: 1password/load-secrets-action@v4
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: op://Tauri/Tauri Secrets/signing-key
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: op://Tauri/Tauri Secrets/signing-key-password
+          APPLE_SIGNING_IDENTITY: op://Tauri/Apple Secrets/identity
+          APPLE_API_ISSUER: op://Tauri/Apple Secrets/api-issuer
+          APPLE_API_KEY: op://Tauri/Apple Secrets/api-key
+          APPLE_API_KEY_CERTIFICATE: op://Tauri/Apple Secrets/api-key-certificate
+
+      - name: Prepare Apple API key file
         if: matrix.platform == 'macos-latest' || matrix.platform == 'macos-15-intel'
+        shell: bash
         run: |
-          jq '.bundle.macOS.signingIdentity = "-"' src-tauri/tauri.conf.json > src-tauri/tauri.conf.json.tmp && mv src-tauri/tauri.conf.json.tmp src-tauri/tauri.conf.json
+          APPLE_KEY_FILE="$RUNNER_TEMP/apple_api_key.p8"
+          printf '%s' "$APPLE_API_KEY_CERTIFICATE" > "$APPLE_KEY_FILE"
+          chmod 600 "$APPLE_KEY_FILE"
+          echo "APPLE_API_KEY_PATH=$APPLE_KEY_FILE" >> "$GITHUB_ENV"
 
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ env.TAURI_SIGNING_PRIVATE_KEY || secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ env.APPLE_SIGNING_IDENTITY || secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_API_ISSUER: ${{ env.APPLE_API_ISSUER || secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ env.APPLE_API_KEY || secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_PATH: ${{ env.APPLE_API_KEY_PATH || secrets.APPLE_API_KEY_PATH }}
         with:
           # use existing release created by prepare-release job
           releaseId: ${{ needs.prepare-release.outputs.release_id }}
