@@ -5,6 +5,7 @@
 
 mod app_nap;
 mod data_migration;
+mod install_type;
 mod logging;
 mod macos_menu;
 mod migrations;
@@ -83,7 +84,9 @@ fn main() {
             notifications::request_notification_permission,
             notification_manager::send_notification_with_actions,
             macos_menu::apply_macos_menu_fixes,
-            force_quit
+            force_quit,
+            install_type::should_disable_updates,
+            install_type::get_install_type
         ])
         .setup(|_app| {
             // Disable App Nap after logging has been initialized so App Nap
