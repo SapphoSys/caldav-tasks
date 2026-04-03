@@ -416,7 +416,9 @@ export const DatePickerModal = ({
             <div className="grid grid-cols-7 gap-1">
               {paddedDays.map((day, index) => {
                 if (!day) {
-                  return <div key={`empty-${index}-${day}`} />;
+                  // Empty padding cells at start of calendar grid - index is stable based on month start day
+                  // biome-ignore lint/suspicious/noArrayIndexKey: Padding cells have no identity; index represents stable grid position
+                  return <div key={index} />;
                 }
                 const isLocalSelected = !!(localValue && isSameDay(day, localValue));
                 const isCurrentMonth = isSameMonth(day, currentMonth);
