@@ -305,7 +305,13 @@ const App = () => {
                 }}
                 className="absolute top-0 left-0 w-1 h-full cursor-col-resize hover:bg-primary-400 dark:hover:bg-primary-600 transition-colors z-10"
               />
-              <TaskEditor task={selectedTask} />
+              <TaskEditor
+                task={selectedTask}
+                onOpenNotificationSettings={() => {
+                  menuHandlers.setSettingsInitialTab({ category: 'app', subtab: 'notifications' });
+                  menuHandlers.setShowSettings(true);
+                }}
+              />
             </div>
           )}
         </div>
