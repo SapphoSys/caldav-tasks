@@ -4,22 +4,22 @@ import ChevronRight from 'lucide-react/icons/chevron-right';
 import Code from 'lucide-react/icons/code';
 import Coffee from 'lucide-react/icons/coffee';
 import ExternalLink from 'lucide-react/icons/external-link';
+import Globe from 'lucide-react/icons/globe';
 import Heart from 'lucide-react/icons/heart';
 import Loader2 from 'lucide-react/icons/loader-2';
-import MessageCircle from 'lucide-react/icons/message-circle';
+import Mail from 'lucide-react/icons/mail';
 import RefreshCw from 'lucide-react/icons/refresh-cw';
 import ScrollText from 'lucide-react/icons/scroll-text';
 import Sparkles from 'lucide-react/icons/sparkles';
-import Tag from 'lucide-react/icons/tag';
 import type { ReactNode } from 'react';
 import { ChangelogModal } from '$components/modals/ChangelogModal';
 import { useChangelog } from '$hooks/useChangelog';
 import { getAppInfo } from '$utils/version';
 
 const GITHUB_URL = 'https://github.com/SapphoSys/chiri';
-const ISSUES_URL = 'https://github.com/SapphoSys/chiri/issues';
 const NEW_ISSUE_URL = 'https://github.com/SapphoSys/chiri/issues/new';
-const CONTACT_URL = 'https://github.com/SapphoSys/chiri/discussions';
+const CONTACT_EMAIL = 'contact@sapphic.moe';
+const FIND_US_ELSEWHERE = 'https://sapphic.moe/contact';
 
 const link = (url: string) => () => openUrl(url);
 
@@ -148,22 +148,22 @@ export const AboutSettings = ({ onNavigateToUpdates }: AboutSettingsProps) => {
 
         <Section title="Support">
           <LinkRow
-            icon={<Tag className="w-5 h-5" />}
-            label="Issue tracker"
-            description="Browse open issues on GitHub"
-            onClick={link(ISSUES_URL)}
-          />
-          <LinkRow
             icon={<Bug className="w-5 h-5" />}
             label="Report a bug"
             description="Open a new issue on GitHub"
             onClick={link(NEW_ISSUE_URL)}
           />
           <LinkRow
-            icon={<MessageCircle className="w-5 h-5" />}
+            icon={<Mail className="w-5 h-5" />}
             label="Contact developer"
-            description="Ask a question or start a discussion"
-            onClick={link(CONTACT_URL)}
+            description={CONTACT_EMAIL}
+            onClick={link(`mailto:${CONTACT_EMAIL}`)}
+          />
+          <LinkRow
+            icon={<Globe className="w-5 h-5" />}
+            label="Find us elsewhere"
+            description="Follow or contact us elsewhere through our website"
+            onClick={link(FIND_US_ELSEWHERE)}
           />
         </Section>
 
