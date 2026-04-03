@@ -17,7 +17,7 @@
   libsoup_3,
 
   # Optional: override version
-  version ? "0.7.1",
+  version ? "0.8.0",
 }:
 
 let
@@ -27,19 +27,19 @@ let
   platformInfo = {
     "x86_64-linux" = {
       asset = "chiri_${version}_amd64.deb";
-      hash = "sha256-qz3VVDYdKjpNervbpskhRlfH/jmJDh2YtrnhiIIvqto=";
+      hash = "sha256-8AcQW6mAnk1LdVqbN0FeeLsZlth5P3AjRANLGSXmXbs=";
     };
     "aarch64-linux" = {
       asset = "chiri_${version}_arm64.deb";
-      hash = "sha256-hUVIqLc4Ffxlr83Bak4V0LW1k2J8CyT7dt13vW7QOWI=";
+      hash = "sha256-qpWS9oy7jez4zZDXJMX2aR4ATXiriLQhJAlBTVgnhow=";
     };
     "x86_64-darwin" = {
       asset = "chiri_${version}_x64.dmg";
-      hash = "sha256-Lfec/madBDbZwqme/awCggjcS7Q0zOQjgZezpN6et90=";
+      hash = "sha256-T295TLcd1BFHf3TcpVJ6Q/iP0ERxD0f7tnMcjbA8FXk=";
     };
     "aarch64-darwin" = {
       asset = "chiri_${version}_aarch64.dmg";
-      hash = "sha256-cBZ1MXW6QO3vncujmLbA63pGGYR4oI6DpshV76nKTNA=";
+      hash = "sha256-U9gJzYb8VSoVBnmM1HFhXM4NzCMolplNhXLH7F+bghA=";
     };
   };
 
