@@ -4,14 +4,14 @@ import { type ReactNode, useEffect, useState } from 'react';
 
 const getButtonClasses = (isDestructive: boolean, isPrimary: boolean) => {
   if (isDestructive) {
-    return 'bg-red-600 hover:bg-red-700 focus:ring-2 focus:ring-red-200 dark:focus:ring-red-900/50 text-white';
+    return 'bg-red-600 hover:bg-red-700 outline-none focus-visible:ring-2 focus-visible:ring-red-500 text-white';
   }
 
   if (isPrimary) {
-    return 'bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900/50 text-primary-contrast';
+    return 'bg-primary-600 hover:bg-primary-700 outline-none focus-visible:ring-2 focus-visible:ring-primary-700 text-primary-contrast';
   }
 
-  return 'border border-surface-200 dark:border-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700';
+  return 'border border-surface-200 dark:border-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 outline-none focus-visible:ring-2 focus-visible:ring-primary-500';
 };
 
 interface ConfirmDialogProps {
@@ -120,7 +120,7 @@ export const ConfirmDialog = ({
           <button
             type="button"
             onClick={onCancel}
-            className="flex-shrink-0 ml-3 text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-700 p-1 rounded transition-colors"
+            className="flex-shrink-0 ml-3 text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-700 p-1 rounded transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -141,7 +141,7 @@ export const ConfirmDialog = ({
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="px-4 py-2 text-sm font-medium rounded-lg border border-surface-200 dark:border-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium rounded-lg border border-surface-200 dark:border-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             {cancelLabel}
           </button>

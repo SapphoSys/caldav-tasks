@@ -134,7 +134,7 @@ export const DestinationStep = ({
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           onKeyDown={handleKeyDown}
-          className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 text-sm text-left rounded-lg border transition-colors ${
+          className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 text-sm text-left rounded-lg border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
             isOpen
               ? 'border-primary-500 ring-2 ring-primary-500/20 bg-white dark:bg-surface-700'
               : 'border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 hover:border-surface-300 dark:hover:border-surface-500'
@@ -195,7 +195,7 @@ export const DestinationStep = ({
                       role="option"
                       aria-selected={isSelected}
                       onClick={() => handleSelect(account.id, cal.id)}
-                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors ${
+                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset ${
                         isSelected
                           ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
                           : 'hover:bg-surface-50 dark:hover:bg-surface-700/50 text-surface-700 dark:text-surface-300'

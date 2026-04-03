@@ -216,7 +216,7 @@ export const OnboardingModal = ({ onComplete, onAddAccount }: OnboardingModalPro
               <button
                 type="button"
                 onClick={() => toggleSection('sync')}
-                className="w-full flex items-center justify-between p-4 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors"
+                className="w-full flex items-center justify-between p-4 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
               >
                 <div className="flex items-center gap-2">
                   <RefreshCw className="w-5 h-5 text-surface-600 dark:text-surface-400" />
@@ -281,7 +281,7 @@ export const OnboardingModal = ({ onComplete, onAddAccount }: OnboardingModalPro
               <button
                 type="button"
                 onClick={() => toggleSection('appearance')}
-                className="w-full flex items-center justify-between p-4 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors"
+                className="w-full flex items-center justify-between p-4 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
               >
                 <div className="flex items-center gap-2">
                   <Palette className="w-5 h-5 text-surface-600 dark:text-surface-400" />
@@ -349,7 +349,7 @@ export const OnboardingModal = ({ onComplete, onAddAccount }: OnboardingModalPro
               <button
                 type="button"
                 onClick={() => toggleSection('system')}
-                className="w-full flex items-center justify-between p-4 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors"
+                className="w-full flex items-center justify-between p-4 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
               >
                 <div className="flex items-center gap-2">
                   <Monitor className="w-5 h-5 text-surface-600 dark:text-surface-400" />
@@ -418,7 +418,7 @@ export const OnboardingModal = ({ onComplete, onAddAccount }: OnboardingModalPro
               <button
                 type="button"
                 onClick={() => toggleSection('notifications')}
-                className="w-full flex items-center justify-between p-4 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors"
+                className="w-full flex items-center justify-between p-4 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
               >
                 <div className="flex items-center gap-2">
                   <Bell className="w-5 h-5 text-surface-600 dark:text-surface-400" />

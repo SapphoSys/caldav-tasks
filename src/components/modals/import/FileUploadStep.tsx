@@ -83,7 +83,7 @@ export const FileUploadStep = ({
         }}
         onDragEnter={onDragEnter}
         onDragLeave={handleDragLeave}
-        className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
+        className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${
           isDraggingOver
             ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 scale-[1.02]'
             : fileName
@@ -106,7 +106,7 @@ export const FileUploadStep = ({
               <button
                 type="button"
                 onClick={handleRemoveFile}
-                className="p-1 text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded transition-colors pointer-events-auto"
+                className="p-1 text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded transition-colors pointer-events-auto outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                 aria-label="Remove file"
               >
                 <X className="w-4 h-4" />

@@ -59,7 +59,7 @@ export const TagPickerModal = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors"
+            className="p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             <X className="w-5 h-5" />
           </button>
@@ -105,7 +105,7 @@ export const TagPickerModal = ({
                         type="button"
                         key={tag.id}
                         onClick={() => handleSelectTag(tag.id)}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
                       >
                         {tag.emoji ? (
                           <span className="text-xs leading-none" style={{ color: tag.color }}>
@@ -127,7 +127,7 @@ export const TagPickerModal = ({
                     onCreateTag(searchQuery.trim());
                     onClose();
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors text-surface-700 dark:text-surface-300"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors text-surface-700 dark:text-surface-300 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
                 >
                   <Plus className="w-4 h-4 text-surface-400 flex-shrink-0" />
                   {searchQuery.trim() ? `Create tag "${searchQuery.trim()}"` : 'Create a new tag'}
@@ -142,7 +142,7 @@ export const TagPickerModal = ({
                 onCreateTag('');
                 onClose();
               }}
-              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors text-surface-700 dark:text-surface-300"
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors text-surface-700 dark:text-surface-300 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
             >
               <Plus className="w-4 h-4 text-surface-400 flex-shrink-0" />
               Create a new tag
@@ -154,7 +154,7 @@ export const TagPickerModal = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             Cancel
           </button>

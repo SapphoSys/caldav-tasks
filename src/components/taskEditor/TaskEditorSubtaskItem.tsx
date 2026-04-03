@@ -119,7 +119,7 @@ export const TaskEditorSubtaskItem = ({
           <button
             type="button"
             onClick={toggleExpanded}
-            className="cursor-pointer flex-shrink-0 w-4 h-4 flex items-center justify-center rounded text-surface-400 dark:text-surface-500 hover:text-surface-600 dark:hover:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
+            className="cursor-pointer flex-shrink-0 w-4 h-4 flex items-center justify-center rounded text-surface-400 dark:text-surface-500 hover:text-surface-600 dark:hover:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             aria-label={isExpanded ? 'Collapse subtasks' : 'Expand subtasks'}
           >
             <ChevronRight
@@ -140,7 +140,7 @@ export const TaskEditorSubtaskItem = ({
               completedAt: newStatus === 'completed' ? new Date() : undefined,
             });
           }}
-          className={`cursor-pointer w-4 h-4 rounded border-[1.5px] flex items-center justify-center flex-shrink-0 transition-colors ${
+          className={`cursor-pointer w-4 h-4 rounded border-[1.5px] flex items-center justify-center flex-shrink-0 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 ${
             task.status === 'completed'
               ? 'bg-primary-500 border-primary-500'
               : task.status === 'cancelled'
@@ -167,7 +167,7 @@ export const TaskEditorSubtaskItem = ({
           <button
             type="button"
             onClick={handleStartEdit}
-            className={`flex-1 pl-0.5 text-sm text-left whitespace-nowrap ${
+            className={`flex-1 pl-0.5 text-sm text-left whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:rounded ${
               task.completed
                 ? 'line-through text-surface-400 dark:text-surface-500'
                 : 'text-surface-700 dark:text-surface-300 hover:text-surface-900 dark:hover:text-surface-100'
@@ -185,7 +185,7 @@ export const TaskEditorSubtaskItem = ({
             onClick={async () => {
               await confirmAndDelete(task.id);
             }}
-            className="cursor-pointer opacity-0 group-hover/row:opacity-100 p-0.5 flex-shrink-0 rounded text-surface-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+            className="cursor-pointer opacity-0 group-hover/row:opacity-100 p-0.5 flex-shrink-0 rounded text-surface-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-red-500"
           >
             <X className="w-3.5 h-3.5" />
           </button>

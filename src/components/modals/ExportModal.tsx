@@ -171,7 +171,7 @@ export const ExportModal = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors flex-shrink-0"
+            className="p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors flex-shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -189,7 +189,7 @@ export const ExportModal = ({
                   type="button"
                   key={format.id}
                   onClick={() => setSelectedFormat(format.id)}
-                  className={`flex items-start gap-3 p-3 rounded-lg border transition-colors text-left ${
+                  className={`flex items-start gap-3 p-3 rounded-lg border transition-colors text-left outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset ${
                     selectedFormat === format.id
                       ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                       : 'border-surface-200 dark:border-surface-700 hover:border-surface-300 dark:hover:border-surface-600'

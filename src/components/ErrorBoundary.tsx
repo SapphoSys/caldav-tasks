@@ -155,7 +155,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
                 <button
                   type="button"
                   onClick={this.handleReportIssue}
-                  className="rounded-md bg-primary-500 text-primary-contrast hover:bg-primary-600 focus:ring-primary-500 px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  className="rounded-md bg-primary-500 text-primary-contrast hover:bg-primary-600 px-4 py-2 text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
                 >
                   File issue on GitHub
                 </button>
@@ -173,7 +173,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
                   <button
                     type="button"
                     onClick={() => this.setState({ confirmResetPrefs: true })}
-                    className="rounded-md bg-surface-200 dark:bg-surface-700 px-4 py-2 text-sm font-medium text-surface-800 dark:text-surface-200 hover:bg-surface-300 dark:hover:bg-surface-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                    className="rounded-md bg-surface-200 dark:bg-surface-700 px-4 py-2 text-sm font-medium text-surface-800 dark:text-surface-200 hover:bg-surface-300 dark:hover:bg-surface-600 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
                   >
                     Reset Preferences
                   </button>
@@ -187,14 +187,14 @@ ${errorInfo?.componentStack || 'No component stack available'}
                       <button
                         type="button"
                         onClick={this.handleResetPreferences}
-                        className="rounded-md bg-red-600 dark:bg-red-500 px-4 py-2 text-sm font-medium text-primary-contrast hover:bg-red-700 dark:hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                        className="rounded-md bg-red-600 dark:bg-red-500 px-4 py-2 text-sm font-medium text-primary-contrast hover:bg-red-700 dark:hover:bg-red-600 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
                       >
                         Yes, Reset Preferences
                       </button>
                       <button
                         type="button"
                         onClick={() => this.setState({ confirmResetPrefs: false })}
-                        className="rounded-md border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 px-4 py-2 text-sm font-medium text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                        className="rounded-md border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 px-4 py-2 text-sm font-medium text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
                       >
                         Cancel
                       </button>
@@ -214,7 +214,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
                   <button
                     type="button"
                     onClick={this.handleReset}
-                    className="rounded-md bg-primary-500 px-4 py-2 text-sm font-medium text-primary-contrast hover:bg-primary-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                    className="rounded-md bg-primary-500 px-4 py-2 text-sm font-medium text-primary-contrast hover:bg-primary-600 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
                   >
                     Continue anyway
                   </button>
@@ -222,7 +222,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
                   <button
                     type="button"
                     onClick={this.handleReload}
-                    className="rounded-md bg-primary-500 px-4 py-2 text-sm font-medium text-primary-contrast hover:bg-primary-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                    className="rounded-md bg-primary-500 px-4 py-2 text-sm font-medium text-primary-contrast hover:bg-primary-600 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
                   >
                     Reload app
                   </button>
