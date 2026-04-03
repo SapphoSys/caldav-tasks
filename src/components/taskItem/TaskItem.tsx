@@ -1,13 +1,12 @@
 import type { AnimateLayoutChanges } from '@dnd-kit/sortable';
 import { defaultAnimateLayoutChanges, useSortable } from '@dnd-kit/sortable';
-import Check from 'lucide-react/icons/check';
 import ChevronRight from 'lucide-react/icons/chevron-right';
-import Clock from 'lucide-react/icons/clock';
-import Loader from 'lucide-react/icons/loader';
-import X from 'lucide-react/icons/x';
 import { useEffect, useRef, useState } from 'react';
 import { TaskItemBadges } from '$components/taskItem/TaskItemBadges';
+import { TaskItemCheckbox } from '$components/taskItem/TaskItemCheckbox';
 import { TaskItemContextMenu } from '$components/taskItem/TaskItemContextMenu';
+import { TaskItemDueDateBadge } from '$components/taskItem/TaskItemDueDateBadge';
+import { TaskItemTitle } from '$components/taskItem/TaskItemTitle';
 import { getPriorityColor, getPriorityRingColor } from '$constants/priority';
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useToggleTaskComplete } from '$hooks/queries/useTasks';
@@ -23,9 +22,8 @@ import { useSettingsStore } from '$hooks/store/useSettingsStore';
 import { useContextMenu } from '$hooks/ui/useContextMenu';
 import { filterCalDavDescription } from '$lib/ical/vtodo';
 import { toggleTaskCollapsed } from '$lib/store/tasks';
-import type { Account, Task, TaskStatus } from '$types';
+import type { Account, Task } from '$types';
 import { getContrastTextColor } from '$utils/color';
-import { formatDueDate } from '$utils/date';
 
 // Moved outside component — does not close over any component state
 const animateLayoutChanges: AnimateLayoutChanges = (args) => {
@@ -33,90 +31,6 @@ const animateLayoutChanges: AnimateLayoutChanges = (args) => {
   if (wasDragging || !isSorting) return false;
   return defaultAnimateLayoutChanges(args);
 };
-
-interface TaskCheckboxProps {
-  status: TaskStatus;
-  flashComplete: boolean;
-  checkmarkColor: string;
-  onClick: (e: React.MouseEvent) => void;
-}
-
-const TaskCheckbox = ({ status, flashComplete, checkmarkColor, onClick }: TaskCheckboxProps) => {
-  const isCompleted = status === 'completed' || flashComplete;
-  const isCancelled = status === 'cancelled';
-  const isInProcess = status === 'in-process';
-
-  const getTitle = () => {
-    if (isCancelled) return 'Cancelled';
-    if (isInProcess) return 'In Progress';
-    if (status === 'completed') return 'Completed — click to reopen';
-    return 'Mark complete';
-  };
-
-  const getClassName = () => {
-    const base =
-      'w-5 h-5 rounded border-2 flex items-center justify-center transition-all outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset';
-    if (isCompleted) return `${base} bg-primary-500 border-primary-500`;
-    if (isCancelled)
-      return `${base} bg-rose-400 border-rose-400 dark:bg-rose-500 dark:border-rose-500`;
-    if (isInProcess)
-      return `${base} bg-blue-400 border-blue-400 dark:bg-blue-500 dark:border-blue-500`;
-    return `${base} border-surface-300 dark:border-surface-600 hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30`;
-  };
-
-  return (
-    <button type="button" onClick={onClick} title={getTitle()} className={getClassName()}>
-      {isCompleted && (
-        <Check className="w-4 h-4" style={{ color: checkmarkColor }} strokeWidth={3} />
-      )}
-      {isCancelled && <X className="w-4 h-4 text-white dark:text-surface-200" strokeWidth={3} />}
-      {isInProcess && <Loader className="w-4 h-4 text-white dark:text-blue-100" />}
-    </button>
-  );
-};
-
-interface TaskTitleProps {
-  title: string;
-  status: TaskStatus;
-  isUnstarted: boolean;
-  className?: string;
-}
-
-const TaskTitle = ({ title, status, isUnstarted, className = '' }: TaskTitleProps) => {
-  const getTextClass = () => {
-    if (status === 'completed') return 'line-through text-surface-400';
-    if (status === 'cancelled') return 'line-through text-surface-400 dark:text-surface-500';
-    if (isUnstarted) return 'text-surface-500 dark:text-surface-400';
-    return 'text-surface-800 dark:text-surface-200';
-  };
-
-  return (
-    <div className={`${className} ${getTextClass()}`}>
-      {title || <span className="text-surface-400 italic">Untitled task</span>}
-    </div>
-  );
-};
-
-interface DueDateBadgeProps {
-  dueDate: Date | undefined;
-}
-
-const DueDateBadge = ({ dueDate }: DueDateBadgeProps) => {
-  if (!dueDate) return null;
-  const display = formatDueDate(dueDate);
-  if (!display) return null;
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border ${display.className}`}
-    >
-      <Clock className="w-3 h-3" />
-      {display.text}
-    </span>
-  );
-};
-
-// --- Main Component ---
 
 interface TaskItemProps {
   task: Task;
@@ -276,7 +190,7 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
         className={containerClass}
       >
         <div className="task-checkbox-wrapper flex-shrink-0">
-          <TaskCheckbox
+          <TaskItemCheckbox
             status={task.status}
             flashComplete={flashComplete}
             checkmarkColor={checkmarkColor}
@@ -288,7 +202,7 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
           {taskListDensity === 'compact' ? (
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
-                <TaskTitle
+                <TaskItemTitle
                   title={task.title}
                   status={task.status}
                   isUnstarted={isUnstarted}
@@ -297,20 +211,20 @@ export const TaskItem = ({ task, depth, ancestorIds, isDragEnabled, isOverlay }:
                 <TaskItemBadges {...badgesProps} compact={true} />
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
-                {taskBadgeVisibility.dueDate && <DueDateBadge dueDate={task.dueDate} />}
+                {taskBadgeVisibility.dueDate && <TaskItemDueDateBadge dueDate={task.dueDate} />}
               </div>
             </div>
           ) : (
             <>
               <div className="flex items-start justify-between gap-2">
-                <TaskTitle
+                <TaskItemTitle
                   title={task.title}
                   status={task.status}
                   isUnstarted={isUnstarted}
                   className="text-sm font-medium leading-5 truncate flex-1 min-w-0"
                 />
                 <div className="flex items-center gap-1 flex-shrink-0">
-                  <DueDateBadge dueDate={task.dueDate} />
+                  <TaskItemDueDateBadge dueDate={task.dueDate} />
                 </div>
               </div>
               {filterCalDavDescription(task.description) && (

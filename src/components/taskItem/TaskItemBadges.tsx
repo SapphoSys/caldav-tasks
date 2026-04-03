@@ -1,169 +1,17 @@
-import { openUrl } from '@tauri-apps/plugin-opener';
-import CalendarClock from 'lucide-react/icons/calendar-clock';
-import CheckCircle2 from 'lucide-react/icons/check-circle-2';
-import ChevronDown from 'lucide-react/icons/chevron-down';
-import ChevronRight from 'lucide-react/icons/chevron-right';
-import Link from 'lucide-react/icons/link';
-import Loader from 'lucide-react/icons/loader';
-import RefreshCw from 'lucide-react/icons/refresh-cw';
+import { TaskItemCalendarBadge } from '$components/taskItem/TaskItemCalendarBadge';
+import { TaskItemCollapseButton } from '$components/taskItem/TaskItemCollapseButton';
+import { TaskItemHiddenSubtasksBadge } from '$components/taskItem/TaskItemHiddenSubtasksBadge';
+import { TaskItemInProgressBadge } from '$components/taskItem/TaskItemInProgressBadge';
+import { TaskItemRepeatBadge } from '$components/taskItem/TaskItemRepeatBadge';
+import { TaskItemStartDateBadge } from '$components/taskItem/TaskItemStartDateBadge';
+import { TaskItemSubtaskProgressBadge } from '$components/taskItem/TaskItemSubtaskProgressBadge';
+import { TaskItemTagBadge } from '$components/taskItem/TaskItemTagBadge';
+import { TaskItemURLBadge } from '$components/taskItem/TaskItemURLBadge';
 import { FALLBACK_ITEM_COLOR } from '$constants';
-import { getIconByName } from '$constants/icons';
 import { getAllTags } from '$lib/store/tags';
 import { countChildren, getChildTasks } from '$lib/store/tasks';
-import type { Account, Calendar, Tag, Task } from '$types';
+import type { Account, Tag, Task } from '$types';
 import { formatStartDate } from '$utils/date';
-import { pluralize } from '$utils/misc';
-
-// Sub-components to reduce complexity
-const StartDateBadge = ({
-  startDateDisplay,
-}: {
-  startDateDisplay: ReturnType<typeof formatStartDate>;
-}) => (
-  <span
-    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border"
-    style={{
-      borderColor: startDateDisplay.borderColor,
-      backgroundColor: startDateDisplay.bgColor,
-      color: startDateDisplay.textColor,
-    }}
-  >
-    <CalendarClock className="w-3 h-3" />
-    {startDateDisplay.text}
-  </span>
-);
-
-const TagBadge = ({ tag, onTagClick }: { tag: Tag; onTagClick: (tagId: string) => void }) => {
-  const TagIcon = getIconByName(tag.icon || 'tag');
-  return (
-    <button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        onTagClick(tag.id);
-      }}
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium hover:opacity-80 transition-opacity border outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500"
-      style={{
-        borderColor: tag.color,
-        backgroundColor: `${tag.color}15`,
-        color: tag.color,
-      }}
-    >
-      {tag.emoji ? (
-        <span className="text-xs leading-none">{tag.emoji}</span>
-      ) : (
-        <TagIcon className="w-3 h-3" />
-      )}
-      {tag.name}
-    </button>
-  );
-};
-
-const CalendarBadge = ({
-  calendar,
-  calendarColor,
-  onCalendarClick,
-}: {
-  calendar: Calendar;
-  calendarColor: string;
-  onCalendarClick: (calendarId: string) => void;
-}) => {
-  const CalendarIcon = getIconByName(calendar.icon || 'calendar');
-  return (
-    <button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        onCalendarClick(calendar.id);
-      }}
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border hover:opacity-80 transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
-      style={{
-        borderColor: calendarColor,
-        backgroundColor: `${calendarColor}15`,
-        color: calendarColor,
-      }}
-    >
-      {calendar.emoji ? (
-        <span className="text-xs leading-none">{calendar.emoji}</span>
-      ) : (
-        <CalendarIcon className="w-3 h-3" />
-      )}
-      {calendar.displayName || 'Calendar'}
-    </button>
-  );
-};
-
-const UrlBadge = ({ url }: { url: string }) => (
-  <button
-    type="button"
-    onClick={(e) => {
-      e.stopPropagation();
-      openUrl(url);
-    }}
-    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:opacity-80 transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
-    title={url}
-  >
-    <Link className="w-3 h-3" />
-    URL
-  </button>
-);
-
-const InProgressBadge = ({ percentComplete }: { percentComplete?: number }) => (
-  <span
-    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border"
-    style={{
-      borderColor: '#3b82f6',
-      backgroundColor: '#3b82f615',
-      color: '#3b82f6',
-    }}
-  >
-    <Loader className="w-3 h-3" />
-    {percentComplete}%
-  </span>
-);
-
-const RepeatBadge = () => (
-  <span
-    title="Repeating task"
-    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-surface-300 dark:border-surface-600 bg-surface-50 dark:bg-surface-800 text-surface-600 dark:text-surface-400"
-  >
-    <RefreshCw className="w-3 h-3" />
-  </span>
-);
-
-const SubtaskProgressBadge = ({ completed, total }: { completed: number; total: number }) => (
-  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-surface-300 dark:border-surface-600 bg-surface-50 dark:bg-surface-800 text-surface-600 dark:text-surface-400">
-    <CheckCircle2 className="w-3 h-3" />
-    {completed}/{total}
-  </span>
-);
-
-const CollapseButton = ({
-  isCollapsed,
-  childCount,
-  onToggleCollapsed,
-}: {
-  isCollapsed: boolean;
-  childCount: number;
-  onToggleCollapsed: (e: React.MouseEvent) => void;
-}) => (
-  <button
-    type="button"
-    onClick={onToggleCollapsed}
-    className="collapse-button inline-flex items-center gap-0.5 px-2 py-0.5 rounded border border-surface-200 dark:border-surface-600 bg-surface-50 dark:bg-surface-800 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors text-xs text-surface-500 dark:text-surface-400 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
-  >
-    {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-    <span>
-      {childCount} {pluralize(childCount, 'subtask')}
-    </span>
-  </button>
-);
-
-const HiddenSubtasksBadge = ({ count }: { count: number }) => (
-  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border border-surface-300 dark:border-surface-600 bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-400">
-    {count} hidden {pluralize(count, 'subtask')}
-  </span>
-);
 
 interface TaskItemBadgesProps {
   task: Task;
@@ -233,34 +81,34 @@ export const TaskItemBadges = ({
       className={`flex items-center gap-2 ${compact ? 'overflow-hidden flex-shrink-0' : 'mt-2 flex-wrap'}`}
     >
       {badgeVisibility.startDate && startDateDisplay && (
-        <StartDateBadge startDateDisplay={startDateDisplay} />
+        <TaskItemStartDateBadge startDateDisplay={startDateDisplay} />
       )}
 
       {badgeVisibility.tags &&
-        taskTags.map((tag) => <TagBadge key={tag.id} tag={tag} onTagClick={onTagClick} />)}
+        taskTags.map((tag) => <TaskItemTagBadge key={tag.id} tag={tag} onTagClick={onTagClick} />)}
 
       {badgeVisibility.calendar && showCalendar && calendar && (
-        <CalendarBadge
+        <TaskItemCalendarBadge
           calendar={calendar}
           calendarColor={calendarColor}
           onCalendarClick={onCalendarClick}
         />
       )}
 
-      {badgeVisibility.url && task.url && <UrlBadge url={task.url} />}
+      {badgeVisibility.url && task.url && <TaskItemURLBadge url={task.url} />}
 
       {badgeVisibility.status && task.status === 'in-process' && (
-        <InProgressBadge percentComplete={task.percentComplete} />
+        <TaskItemInProgressBadge percentComplete={task.percentComplete} />
       )}
 
-      {badgeVisibility.repeat && task.rrule && <RepeatBadge />}
+      {badgeVisibility.repeat && task.rrule && <TaskItemRepeatBadge />}
 
       {badgeVisibility.subtasks && totalSubtasks > 0 && (
-        <SubtaskProgressBadge completed={completedSubtasks} total={totalSubtasks} />
+        <TaskItemSubtaskProgressBadge completed={completedSubtasks} total={totalSubtasks} />
       )}
 
       {badgeVisibility.subtasks && childCount > 0 && (
-        <CollapseButton
+        <TaskItemCollapseButton
           isCollapsed={!!task.isCollapsed}
           childCount={childCount}
           onToggleCollapsed={onToggleCollapsed}
@@ -268,7 +116,7 @@ export const TaskItemBadges = ({
       )}
 
       {badgeVisibility.subtasks && hiddenChildCount > 0 && (
-        <HiddenSubtasksBadge count={hiddenChildCount} />
+        <TaskItemHiddenSubtasksBadge count={hiddenChildCount} />
       )}
     </div>
   );

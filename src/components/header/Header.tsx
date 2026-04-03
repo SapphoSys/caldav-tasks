@@ -1,13 +1,14 @@
 import { formatDistanceToNow } from 'date-fns';
-import SortDesc from 'lucide-react/icons/arrow-down-wide-narrow';
-import SortAsc from 'lucide-react/icons/arrow-up-narrow-wide';
-import Check from 'lucide-react/icons/check';
+
 import Plus from 'lucide-react/icons/plus';
 import RefreshCw from 'lucide-react/icons/refresh-cw';
 import Search from 'lucide-react/icons/search';
 import SlidersHorizontal from 'lucide-react/icons/sliders-horizontal';
 import { useEffect, useRef, useState } from 'react';
 import { ComposedInput } from '$components/ComposedInput';
+import { HeaderSortDirectionButton } from '$components/header/HeaderSortDirectionButton';
+import { HeaderSortOptionButton } from '$components/header/HeaderSortOptionsButton';
+import { HeaderViewMenuCheckbox } from '$components/header/HeaderViewMenuCheckbox';
 import { Tooltip } from '$components/Tooltip';
 import { DEFAULT_SORT_CONFIG, JUST_NOW_SYNC_TEXT_MS_THRESHOLD, SORT_OPTIONS } from '$constants';
 import { useModalState } from '$context/modalStateContext';
@@ -20,7 +21,7 @@ import {
   useSetSortConfig,
   useUIState,
 } from '$hooks/queries/useUIState';
-import type { SortConfig, SortDirection, SortMode } from '$types';
+import type { SortDirection, SortMode } from '$types';
 import { getMetaKeyLabel, getModifierJoiner } from '$utils/keyboard';
 
 // Extracted helper: get sync button tooltip content
@@ -56,97 +57,6 @@ const getSyncButtonClass = (
     return `${base} text-surface-300 dark:text-surface-600 border-transparent cursor-not-allowed`;
   }
   return `${base} text-surface-500 dark:text-surface-400 border-transparent ${!isAnyModalOpen ? 'hover:bg-surface-100 dark:hover:bg-surface-700' : ''}`;
-};
-
-// Extracted sub-component: Checkbox toggle for view menu
-const ViewMenuCheckbox = ({
-  label,
-  checked,
-  onClick,
-}: {
-  label: string;
-  checked: boolean;
-  onClick: () => void;
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className="w-full flex items-center justify-between gap-2.5 py-1.5 text-sm text-surface-700 dark:text-surface-300 hover:text-surface-900 dark:hover:text-surface-100 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset rounded"
-  >
-    <span>{label}</span>
-    <div
-      className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
-        checked ? 'bg-primary-500 border-primary-500' : 'border-surface-300 dark:border-surface-600'
-      }`}
-    >
-      {checked && <Check className="w-3 h-3 text-primary-contrast" strokeWidth={3} />}
-    </div>
-  </button>
-);
-
-// Extracted sub-component: Sort option button
-const SortOptionButton = ({
-  option,
-  isActive,
-  onClick,
-}: {
-  option: { value: SortMode; label: string };
-  isActive: boolean;
-  onClick: () => void;
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset ${
-      isActive
-        ? 'text-primary-600 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30'
-        : 'text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700'
-    }`}
-  >
-    <span>{option.label}</span>
-  </button>
-);
-
-// Extracted sub-component: Sort direction button
-const SortDirectionButton = ({
-  sortConfig,
-  onToggle,
-}: {
-  sortConfig: SortConfig;
-  onToggle: () => void;
-}) => {
-  const isDisabled = sortConfig.mode === 'manual';
-  const buttonClass = `w-full flex rounded-b-md items-center justify-between gap-2 px-3 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset ${
-    isDisabled
-      ? 'text-surface-400 dark:text-surface-600 cursor-not-allowed'
-      : 'text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700'
-  }`;
-
-  return (
-    <Tooltip
-      content={isDisabled ? 'Not available for manual sorting' : ''}
-      position="bottom"
-      allowInModal
-      className="whitespace-nowrap"
-      triggerClassName="w-full"
-    >
-      <button
-        type="button"
-        onClick={isDisabled ? () => {} : onToggle}
-        disabled={isDisabled}
-        className={buttonClass}
-      >
-        <div className="flex items-center gap-2">
-          {sortConfig.direction === 'asc' ? (
-            <SortAsc className="w-4 h-4" />
-          ) : (
-            <SortDesc className="w-4 h-4" />
-          )}
-          <span>{sortConfig.direction === 'asc' ? 'Ascending' : 'Descending'}</span>
-        </div>
-      </button>
-    </Tooltip>
-  );
 };
 
 interface HeaderProps {
@@ -327,12 +237,12 @@ export const Header = ({
                   className="absolute right-0 top-full mt-1 bg-white dark:bg-surface-800 rounded-lg shadow-lg border border-surface-200 dark:border-surface-700 z-50 min-w-[240px] animate-scale-in"
                 >
                   <div className="px-3 py-2 border-b border-surface-200 dark:border-surface-700">
-                    <ViewMenuCheckbox
+                    <HeaderViewMenuCheckbox
                       label="Show completed"
                       checked={showCompletedTasks}
                       onClick={() => setShowCompletedTasksMutation.mutate(!showCompletedTasks)}
                     />
-                    <ViewMenuCheckbox
+                    <HeaderViewMenuCheckbox
                       label="Show unstarted"
                       checked={showUnstartedTasks}
                       onClick={() => setShowUnstartedTasksMutation.mutate(!showUnstartedTasks)}
@@ -344,7 +254,7 @@ export const Header = ({
                       Sort By
                     </div>
                     {SORT_OPTIONS.map((option) => (
-                      <SortOptionButton
+                      <HeaderSortOptionButton
                         key={option.value}
                         option={option}
                         isActive={sortConfig.mode === option.value}
@@ -357,7 +267,10 @@ export const Header = ({
                     <div className="px-3 pb-2 pt-1 text-xs font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wider">
                       Sort Direction
                     </div>
-                    <SortDirectionButton sortConfig={sortConfig} onToggle={toggleSortDirection} />
+                    <HeaderSortDirectionButton
+                      sortConfig={sortConfig}
+                      onToggle={toggleSortDirection}
+                    />
                   </div>
                 </div>
               </>

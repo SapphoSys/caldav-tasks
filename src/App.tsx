@@ -2,7 +2,8 @@ import { getVersion } from '@tauri-apps/api/app';
 import { useCallback, useEffect, useState } from 'react';
 
 import { DragOverlay } from '$components/DragOverlay';
-import { Header } from '$components/Header';
+import { Header } from '$components/header/Header';
+
 import { AccountModal } from '$components/modals/AccountModal';
 import { CalendarModal } from '$components/modals/CalendarModal';
 import { ChangelogModal } from '$components/modals/ChangelogModal';
@@ -12,6 +13,7 @@ import { OnboardingModal } from '$components/modals/OnboardingModal';
 import { SettingsModal } from '$components/modals/SettingsModal';
 import { TaskActionsModal } from '$components/modals/TaskActionsModal';
 import { UpdateModal } from '$components/modals/UpdateModal';
+
 import { OfflineBanner } from '$components/OfflineBanner';
 import { Sidebar } from '$components/sidebar/Sidebar';
 import { TaskList } from '$components/TaskList';
