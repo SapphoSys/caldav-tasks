@@ -187,11 +187,15 @@ const App = () => {
     handleDragLeave,
     clearDragState,
   } = useFileDrop({
+    // only process file drops when import modal is NOT open
+    // when modal is open, the modal handles its own drops
     onFileDrop: (file) => {
+      if (menuHandlers.showImport) return;
       setPreloadedFile(file);
       menuHandlers.setShowImport(true);
     },
     onConfigProfileDrop: (config) => {
+      if (menuHandlers.showImport) return;
       setPreloadedConfig(config);
       menuHandlers.setShowAccountModal(true);
     },
@@ -253,7 +257,9 @@ const App = () => {
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
     >
-      {isDragOver && <DragOverlay isUnsupportedFile={isUnsupportedFile} />}
+      {isDragOver && !menuHandlers.showImport && (
+        <DragOverlay isUnsupportedFile={isUnsupportedFile} />
+      )}
 
       <Sidebar
         onOpenSettings={menuHandlers.handleOpenSettings}
