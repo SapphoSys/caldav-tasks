@@ -1,5 +1,5 @@
 import { type ReactNode, useCallback, useRef, useState } from 'react';
-import { ConfirmDialog } from '$components/ConfirmDialog';
+import { ConfirmDialogModal } from '$components/modals/ConfirmDialogModal';
 import {
   ConfirmDialogContext,
   type ConfirmOptions,
@@ -70,7 +70,7 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
       value={{ confirm, confirmWithAlternate, isOpen, setLoading: setIsLoading, close }}
     >
       {children}
-      <ConfirmDialog
+      <ConfirmDialogModal
         key={dialogKey}
         isOpen={isOpen}
         title={options.title ?? defaultConfirmOptions.title}

@@ -1,6 +1,7 @@
 import Loader2 from 'lucide-react/icons/loader-2';
 import X from 'lucide-react/icons/x';
 import { type ReactNode, useEffect, useState } from 'react';
+import { ModalBackdrop } from '$components/ModalBackdrop';
 
 const getButtonClasses = (isDestructive: boolean, isPrimary: boolean) => {
   if (isDestructive) {
@@ -31,7 +32,7 @@ interface ConfirmDialogProps {
   onCancel: () => void;
 }
 
-export const ConfirmDialog = ({
+export const ConfirmDialogModal = ({
   isOpen,
   title,
   subtitle,
@@ -86,19 +87,13 @@ export const ConfirmDialog = ({
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4 animate-fade-in"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="confirm-dialog-title"
-      aria-describedby="confirm-dialog-description"
-      onKeyDown={(e) => e.key === 'Escape' && onCancel()}
-    >
+    <ModalBackdrop zIndex="z-[70]" onClose={onCancel}>
       <div
-        role="document"
-        className="bg-white dark:bg-surface-800 rounded-xl shadow-xl w-full max-w-sm animate-scale-in"
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-dialog-title"
+        aria-describedby="confirm-dialog-description"
+        className="relative bg-white dark:bg-surface-800 rounded-xl shadow-xl w-full max-w-sm animate-scale-in"
       >
         <div className="flex items-start justify-between p-4 border-b border-surface-200 dark:border-surface-700 rounded-t-xl">
           <div className="flex-1 min-w-0">
@@ -166,6 +161,6 @@ export const ConfirmDialog = ({
           </button>
         </div>
       </div>
-    </div>
+    </ModalBackdrop>
   );
 };
