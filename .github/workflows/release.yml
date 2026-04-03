@@ -179,6 +179,7 @@ jobs:
         run: pnpm install
 
       - name: Load signing secrets from 1Password
+        if: matrix.platform != 'windows-11-arm'
         uses: 1password/load-secrets-action@v4
         with:
           export-env: true
@@ -187,9 +188,46 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: op://Tauri/Tauri Secrets/signing-key
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: op://Tauri/Tauri Secrets/signing-key-password
           APPLE_SIGNING_IDENTITY: op://Tauri/Apple Secrets/identity
+          APPLE_CERTIFICATE: op://Tauri/Apple Secrets/certificate
+          APPLE_CERTIFICATE_PASSWORD: op://Tauri/Apple Secrets/api-key
           APPLE_API_ISSUER: op://Tauri/Apple Secrets/api-issuer
           APPLE_API_KEY: op://Tauri/Apple Secrets/api-key
           APPLE_API_KEY_CERTIFICATE: op://Tauri/Apple Secrets/api-key-certificate
+
+      - name: Load signing secrets from 1Password (Windows ARM)
+        if: matrix.platform == 'windows-11-arm'
+        shell: pwsh
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+        run: |
+          # Install 1Password CLI manually for Windows ARM (not officially supported)
+          $opUrl = "https://cache.agilebits.com/dist/1P/op2/pkg/v2.33.1/op_windows_amd64_v2.33.1.zip"
+          Invoke-WebRequest -Uri $opUrl -OutFile "$env:RUNNER_TEMP\op.zip"
+          Expand-Archive -Path "$env:RUNNER_TEMP\op.zip" -DestinationPath "$env:RUNNER_TEMP\op"
+          $env:PATH = "$env:RUNNER_TEMP\op;$env:PATH"
+          
+          # Load secrets
+          $signingKey = op read "op://Tauri/Tauri Secrets/signing-key"
+          $signingKeyPassword = op read "op://Tauri/Tauri Secrets/signing-key-password"
+          
+          # Export to GitHub environment
+          "TAURI_SIGNING_PRIVATE_KEY=$signingKey" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "TAURI_SIGNING_PRIVATE_KEY_PASSWORD=$signingKeyPassword" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Import Apple signing certificate
+        if: matrix.platform == 'macos-latest' || matrix.platform == 'macos-15-intel'
+        shell: bash
+        run: |
+          echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
+          KEYCHAIN_PASSWORD="$(openssl rand -base64 32)"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
+          security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          security find-identity -v -p codesigning build.keychain
+          rm certificate.p12
 
       - name: Prepare Apple API key file
         if: matrix.platform == 'macos-latest' || matrix.platform == 'macos-15-intel'
@@ -200,15 +238,15 @@ jobs:
           chmod 600 "$APPLE_KEY_FILE"
           echo "APPLE_API_KEY_PATH=$APPLE_KEY_FILE" >> "$GITHUB_ENV"
 
-      - uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ env.TAURI_SIGNING_PRIVATE_KEY || secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ env.APPLE_SIGNING_IDENTITY || secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_API_ISSUER: ${{ env.APPLE_API_ISSUER || secrets.APPLE_API_ISSUER }}
-          APPLE_API_KEY: ${{ env.APPLE_API_KEY || secrets.APPLE_API_KEY }}
-          APPLE_API_KEY_PATH: ${{ env.APPLE_API_KEY_PATH || secrets.APPLE_API_KEY_PATH }}
+          APPLE_SIGNING_IDENTITY: ${{ env.APPLE_SIGNING_IDENTITY }}
+          APPLE_API_ISSUER: ${{ env.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ env.APPLE_API_KEY }}
+          APPLE_API_KEY_PATH: ${{ env.APPLE_API_KEY_PATH }}
         with:
           # use existing release created by prepare-release job
           releaseId: ${{ needs.prepare-release.outputs.release_id }}
