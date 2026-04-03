@@ -11,7 +11,7 @@ import { downloadFile } from '$utils/misc';
  */
 export const exportSettingsToFile = async (
   settingsJson: string,
-  fileName = 'caldav-settings.json',
+  fileName = 'chiri-settings.json',
 ) => {
   try {
     const path = await save({
