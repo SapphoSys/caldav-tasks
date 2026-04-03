@@ -3,7 +3,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import CheckCircle2 from 'lucide-react/icons/check-circle-2';
 import Plus from 'lucide-react/icons/plus';
 import { useMemo, useState } from 'react';
-import { SubtaskTreeItem } from '$components/SubtaskTreeItem';
+import { TaskEditorSubtaskItem } from '$components/taskEditor/TaskEditorSubtaskItem';
 import { useChildTasks, useCreateTask, useTasks } from '$hooks/queries/useTasks';
 import { truncateName, useSortableDrag } from '$hooks/ui/useSortableDrag';
 import { getSortedTasks } from '$lib/store/filters';
@@ -139,7 +139,7 @@ export const TaskEditorSubtasks = ({
                   strategy={verticalListSortingStrategy}
                 >
                   {visibleFlattenedSubtasks.slice(1).map((flatItem) => (
-                    <SubtaskTreeItem
+                    <TaskEditorSubtaskItem
                       key={flatItem.id}
                       task={flatItem}
                       depth={flatItem.depth - 1}
@@ -165,7 +165,7 @@ export const TaskEditorSubtasks = ({
                               : `← Move under ${truncateName(targetSubtaskParentName || 'parent')}`}
                         </div>
                       )}
-                      <SubtaskTreeItem
+                      <TaskEditorSubtaskItem
                         task={activeDragSubtask}
                         depth={targetSubtaskIndent - 1}
                         checkmarkColor={checkmarkColor}

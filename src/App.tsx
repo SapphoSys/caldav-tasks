@@ -1,5 +1,6 @@
 import { getVersion } from '@tauri-apps/api/app';
 import { useCallback, useEffect, useState } from 'react';
+
 import { DragOverlay } from '$components/DragOverlay';
 import { Header } from '$components/Header';
 import { AccountModal } from '$components/modals/AccountModal';
@@ -15,7 +16,9 @@ import { OfflineBanner } from '$components/OfflineBanner';
 import { Sidebar } from '$components/sidebar/Sidebar';
 import { TaskList } from '$components/TaskList';
 import { TaskEditor } from '$components/taskEditor/TaskEditor';
+
 import { MAX_EDITOR_WIDTH, MIN_EDITOR_WIDTH } from '$constants';
+
 import { useAccounts } from '$hooks/queries/useAccounts';
 import { useSyncQuery } from '$hooks/queries/useSync';
 import { useTasks } from '$hooks/queries/useTasks';
@@ -32,7 +35,9 @@ import { toastManager } from '$hooks/ui/useToast';
 import { useAppMenu } from '$hooks/useAppMenu';
 import { useChangelog } from '$hooks/useChangelog';
 import { useMenuHandlers } from '$hooks/useMenuHandlers';
+
 import { getTasksByCalendar } from '$lib/store/tasks';
+
 import type { CalDAVConfig } from '$utils/mobileconfig';
 
 const App = () => {

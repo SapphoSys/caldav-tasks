@@ -14,7 +14,7 @@ const animateLayoutChanges: AnimateLayoutChanges = (args) =>
 // is always shown before the checkbox so all levels align consistently.
 const getPaddingLeft = (depth: number) => 8 + depth * 20;
 
-interface SubtaskTreeItemProps {
+interface TaskEditorSubtaskItemProps {
   task: Task;
   depth: number;
   checkmarkColor: string;
@@ -26,7 +26,7 @@ interface SubtaskTreeItemProps {
   isOverlay?: boolean;
 }
 
-export const SubtaskTreeItem = ({
+export const TaskEditorSubtaskItem = ({
   task,
   depth,
   checkmarkColor,
@@ -36,7 +36,7 @@ export const SubtaskTreeItem = ({
   confirmAndDelete,
   isDragEnabled,
   isOverlay = false,
-}: SubtaskTreeItemProps) => {
+}: TaskEditorSubtaskItemProps) => {
   const { data: children = [] } = useChildTasks(task.uid);
   const hasChildren = children.length > 0;
   const isExpanded = expandedSubtasks.has(task.id);
