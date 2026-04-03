@@ -2,7 +2,7 @@ id: moe.sapphic.Chiri
 runtime: org.gnome.Platform
 runtime-version: '48'
 sdk: org.gnome.Sdk
-command: chiri
+command: moe.sapphic.Chiri
 
 finish-args:
   # Display
@@ -17,14 +17,27 @@ finish-args:
   # Notifications
   - --talk-name=org.freedesktop.Notifications
 
-  # System tray icon
+  # System tray icon - talk to the SNI watcher and own the StatusNotifierItem well-known name.
+  # libappindicator claims org.kde.StatusNotifierItem-{PID}-1; the wildcard must follow a period in Flatpak policy,
+  # so org.kde.* is the valid form (org.kde.StatusNotifierItem-{PID}-1 is one element after org.kde.).
   - --talk-name=org.kde.StatusNotifierWatcher
+  - --talk-name=org.freedesktop.StatusNotifierWatcher
+  - --own-name=org.kde.*
+
+  # libappindicator writes the tray icon to $TMPDIR as a temp file. Flatpak's
+  # default /tmp is a private sandboxed directory (mapped to
+  # /run/user/1000/.flatpak/<id>/tmp/ on the host), so the host tray manager
+  # (KDE plasma) cannot find the icon when it reads the IconThemePath from
+  # D-Bus. --filesystem=/tmp mounts the real host /tmp into the sandbox,
+  # making the icon file visible to both the app and the host tray.
+  - --filesystem=/tmp
+  - --env=TMPDIR=/tmp
 
 modules:
   # Tray icon support (includes libdbusmenu, libindicator, libappindicator)
   - shared-modules/libappindicator/libappindicator-gtk3-12.10.json
 
-  - name: chiri
+  - name: Chiri
     buildsystem: simple
 
     sources:
@@ -49,7 +62,7 @@ modules:
 
       # ARM64 .deb package - LOCAL BUILD FOR TESTING
       - type: file
-        path: chiri_0.7.1_arm64.deb
+        path: Chiri_0.7.1_arm64.deb
         only-arches: [aarch64]
 
       # Uncomment for production builds from GitHub:
@@ -72,8 +85,10 @@ modules:
       - ar -x *.deb --output deb-extract
       - tar -C deb-extract -xf deb-extract/data.tar.gz
 
-      # Install the binary
-      - install -Dm755 deb-extract/usr/bin/chiri /app/bin/chiri
+      # Install the binary named after the Flatpak app ID. Tauri appears to derive the GtkApplication ID
+      # (and thus the Wayland xdg_toplevel app_id) from the binary name rather than the tauri.conf.json
+      # identifier. Naming it moe.sapphic.Chiri makes KWin find the correct moe.sapphic.Chiri.desktop entry for the title bar icon.
+      - install -Dm755 deb-extract/usr/bin/Chiri /app/bin/moe.sapphic.Chiri
 
       # If there are bundled resources (uncomment if needed)
       # - mkdir -p /app/lib/chiri
@@ -81,11 +96,11 @@ modules:
       # - find /app/lib/chiri -type f -exec chmod 644 {} \;
 
       # Install icons with Flatpak naming (app-id based)
-      - install -Dm644 deb-extract/usr/share/icons/hicolor/32x32/apps/chiri.png
+      - install -Dm644 deb-extract/usr/share/icons/hicolor/32x32/apps/Chiri.png
         /app/share/icons/hicolor/32x32/apps/moe.sapphic.Chiri.png
-      - install -Dm644 deb-extract/usr/share/icons/hicolor/128x128/apps/chiri.png
+      - install -Dm644 deb-extract/usr/share/icons/hicolor/128x128/apps/Chiri.png
         /app/share/icons/hicolor/128x128/apps/moe.sapphic.Chiri.png
-      - install -Dm644 deb-extract/usr/share/icons/hicolor/256x256@2/apps/chiri.png
+      - install -Dm644 deb-extract/usr/share/icons/hicolor/256x256@2/apps/Chiri.png
         /app/share/icons/hicolor/256x256@2/apps/moe.sapphic.Chiri.png
 
       # Install desktop file with icon reference updated

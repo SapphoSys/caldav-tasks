@@ -51,45 +51,84 @@ pub async fn is_gnome_desktop() -> Result<bool, String> {
 #[cfg(target_os = "linux")]
 fn get_current_theme(_app_handle: &tauri::AppHandle<AppRuntime>) -> Theme {
     // GNOME's top bar is ALWAYS dark, even in light theme
-    // So always return Dark theme to load the light icon
     if is_gnome() {
         debug!("[Tray] GNOME detected - top bar is always dark, using light icon");
         return Theme::Dark;
     }
 
-    debug!("[Tray] Linux detected - using gsettings for theme detection");
+    // Try the sandboxed XDG Settings portal approach first
+    if let Some(theme) = query_portal_color_scheme() {
+        return theme;
+    }
 
+    // Fall back to gsettings for non-Flatpak installs where
+    // the portal may not be running but dconf is directly accessible
+    query_gsettings_color_scheme()
+}
+
+/// Query color-scheme from the XDG Settings portal via gdbus.
+/// Returns None if the portal is unavailable or returns no preference.
+#[cfg(target_os = "linux")]
+fn query_portal_color_scheme() -> Option<Theme> {
+    let output = std::process::Command::new("gdbus")
+        .args([
+            "call",
+            "--session",
+            "--dest",
+            "org.freedesktop.portal.Desktop",
+            "--object-path",
+            "/org/freedesktop/portal/desktop",
+            "--method",
+            "org.freedesktop.portal.Settings.Read",
+            "org.freedesktop.appearance",
+            "color-scheme",
+        ])
+        .output()
+        .ok()?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    if !output.status.success() {
+        debug!("[Tray] Portal unavailable, falling back to gsettings");
+        return None;
+    }
+
+    // gdbus output format: (<uint32 N>,)  where N = 0/1/2
+    if stdout.contains("uint32 1") {
+        debug!("[Tray] Portal: dark theme");
+        Some(Theme::Dark)
+    } else if stdout.contains("uint32 2") {
+        debug!("[Tray] Portal: light theme");
+        Some(Theme::Light)
+    } else {
+        // 0 = no preference — fall through to gsettings
+        debug!("[Tray] Portal: no preference, trying gsettings");
+        None
+    }
+}
+
+/// Fall back to gsettings for environments where the portal isn't available.
+#[cfg(target_os = "linux")]
+fn query_gsettings_color_scheme() -> Theme {
     match std::process::Command::new("gsettings")
         .args(["get", "org.gnome.desktop.interface", "color-scheme"])
         .output()
     {
         Ok(output) => {
-            let result = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            debug!("[Tray] gsettings color-scheme result: {:?}", result);
-
-            // Returns: 'prefer-dark', 'prefer-light', or 'default'
-            // 'prefer-dark' = Dark theme (use light icon)
-            // 'prefer-light' or 'default' = Light theme (use dark icon)
-            if result.contains("prefer-dark") {
-                debug!("[Tray] Detected dark theme via gsettings");
+            let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            debug!("[Tray] gsettings color-scheme: {:?}", stdout);
+            if stdout.contains("prefer-dark") {
                 Theme::Dark
-            } else if result.contains("prefer-light") || result.contains("default") {
-                debug!("[Tray] Detected light theme via gsettings");
-                Theme::Light
             } else {
-                debug!("[Tray] Unknown gsettings result, defaulting to Dark theme");
-                Theme::Dark
+                Theme::Light
             }
         }
         Err(e) => {
-            debug!(
-                "[Tray] Failed to run gsettings command: {}, defaulting to Dark theme",
-                e
-            );
+            debug!("[Tray] gsettings failed: {}, defaulting to light icon", e);
             Theme::Dark
         }
     }
 }
+
 /// Get the current system theme
 #[cfg(not(target_os = "linux"))]
 fn get_current_theme(app_handle: &tauri::AppHandle<AppRuntime>) -> Theme {
@@ -146,9 +185,7 @@ pub fn is_tray_enabled() -> bool {
     *TRAY_ENABLED.lock().expect("Failed to lock TRAY_ENABLED")
 }
 
-/// initialize the system tray (called from frontend after reading settings)
-#[tauri::command]
-pub async fn initialize_tray(
+fn initialize_tray_impl(
     app_handle: tauri::AppHandle<AppRuntime>,
     enabled: bool,
 ) -> Result<(), String> {
@@ -236,6 +273,17 @@ pub async fn initialize_tray(
         tray_builder = tray_builder.icon_as_template(true);
     }
 
+    // on Linux, force the tray icon temp file into /tmp so the host tray
+    // manager (KDE plasma, etc.) can read it. tray-icon defaults to writing
+    // the icon into $XDG_RUNTIME_DIR/tray-icon/; inside a Flatpak sandbox
+    // $XDG_RUNTIME_DIR is a private directory inaccessible to the host, so
+    // the icon file path advertised via SNI/IconThemePath can't be opened,
+    // resulting in a blank icon slot. /tmp is shared between sandbox and host.
+    #[cfg(target_os = "linux")]
+    {
+        tray_builder = tray_builder.temp_dir_path("/tmp");
+    }
+
     let _tray = tray_builder
         .on_menu_event(|app, event| match event.id.as_ref() {
             "show" => {
@@ -282,6 +330,43 @@ pub async fn initialize_tray(
             e.to_string()
         })?;
     Ok(())
+}
+
+/// initialize the system tray (called from frontend after reading settings)
+#[tauri::command]
+pub async fn initialize_tray(
+    app_handle: tauri::AppHandle<AppRuntime>,
+    enabled: bool,
+) -> Result<(), String> {
+    #[cfg(all(target_os = "macos", feature = "cef"))]
+    {
+        let (tx, rx) = std::sync::mpsc::channel::<Result<(), String>>();
+        let app_for_main = app_handle.clone();
+
+        app_handle
+            .run_on_main_thread(move || {
+                let result = initialize_tray_impl(app_for_main, enabled);
+                let _ = tx.send(result);
+            })
+            .map_err(|e| {
+                error!(
+                    "[Tray] Failed to schedule tray initialization on main thread: {}",
+                    e
+                );
+                e.to_string()
+            })?;
+
+        let received = rx.recv().map_err(|e| {
+            error!("[Tray] Failed to receive tray initialization result: {}", e);
+            e.to_string()
+        })?;
+        return received;
+    }
+
+    #[cfg(not(all(target_os = "macos", feature = "cef")))]
+    {
+        initialize_tray_impl(app_handle, enabled)
+    }
 }
 
 /// get the current tray enabled state (for frontend to read on startup)

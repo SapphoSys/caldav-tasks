@@ -33,32 +33,34 @@ pub fn needs_gtk_decorations() -> bool {
     false
 }
 
-/// Configures the titlebar based on the desktop environment
-/// This must be called BEFORE the window is shown/realized
+/// configures the titlebar based on the desktop environment
+/// must be called BEFORE the window is shown/realized
 ///
-/// - GNOME, COSMIC: Keep GTK client-side decorations (works well, draggable)
-/// - KDE, others: Use native window decorations (integrates better)
+/// - GNOME, COSMIC: keep GTK client-side decorations (works well, draggable)
+/// - KDE, others: use native window decorations (integrates better)
+///
+/// note: the Wayland xdg_toplevel app_id is derived from the binary name,
+/// so the Flatpak installs the binary as moe.sapphic.Chiri to match the .desktop filename for KWin icon lookup
 pub fn configure_titlebar_for_de(window: &tauri::WebviewWindow) {
     use gtk::prelude::GtkWindowExt;
 
     let desktop = env::var("XDG_CURRENT_DESKTOP").unwrap_or_else(|_| "Unknown".to_string());
 
-    if needs_gtk_decorations() {
+    if let Ok(gtk_window) = window.gtk_window() {
+        if needs_gtk_decorations() {
+            log::info!(
+                "Desktop '{}' detected - keeping GTK client-side decorations",
+                desktop
+            );
+            return;
+        }
+
         log::info!(
-            "Desktop '{}' detected - keeping GTK client-side decorations",
+            "Desktop '{}' detected - using native window decorations",
             desktop
         );
-        // Keep the default GTK titlebar
-        return;
-    }
 
-    log::info!(
-        "Desktop '{}' detected - using native window decorations",
-        desktop
-    );
-
-    // Remove the GTK titlebar to use native DE decorations
-    if let Ok(gtk_window) = window.gtk_window() {
+        // remove the GTK titlebar to use native DE decorations
         gtk_window.set_titlebar(Option::<&gtk::Widget>::None);
     }
 }
