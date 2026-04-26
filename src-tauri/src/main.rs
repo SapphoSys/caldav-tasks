@@ -5,11 +5,11 @@
 
 mod app_nap;
 mod data_migration;
-mod http_client;
 mod install_type;
 mod logging;
 mod macos_menu;
 mod migrations;
+mod notification_manager;
 mod notifications;
 mod plist_utils;
 mod tray;
@@ -21,6 +21,8 @@ use tauri::Emitter;
 use tauri::Manager;
 #[cfg(target_os = "macos")]
 use tauri::RunEvent;
+#[cfg(any(windows, target_os = "linux"))]
+use tauri_plugin_deep_link::DeepLinkExt;
 use tauri_plugin_sql::Builder;
 
 /// Exits the process directly via the OS, bypassing Tauri's RunEvent::ExitRequested.
@@ -34,13 +36,6 @@ fn force_quit() {
 
 #[cfg_attr(feature = "cef", tauri::cef_entry_point)]
 fn main() {
-    // On Linux, WebKitGTK 2.42+ allocates DMA-BUF buffers via GBM, which is broken
-    // on NVIDIA proprietary drivers under Wayland and causes an immediate crash ("Error 71: Protocol error").
-    #[cfg(target_os = "linux")]
-    if std::env::var_os("WEBKIT_DISABLE_DMABUF_RENDERER").is_none() {
-        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
-    }
-
     // Initialize default crypto provider for rustls (required for reqwest in CEF)
     #[cfg(feature = "cef")]
     {
@@ -50,6 +45,7 @@ fn main() {
     let db_migrations = migrations::get_migrations();
 
     let builder = tauri::Builder::default()
+        .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             // When a second instance is launched, focus the existing window
             if let Some(window) = app.get_webview_window("main") {
@@ -87,17 +83,23 @@ fn main() {
             tray::is_gnome_desktop,
             plist_utils::convert_plist_to_xml,
             plist_utils::read_file_bytes,
-            notifications::permissions::check_notification_permission,
-            notifications::permissions::request_notification_permission,
-            notifications::manager::send_notification_with_actions,
-            notifications::manager::send_simple_notification,
+            notifications::check_notification_permission,
+            notifications::request_notification_permission,
+            notification_manager::send_notification_with_actions,
+            notification_manager::send_simple_notification,
             macos_menu::apply_macos_menu_fixes,
             force_quit,
             install_type::should_disable_updates,
             install_type::get_install_type,
-            http_client::caldav_request
+            http_client::caldav_request,
+            window_decorations::set_window_decorations
         ])
         .setup(|_app| {
+            // Register deep link URL scheme handler (macOS uses Info.plist; Windows/Linux
+            // need explicit runtime registration so the OS knows which binary to call).
+            #[cfg(any(windows, target_os = "linux"))]
+            _app.deep_link().register_all()?;
+
             // Disable App Nap after logging has been initialized so App Nap
             // messages follow the same format as the rest of the app logs.
             #[cfg(target_os = "macos")]
@@ -119,34 +121,9 @@ fn main() {
             {
                 let bundle_id = _app.config().identifier.clone();
                 let notification_manager =
-                    notifications::NotificationManagerState::new(bundle_id);
+                    notification_manager::NotificationManagerState::new(bundle_id);
                 notification_manager.register_categories_and_handler(_app.handle().clone());
                 _app.manage(notification_manager);
-            }
-            #[cfg(not(target_os = "macos"))]
-            {
-                let bundle_id = _app.config().identifier.clone();
-                let notification_manager =
-                    notifications::NotificationManagerState::new(bundle_id.clone());
-                _app.manage(notification_manager);
-            }
-
-            // Register with the Windows notification platform so toasts show the correct
-            // app name and icon. The icon is embedded in the binary at compile time and
-            // written to %LOCALAPPDATA%\Chiri\ so the path is always valid.
-            #[cfg(target_os = "windows")]
-            {
-                let bundle_id = _app.config().identifier.clone();
-                let display_name = _app.package_info().name.clone();
-                let icon_path = notifications::ensure_notification_icon();
-                match winrt_toast_reborn::register(
-                    &bundle_id,
-                    &display_name,
-                    icon_path.as_deref(),
-                ) {
-                    Ok(()) => log::info!("[Notifications] Windows notification platform registration succeeded with AUM ID {bundle_id:?}"),
-                    Err(e) => log::info!("[Notifications] Windows notification platform registration failed for AUM ID {bundle_id:?}: {e:?}"),
-                }
             }
 
             // tray will be initialized from frontend after reading settings
