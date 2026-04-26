@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { DragOverlay } from '$components/DragOverlay';
 import { Header } from '$components/header/Header';
 
-import { AccountModal } from '$components/modals/AccountModal';
+import { AccountModal } from '$components/modals/account/AccountModal';
 import { CalendarModal } from '$components/modals/CalendarModal';
 import { ChangelogModal } from '$components/modals/ChangelogModal';
 import { ExportModal } from '$components/modals/ExportModal';
@@ -27,6 +27,7 @@ import { useTasks } from '$hooks/queries/useTasks';
 import { useUIState } from '$hooks/queries/useUIState';
 import { useSettingsStore } from '$hooks/store/useSettingsStore';
 import { useConfirmQuit } from '$hooks/system/useConfirmQuit';
+import { useDeepLink } from '$hooks/system/useDeepLink';
 import { useFileDrop } from '$hooks/system/useFileDrop';
 import { useNotifications } from '$hooks/system/useNotifications';
 import { useTray } from '$hooks/system/useTray';
@@ -110,11 +111,7 @@ const App = () => {
 
   const handleMenuSyncCalendar = useCallback(
     (calendarId: string) => {
-      syncCalendar(calendarId, {
-        source: 'app-menu',
-        reason: 'user selected sync calendar from app menu',
-        where: 'useMenuEvents MENU_EVENTS.SYNC_CALENDAR',
-      });
+      syncCalendar(calendarId);
     },
     [syncCalendar],
   );
@@ -207,6 +204,7 @@ const App = () => {
 
   useTheme();
   useConfirmQuit();
+  useDeepLink();
   useNotifications({
     onOpenTaskActions: menuHandlers.handleOpenTaskActions,
   });
